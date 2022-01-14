@@ -1,35 +1,38 @@
 clear
-global M dx k_cut Tramp nRamp
+global M dx k_cut Tramp nRamp HOSODEsyst
 g = 9.81;
 
 %% input
 nx = 2^10;
 M = 5; % solution order
 
-NWaves = 20;
+NWaves = 10;
 lambda = 10;
 ka = .28;
 
 % some computations...
 k0 = 2*pi/lambda;
-TLin = 2*pi/sqrt(k0*g);
+T = 2*pi/((1+.5*ka^2)*sqrt(g*k0));
+
 L = NWaves*lambda;
 
-t_end = 10*TLin;
-dt = t_end/9;
+dt = T;
+t_end = 9*dt;
+
 
 % Ramp: wNl = 1-exp(-(t/Tramp)^nRamp);
-Tramp = 2*TLin;
+Tramp = 2*T;
 nRamp = 2;
 k_cut = (M+5)*k0;
 
 method ='ODE45'; % {'ODE45','RK4','Euler'}
-IC = 'wavePacket'; % {'linearWave','Stokes3','wavePacket'}
+IC = 'linearWave'; % {'linearWave','Stokes3','wavePacket'}
 
 % if IC='wavePacket':
 packetWidth = .1*L;
 x0 = 2/5*L;
 
+relTolODE = 1e-8;
 DRAW_STREAMLINE = false; %outdated?
 
 %% code
@@ -64,8 +67,11 @@ end
 %% simulation
 
 if strcmp(method,'ODE45')
-    
-    [t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS;eta]);
+    HOSODEsyst = @HOSODEeqCurr;
+    ODEoptions = odeset('RelTol',relTolODE);
+    tic
+    [t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS;eta],ODEoptions);
+    fprintf('CPU time (AHA): %gs\n',toc);
     phiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
     t_ip = (0:dt:t_end)';
     nPannel = length(t_ip);
@@ -73,9 +79,9 @@ if strcmp(method,'ODE45')
     eta_ip  = interp1(t,eta ,t_ip);
     
     
-    figure('color','w','Position',[-1587 511 560 1000]); hold on;
+    figure('color','w','Position',[-1587 511 560 1000]); 
     for iP = 1:nPannel
-       subplot(nPannel,1,nPannel-iP+1), plot(x,eta_ip(iP,:),'k') ;
+       subplot(nPannel,1,nPannel-iP+1), plot(x,eta_ip(iP,:),'k');hold on
        ylabel(sprintf('t = %.2fs',t_ip(iP)))
     end
     return

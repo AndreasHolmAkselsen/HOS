@@ -1,0 +1,93 @@
+\documentclass[a4paper,12pt]{article}
+
+\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,bm}
+\usepackage{xcolor}
+
+\begin{document}
+\title{HOS - Second-order wavemaker}
+\author{S\'ebastien Fouques}
+\date{\today}
+\maketitle
+
+\section{HOS propagation equations with wavemaker}
+\subsection{Free surface boundary conditions with additional potential}
+
+\begin{flalign*}
+  \frac{\partial \eta}{dt} &=  \left[ 1+ \left( \frac{\partial \eta}{\partial x}\right)^2 \right] W - \frac{\partial  \phi_S}{\partial x} \frac{\partial \eta}{\partial x} -
+  \frac{\partial  \phi_{add}}{\partial x} \frac{\partial \eta}{\partial x} +
+   \frac{\partial \phi_{add}}{\partial z} && \text{at} z=\eta(x,t)\\
+  \frac{\partial \phi_S}{dt} &= -g\eta +\frac{1}{2} \left[ 1+ \left( \frac{\partial \eta}{\partial x}\right)^2 \right] W^2 -\frac{1}{2} \left( \frac{\partial \phi_S}{\partial x} \right)^2 - \frac{\partial \phi_S}{\partial x} \frac{\partial \phi_{add}}{\partial x} && &&\\
+  &   \hspace{2cm} - \frac{1}{2} \left[ \left( \frac{\partial \phi_{add}}{\partial x} \right)^2 +
+  \left( \frac{\partial \phi_{add}}{\partial z} \right)^2 \right]
+  - \frac{\partial \phi_{add}}{\partial t} - \nu \frac{\partial \eta}{\partial t} && \text{at} z=\eta(x,t)
+\end{flalign*}
+
+\begin{eqnarray*}
+  \phi(x,z,t) & = & \phi_{spec}(x,z,t) + \phi_{add}(x,z,t) \\
+  \phi_S(x,t) & = & \phi_{spec}(x,\eta(x,t),t)\\
+  W(x,t)      & = & \partial \phi_{spec} /\partial z \hspace{0.5cm} \text{at} \hspace{0.5cm} z=\eta(x,t)
+\end{eqnarray*}
+
+\subsection{Second-order wavemaker condition}
+The surface elevation $\eta$ and the velocity potentials are split into linear and nonlinear parts:
+\begin{eqnarray*}
+  \eta(x,t) & = & \eta^{(1)}(x,t) + \eta^{(NL)}(x,t) \\
+  \phi_S(x,t) & = & \phi_S^{(1)}(x,t) + \phi_S^{(NL)}(x,t) \\
+  W(x,t) & = & W^{(1)}(x,t) + W^{(NL)}(x,t) \\
+  \phi_{spec}(x,z,t) & = & \phi_{spec}^{(1)}(x,z,t) + \phi_{spec}^{(NL)}(x,z,t) \\
+  \phi_{add}(x,z,t) & = & \phi_{add}^{(1)}(x,z,t) + \phi_{add}^{(2)}(x,z,t)  + \textit{O}\left(\varepsilon^{3} \right)
+\end{eqnarray*}
+Mode decomposition:
+\begin{flalign*}
+\eta(x,t) &= \sum_p A_p(t) \cos(k_{x_p} x)\\
+\phi_S(x,t) &= \sum_p B_p(t) \cos(k_{x_p} x)\\
+\phi_{spec}(x,z,t) &= \sum_p C_p(t) \cos(k_{x_p} x) \frac{\cosh \left( k_{x_p} \left[z+h\right] \right)}{\cosh \left( k_{x_p} h \right)}\\
+\phi_{add}(x,z,t) & =  \sum_p D_p(t) \cos \left(k_{z_p} \left[z+h\right] \right) \frac{\cosh \left( k_{z_p} \left[L_x-x\right] \right)}{\cosh \left( k_{z_p} L_x \right)},
+\end{flalign*}
+with
+\begin{flalign*}
+k_{x_p} &= \frac{\pi p}{L_x}\\
+k_{z_p} &= \frac{\pi p}{h+h_{add}}\\
+\end{flalign*}
+
+On the free surface:
+\begin{equation*}
+  \phi_{add}(x,\eta,t) =  \phi_{add}^{(1)}(x,0,t) +
+  \left[ \phi_{add}^{(2)}(x,0,t) + \eta^{(1)}(x,t) \frac{\partial \phi_{add}^{(1)}}{\partial z} (x,0,t)\right] + \textit{O}\left(\varepsilon^{3} \right)
+\end{equation*}
+
+Linear part at $z=\eta(x,t)$:
+\begin{flalign*}
+  \frac{\partial \eta^{(1)}}{dt} &=  W^{(1)} + \frac{\partial \phi_{add}^{(1)}}{\partial z} \\
+  \frac{\partial \phi_S^{(1)}}{dt} &=  -g \eta^{(1)} - \frac{\partial \phi_{add}^{(1)}}{\partial t}(0)
+  - \nu \frac{\partial \eta^{(1)}}{\partial t}(0)
+ \end{flalign*}
+
+Nonlinear part at $z=\eta(x,t)$:
+\begin{flalign*}
+  \frac{\partial \eta^{(NL)}}{dt} &= \left( \frac{\partial \eta}{\partial x} \right)^2 W^{(1)} + \left[ 1+ \left(  \frac{\partial \eta}{\partial x} \right)^2 \right] W^{(NL)} \\
+  & \hspace{1cm} -\frac{\partial  \phi_S}{\partial x} \frac{\partial \eta}{\partial x}
+  -\frac{\partial  \phi_{add}}{\partial x} \frac{\partial \eta}{\partial x}
+   +  \left[ \frac{\partial \phi_{add}^{(2)}}{\partial z}(0) + \eta^{(1)} \frac{\partial^2 \phi_{add}^{(1)}}{\partial z^2} (0)\right]\\
+  \frac{\partial \phi_S^{(NL)}}{dt} &=  -g \eta^{(NL)} + \frac{1}{2} \left[ 1+ \left( \frac{\partial \eta}{\partial x}\right)^2 \right] W^2 -\frac{1}{2} \left( \frac{\partial \phi_S}{\partial x} \right)^2 - \frac{\partial \phi_S}{\partial x} \frac{\partial \phi_{add}}{\partial x}  - \frac{1}{2} \left[ \left( \frac{\partial \phi_{add}}{\partial x} \right)^2 +
+  \left( \frac{\partial \phi_{add}}{\partial z} \right)^2 \right] \\
+ & \hspace {1cm}  -\frac{\partial \phi_{add}^{(2)}}{\partial t}(0)
+ -\frac{\partial \eta^{(1)}}{\partial t} \frac{\partial \phi_{add}^{(1)}}{\partial z}(0)
+ -\eta^{(1)} \frac{\partial^2 \phi_{add}^{(1)}}{\partial t \partial z}(0)
+ - \nu \frac{\partial \eta^{(NL)}}{\partial t}
+\end{flalign*}
+
+Additional potential at $x=0$:
+\begin{flalign*}
+\frac{\partial \phi_{add}^{(1)}}{\partial x} &= \frac{\partial X^{(1)}}{\partial t}\\
+\frac{\partial \phi_{add}^{(2)}}{\partial x} &= \frac{\partial X^{(2)}}{\partial t}
+- X^{(1)} \frac{\partial^2 \phi_{add}^{(1)}}{\partial x^2}
+- X^{(1)} \frac{\partial^2 \phi_{spec}^{(1)}}{\partial x^2}
++ \frac{\partial X^{(1)}}{\partial z} \frac{\partial \phi_{add}^{(1)}}{\partial z}
++ \frac{\partial X^{(1)}}{\partial z} \frac{\partial \phi_{spec}^{(1)}}{\partial z}
+\end{flalign*}
+
+\end{document}

@@ -12,8 +12,6 @@ L = 100;
 dk = 2*pi/L; kMax = dk*floor((nx-1)/2);
 
 
-
-
 M = 10; % solution order
 nIt = 20;
 relax = 1;
@@ -29,8 +27,8 @@ nMirror = 3;
 
 % single vortex
 ID_j   = [  -1, -1 ];% 1: Source/sink, -1: vortex  
-zeta_j = [.3-.1i, .7-.1i ]*L;% object centre
-Fr_j   = .05*[ 1, .7];% object strength, in Froude units
+zeta_j = [.3-.05i, .7-.05i ]*L;% object centre
+Fr_j   = .1*[ 1, .7];% object strength, in Froude units
 
 dx = L/nx;
 x = (0:nx-1)'*dx;
@@ -97,17 +95,19 @@ if PLOT_FINAL_VALOCITY_FIELD
     U_eta = conj(df(x+1i*eta));
     u_eta = real(U_eta)+phi_x_eta;
     w_eta =  imag(U_eta)+phi_z_eta;
-    wBerboulli = 1;% .5*max(abs(df(x)))^2;
+    wBerboulli = .5*max(abs(df(x)))^2;
     bernoulli = .5*u_eta.^2 + .5*w_eta.^2 + g*eta;
     
     kinBC = u_eta.*eta_x - w_eta;
-    wKin = 1;% max(abs(df(x)));
+    wKin = max(abs(df(x)));
     
     figure('color','w','position',[-1919   401  1280   603]);    
     subplot(5,1,1);plot(x,eta,'k','linewidth',1);    ylabel('\eta');
     title("M = "+M+", nIt = "+nIt+", relax = "+relax)
-    subplot(5,1,2);plot(x,bernoulli/wBerboulli,'k','linewidth',1);    ylabel('Bernoulli');
-    subplot(5,1,3);plot(x,kinBC/wKin,'k','linewidth',1);    ylabel('kinBC');
+    subplot(5,1,2);plot(x,bernoulli/wBerboulli,'k','linewidth',1);   
+    ylabel('$\frac{\mathrm{Bernoulli}}{\frac12|U|_\mathrm{max}^2}$','interpreter','latex','fontsize',14);
+    subplot(5,1,3);plot(x,kinBC/wKin,'k','linewidth',1);    
+    ylabel('$\frac{\mathrm{kin.\, BC}}{|U|_\mathrm{max}}$','interpreter','latex','fontsize',14);
     subplot(5,1,4);plot(x,W,'k',x,phi_z_eta,'--r',x,phi_z_0,':b','linewidth',1);    legend('W','\phi_z(z=\eta)','\phi_z(z=0)');
     subplot(5,1,5);plot(x,phi_x_eta,'--r',x,phi_x_0,':b','linewidth',1);    legend('\phi_x(z=\eta)','\phi_x(z=0)');
 end

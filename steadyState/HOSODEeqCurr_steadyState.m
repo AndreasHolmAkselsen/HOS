@@ -3,8 +3,8 @@ g = 9.81;
 [eta,phiS_x,eta_x,W] = deal(0*x);
 
 % figure('color','w','position',[ -1704 505 560 420]); hp=plot(x,0*x,'k'); 
-
 % [WArr, etaArr] = deal(zeros(length(x),nIt));
+
 for it = 1:nIt
     dfS = df(x + 1i*eta);
     Phi_x =  real(dfS);

@@ -1,0 +1,134 @@
+\documentclass[a4paper,12pt]{article}
+%\documentclass{amsart}
+
+\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage{amsmath,bm}
+\usepackage{xcolor}
+\usepackage{amsmath}%
+\usepackage{amsfonts}%
+\usepackage{amssymb}%
+\usepackage{graphicx}
+\usepackage{natbib}
+\usepackage{mathtools}
+\newcommand{\mr}{\mathrm}
+\renewcommand{\S}{^\mr{S}}
+\newcommand{\ii}{\mr{i}}
+\newcommand{\ee}{\mr{e}}
+%\newcommand{\phit}{\psi}
+\newcommand{\phit}{\tilde\phi}
+
+\begin{document}
+\title{The Higher Order Spectral method extended with a background potential flow field}
+\author{Andreas H. Akselsen}
+\date{\today}
+\maketitle
+
+\section{HOS model extension}
+\subsection{Boundary conditions}
+The kinematic and dynamic boundary conditions respectively read
+\begin{subequations}
+\begin{align}
+\frac{\mr D \xi}{\mr D t}  = \eta_t + \nabla \phit \cdot\nabla \xi &= 0  \quad \text{at }z = \eta, 
+\\
+\phit_t + \frac12|\nabla\phit|^2 + g\eta &= 0  \quad  \text{at }z = \eta.
+\end{align}%
+\label{eq:BC0}%
+\end{subequations}%
+%\begin{equation}
+%%\left.
+%\begin{aligned}
+%\eta_t &= \nabla \phit \cdot\nabla \xi\\
+%\phit_t &= -\frac12|\nabla\phit|^2 - g\eta
+%%\quad \text{at }z = \eta.
+%\end{aligned}
+%%\right\}
+%\qquad \text{at }z = \eta.
+%\end{equation}
+Here, $\phit(x,y,z,t)$ is the full velocity potential and $\xi = \eta(x,y,t)-z$, $z = \eta$ being the free surface.
+The full velocity potential is split in two parts, $\phit = \phi + \Phi$, where $\Phi$ is a known background potential flow field and $\phi$ is the wave field enforcing the boundary conditions \eqref{eq:BC0}.
+$\Phi(x,y,z,t)$, being user-defined, is known everywhere and its derivatives can be evaluated directly at $z=\eta$.
+For $\phi$ it is beneficial for convergence to express the boundary conditions in terms of a potential defined at the free surface, and so we introduce 
+$\phi\S(x,y,t) \equiv \phi[x,y,\eta(x,y,t),t]$.%
+\footnote{This idea originates from Zakharov and it's beneficial convergence demonstrated by \citet{west1981deep}.}
+The chain rule yields the following relationships
+\begin{align*}
+\phi_t\big|_{z=\eta} &= \phi_t\S - W\eta_t,\\
+(\nabla\phi)\big|_{z=\eta}  &= \nabla\phi\S - W\nabla\xi , 
+\end{align*}
+where $W\equiv \phi_z\big|_{z=\eta}$.
+Introducing these relationships into \eqref{eq:BC0} we find after a bit of algebra
+\begin{subequations}
+\begin{align}
+\eta_t &= - \nabla \xi\cdot\big[\nabla\phi\S + (\nabla\Phi)_{z=\eta} - W\nabla\xi\big], 
+\\
+\phi\S_t &= -\Phi_t\big|_{z=\eta} - \frac12\big|\nabla\phi\S +(\nabla\Phi)_{z=\eta}\big|^2 + \frac12|W\nabla\xi|^2 - g\eta.
+\end{align}
+\label{eq:BCS}
+\end{subequations}
+Expanded for the sake of comparison, we have
+\begin{align*}
+\eta_t &=   - \nabla\eta\cdot\nabla\phi\S  - \nabla\eta\cdot(\nabla\Phi)_{z=\eta} + (\Phi_z)_{z=\eta}   + \big(1+|\nabla\eta|^2\big)W, 
+\\
+\phi\S_t &= -\Phi_t\big|_{z=\eta} - \frac12\big|\nabla\phi\S +(\nabla\Phi)_{z=\eta}\big|^2 + \frac12\big(1+|\nabla\eta|^2\big)W^2 - g\eta.
+\end{align*}
+%
+We have chosen to use the background velocities evaluated at $z=\eta$ as these are everywhere available.%
+\footnote{Note that all derivatives of $\Phi$ are also available so it is possible to instead use a complete surface potential function $\phit\S\equiv\phit[x,y,\eta(x,y,t),t]$, $\tilde W\equiv \phit_z\big|_{z=\eta}$, and solve
+%\begin{subequations}
+\begin{align*}
+\eta_t &= - \nabla \xi\cdot\big[\nabla\phit\S - \tilde W\nabla\xi\big], 
+&
+\phit\S_t &= - \frac12\big|\nabla\phit\S\big|^2 + \frac12|\tilde W\nabla\xi|^2 - g\eta.
+\end{align*}
+%\end{subequations}
+%with $\tilde W\equiv \phit_z\big|_{z=\eta}$.
+}
+
+\subsection{The background flow}
+Classical potential flow constructs is here adopted to generate a potential flow field that satisfies the conditions
+\begin{subequations}
+\begin{alignat}{2}
+\nabla^2\Phi &= 0 &\quad&\\
+\Phi_z &=0 & &\text{at } z=0\\
+\Phi_x, \Phi_y &= 0\text{ or periodic} & &\text{at } \{x,y\} = 0,L_{\{x,y\}} \text{ depending on domain.}
+\label{eq:}%
+\end{alignat}%
+\end{subequations}%
+These flows can be constructed in three-dimensional domains, either as three-dimensional flows or as two-dimensional flows uniform an a third dimension.
+We will here consider demonstrate two-dimensional flows only.
+
+We construct the background flow by superposing elementary complex potential flow solutions $f(\zeta)$.
+These are defined by $f(\zeta) = \Phi(x,z) + \ii\Psi(x,z)$, $\zeta = x + \ii z$, $\Psi$ being the stream function.
+We mirror each solution about the plane $z=0$ by adding the conjugate solution $f^*(\zeta^*)$. This ensures that no streamlines crosses the plane $z=0$.
+\begin{equation}
+f(\zeta) = \sum_j \big[ A_j\ln(\zeta-\zeta_j) + A_j^*\ln(\zeta-\zeta_j^*) \big]
+\label{eq:f}
+\end{equation}
+where real positive/negative $A_j$ constitutes a source/sink at $\zeta_j$ and imaginary positive/negative $A_j$ constitutes a clockwise/counter-clockwise rotating line vortex at $\zeta_j$.
+The  derivative
+\begin{equation}
+f'(\zeta) = \sum_j \bigg[ \frac{A_j}{\zeta-\zeta_j} + \frac{A_j^*}{\zeta-\zeta_j^*} \bigg] = U^*(\zeta)
+\label{eq:df}
+\end{equation}
+directly yields the velocity field $U$. In real coordinates, $\Phi_x = \rm{Re}[f'(x+\ii z)$], $\Phi_z = -\rm{Im}[f'(x+\ii z)]$.
+We normalize the intensities $A_j$ according to the velocity intensity brought about at $z=0$ by the element relative to the phase velocity:
+\[
+F_j = \frac{2A_j}{c_p |\mr{Im}\zeta_j|}
+\]
+One can also impose doublets
+\begin{equation}
+f_j^\mr{d} = \frac{B_j}{\zeta-\zeta_j}+\frac{B_j^*}{\zeta-\zeta_j^*},\quad (f^\mr{d}_j)' = -\frac{B_j}{(\zeta-\zeta_j)^2}-\frac{B_j^*}{(\zeta-\zeta_j^*)^2},
+\label{eq:doublet}
+\end{equation}
+where the angle of $B_j$ dictates the doublet direction and its magnitude the intensity.
+Periodic boundaries in the horizontal plane are closely approximated by repeating the domain a number of times in the horizontal direction:
+%$\{A_j\}:=\{\ldots,\{A_j\},\{A_j\},\{A_j\},\ldots\}$, $\{\zeta_j\}:=\{\ldots,\{\zeta_j-L_x\},\{\zeta_j\},\{\zeta_j+L_x\},\ldots\}$
+$\{A_j\}\coloneqq\bigcup_{n=-N}^N \{A_j\}$, $\{\zeta_j\}\coloneqq\bigcup_{n=-N}^N\{\zeta_j + n L_x \}$.
+
+\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
+\bibliography{bib} %You need a file 'literature.bib' for this.
+
+
+\end{document}

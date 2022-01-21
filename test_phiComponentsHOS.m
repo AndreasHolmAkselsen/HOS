@@ -1,6 +1,6 @@
 clear
 addpath ./steadyState
-global M dx k_cut
+global M x k_cut
 g = 9.81;
 
 %% input

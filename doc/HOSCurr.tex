@@ -4,20 +4,41 @@
 \usepackage[a4paper, total={17cm, 25cm}]{geometry}
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
-\usepackage{amsmath,bm}
+\usepackage{amsmath,bm,amsfonts,amssymb}
 \usepackage{xcolor}
-\usepackage{amsmath}%
-\usepackage{amsfonts}%
-\usepackage{amssymb}%
 \usepackage{graphicx}
-\usepackage{natbib}
+\usepackage[round]{natbib}
 \usepackage{mathtools}
+\usepackage[font=normalsize]{subfig}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{cprotect}%for \verb in captions
+\hypersetup{colorlinks=true,
+			linkcolor=blue,
+			filecolor=blue,
+			urlcolor=blue,
+			citecolor=blue}
 \newcommand{\mr}{\mathrm}
+\newcommand{\mc}{\mathcal}
+\let\SSS\S
 \renewcommand{\S}{^\mr{S}}
 \newcommand{\ii}{\mr{i}}
 \newcommand{\ee}{\mr{e}}
 %\newcommand{\phit}{\psi}
 \newcommand{\phit}{\tilde\phi}
+\newcommand{\br}[3]{\left#1#2\right#3}
+\let\underscore\_
+\renewcommand{\_}[1]{_\mr{#1}}
+\newcommand{\oo}[1]{^{(#1)}}
+\newcommand{\rr}{\bm r}%{x,y}
+\newcommand{\cp}{c\_p}
+\let\Re\relax
+\let\Im\relax
+\DeclareMathOperator\Re{Re}
+\DeclareMathOperator\Im{Im}
+\newcommand{\w}{w}
+\newcommand{\bU}{\bm U}
+%\newcommand{\bU}{(\nabla\Phi)_{z=\eta}}
 
 \begin{document}
 \title{The Higher Order Spectral method extended with a background potential flow field}
@@ -25,8 +46,108 @@
 \date{\today}
 \maketitle
 
+\tableofcontents
+
+\section{Introduction}
+SINTEF Ocean has at their disposal HOS codes both the c++ and MATLAB languages.
+For a description on the code development up until now please see memo \citet{SFo2018_HOS}, as well as the mixed Eulearian-Lagrangien variation of the method published by \citep{fouques2020mixedHOS}.
+
+The HOS model discussed presently, described in \SSS\ref{sec:model}, has been implemented separately in the MATLAB language for development. Extension of pre-existing codes with support for current flows is believed to require little effort.
+
+
+
+\section{Capabilities of flow field extended HOS}
+We begin by benchmarking and demonstrating the potential of extending the HOS method with a background flow field.
+
+\subsection{Benchmark against existing HOS code}
+We first compare the results of the pre-existing MATLAB HOS code \citep{SFo2018_HOS} with the present implementation without current for the purpose of benchmarking. 
+As describe in the cited memo, and reference there within, a ramping of the nonlinear terms is used to provide stable conformity between the initial conditions and the developing solution. 
+The ramp used is 
+\[w(t) = 1-\exp[-(t/T\_{ramp})^2]\];
+
+Figure~\ref{fig:stokes_ka025} shows the development of a Stokes wave for linear steepness $ka = 0.25$, $T\_{ramp}$ equalling one wave period.
+The match between codes seems precise. 
+Notice however that both codes predict an slow undulation in the shape of the Stokes wave, the Stokes wave alternately adopting a more and less nonlinear profile.  
+
+A steeper wave is demonstrated in figure~\ref{fig:stokes_ka028}, here with $ka = 0.28$. The time interval between each panel is here shorter. Good agreement is shown, but the new implementation becomes unstable after about 18 periods. This is not surprising as more effort has been put into the pre-existing with regard to simulation stability. On the other hand, the new implementation runs about twice as fast, the CPU time being 94\,s vs. 220\,s in the former example and 52\,s vs.\ 110\,s in the latter.
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.75\columnwidth]{./figures/AHAvsSFo_waveField_Stokes_ka025_dt5T.pdf}%
+\caption{Benchmark, regular wave. Solid line: MATLAB HOS code \citep{SFo2018_HOS}, dashed line: presently implemented HOS code.
+Linear steepness $ka = 0.25$, five period time intervals, $T\_{ramp}=T$.
+}%
+\label{fig:stokes_ka025}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.75\columnwidth]{./figures/AHAvsSFo_waveField_Stokes_ka028_dt2T.pdf}%
+\caption{Benchmark, regular wave. Solid line: MATLAB HOS code \citep{SFo2018_HOS}, dashed line: presently implemented HOS code.
+Linear steepness $ka = 0.28$, two period time intervals, $T\_{ramp}=T$.
+}%
+\label{fig:stokes_ka028}%
+\end{figure}
+
+\subsection{Examples with a background flow}
+Figure~\ref{fig:vortex:ka02} shows a simulation of a regular wave propagating over a opposing vortex (upper flow field directed against the wave propagation direction). 
+The vortex generates a counter current which causes stagnation in the wave train. 
+Consequently, a build-up in wave height is observed over the vortex, with a corresponding reduction in wave height observed in the region following.
+As a matter of precaution, the background flow field is ramped up with the same ramp as is used for the nonlinear terms. 
+Later tests have indicated that simulations remain stable also without this ramp.
+This simulation (or flow?) is not stable and crashes soon after the last shown frame.
+\\
+
+The simulations can be stabilized by reducing the wave steepness or vortex intensity, which allows us to look further on in time.
+This we do in figure~\ref{fig:vortex:ka01} where the steepness has been reduces to $ka = 0.1$ and the time interval between panels increased.
+The evolution of the wave field is worth inspection.
+There build-up of wave heigh noted earlier appears after a while to `break free' in the form of a large and irregular group propagating downstream. 
+The small-amplitude portion of the wave train is now to be found on the opposite side of the vortex.
+This larger wave group travels through the periodic boundary at re-engages with the vortex, soon after which the simulation breaks down. 
+Such a transient dynamic suggests that the presence of opposing vortices can serve to generate more extreme wave statistics.  
+\\
+
+\begin{figure}[H]%
+\centering
+\subfloat[Background flow field]{\includegraphics[width=.75\columnwidth]{./figures/flowField_vortex.pdf}}\\
+\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/waveField_vortex.pdf}}%
+\caption{Flow over a single line vortex. The vortex is centred at $\zeta_1 = (0.5+0.075\ii)L_x$ with intensity $F_1 = -0.2\ii$ (see \SSS\ref{sec:Phi}).
+The linear steepness of the shown wave is $ka = 0.2$, $M=5$ terms are used in the Taylor expansion and the number of points/modes is $2^{10}$. $T\_{ramp}=T$ with one period between each panel, is indicated in the ordinate labels.
+The Stokes wave period is about $2.48$ seconds.
+}%
+\label{fig:vortex:ka02}%
+\end{figure}
+
+
+\begin{figure}[H]%
+\centering
+\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/vortex_ka0p1_M5_Nw20_dt7p5T.pdf}}%
+\caption{
+Same as figure~\ref{fig:vortex:ka02} but with $ka=0.1$ and $7.5$ periods between each panel. 
+}%
+\label{fig:vortex:ka01}%
+\end{figure}
+
+As another example, we show in figure~\ref{fig:doublet:ka01} the evolution of a flow over an upwards-pointing doublet. 
+The ratio of the largest surface current speed to the phase velocity is for this case about $0.065$. 
+The steepness of the quiescent wave train is small ($ka=0.1$) as in the previous example, but the underlying doublet causes a focusing of wave energy such that the simulation breaks down at a later stage. 
+\begin{figure}[H]%
+\centering
+\subfloat[Background flow field]{\includegraphics[width=.75\columnwidth]{./figures/curr_upDoubletka0p1_M5_Nw20_dt7p5T.pdf}}\\
+\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/upDoubletka0p1_M5_Nw20_dt7p5T.pdf}}%
+\caption{
+Upwards-pointing doublet; $\zeta_1 = (0.5-0.15\ii)L_x$ with intensity $F_1 = 0.1\ii$ (see \SSS\ref{sec:Phi}).
+ $ka=0.1$ and $7.5$ periods between each panel. 
+}%
+\label{fig:doublet:ka01}%
+\end{figure}
+
+
+
+
 \section{HOS model extension}
+\label{sec:model}
 \subsection{Boundary conditions}
+\label{sec:BC}
 The kinematic and dynamic boundary conditions respectively read
 \begin{subequations}
 \begin{align}
@@ -46,47 +167,49 @@ The kinematic and dynamic boundary conditions respectively read
 %%\right\}
 %\qquad \text{at }z = \eta.
 %\end{equation}
-Here, $\phit(x,y,z,t)$ is the full velocity potential and $\xi = \eta(x,y,t)-z$, $z = \eta$ being the free surface.
+Here, $\nabla=(\partial_x,\partial_y,\partial_z)$  with $\phit(\rr,z,t)$ being the full velocity potential and $\xi = \eta(\rr,t)-z$, $z = \eta$ being the free surface.
+Horizontal coordinates are $\rr=(x,y)$.
 The full velocity potential is split in two parts, $\phit = \phi + \Phi$, where $\Phi$ is a known background potential flow field and $\phi$ is the wave field enforcing the boundary conditions \eqref{eq:BC0}.
-$\Phi(x,y,z,t)$, being user-defined, is known everywhere and its derivatives can be evaluated directly at $z=\eta$.
+$\Phi(\rr,z,t)$, being user-defined, is known everywhere and its derivatives can be evaluated directly at $z=\eta$.
 For $\phi$ it is beneficial for convergence to express the boundary conditions in terms of a potential defined at the free surface, and so we introduce 
-$\phi\S(x,y,t) \equiv \phi[x,y,\eta(x,y,t),t]$.%
+$\phi\S(\rr,t) \equiv \phi[\rr,\eta(\rr,t),t]$.%
 \footnote{This idea originates from Zakharov and it's beneficial convergence demonstrated by \citet{west1981deep}.}
 The chain rule yields the following relationships
 \begin{align*}
-\phi_t\big|_{z=\eta} &= \phi_t\S - W\eta_t,\\
-(\nabla\phi)\big|_{z=\eta}  &= \nabla\phi\S - W\nabla\xi , 
+\phi_t\big|_{z=\eta} &= \phi_t\S - \w\eta_t,\\
+(\nabla\phi)\big|_{z=\eta}  &= \nabla\phi\S - \w\nabla\xi , 
 \end{align*}
-where $W\equiv \phi_z\big|_{z=\eta}$.
+where $\w\equiv \phi_z\big|_{z=\eta}$. 
 Introducing these relationships into \eqref{eq:BC0} we find after a bit of algebra
 \begin{subequations}
 \begin{align}
-\eta_t &= - \nabla \xi\cdot\big[\nabla\phi\S + (\nabla\Phi)_{z=\eta} - W\nabla\xi\big], 
+\eta_t &= - \nabla \xi\cdot\big[\nabla\phi\S + \bU - \w\nabla\xi\big], 
 \\
-\phi\S_t &= -\Phi_t\big|_{z=\eta} - \frac12\big|\nabla\phi\S +(\nabla\Phi)_{z=\eta}\big|^2 + \frac12|W\nabla\xi|^2 - g\eta.
+\phi\S_t &= -\Phi_t\big|_{z=\eta} - \frac12\big|\nabla\phi\S + \bU\big|^2 + \frac12|\w\nabla\xi|^2 - g\eta.
 \end{align}
 \label{eq:BCS}
 \end{subequations}
 Expanded for the sake of comparison, we have
 \begin{align*}
-\eta_t &=   - \nabla\eta\cdot\nabla\phi\S  - \nabla\eta\cdot(\nabla\Phi)_{z=\eta} + (\Phi_z)_{z=\eta}   + \big(1+|\nabla\eta|^2\big)W, 
+\eta_t &=   - \nabla\eta\cdot\nabla\phi\S  - \nabla\eta\cdot\bU + W  + \big(1+|\nabla\eta|^2\big)\w, %(\Phi_z)_{z=\eta} 
 \\
-\phi\S_t &= -\Phi_t\big|_{z=\eta} - \frac12\big|\nabla\phi\S +(\nabla\Phi)_{z=\eta}\big|^2 + \frac12\big(1+|\nabla\eta|^2\big)W^2 - g\eta.
+\phi\S_t &= -\Phi_t\big|_{z=\eta} - \frac12\big|\nabla\phi\S +\bU\big|^2 + \frac12\big(1+|\nabla\eta|^2\big)\w^2 - g\eta.
 \end{align*}
 %
-We have chosen to use the background velocities evaluated at $z=\eta$ as these are everywhere available.%
-\footnote{Note that all derivatives of $\Phi$ are also available so it is possible to instead use a complete surface potential function $\phit\S\equiv\phit[x,y,\eta(x,y,t),t]$, $\tilde W\equiv \phit_z\big|_{z=\eta}$, and solve
+We have chosen to use the background velocities $\bU = (\nabla\Phi)_{z=\eta}$ evaluated at at the surface as these are everywhere available.%
+\footnote{Note that all derivatives of $\Phi$ are also available so it is possible to instead use a complete surface potential function $\phit\S\equiv\phit[\rr,\eta(\rr,t),t]$, $\tilde \w\equiv \phit_z\big|_{z=\eta}$, and solve
 %\begin{subequations}
 \begin{align*}
-\eta_t &= - \nabla \xi\cdot\big[\nabla\phit\S - \tilde W\nabla\xi\big], 
+\eta_t &= - \nabla \xi\cdot\big[\nabla\phit\S - \tilde \w\nabla\xi\big], 
 &
-\phit\S_t &= - \frac12\big|\nabla\phit\S\big|^2 + \frac12|\tilde W\nabla\xi|^2 - g\eta.
+\phit\S_t &= - \frac12\big|\nabla\phit\S\big|^2 + \frac12|\tilde \w\nabla\xi|^2 - g\eta.
 \end{align*}
 %\end{subequations}
-%with $\tilde W\equiv \phit_z\big|_{z=\eta}$.
+%with $\tilde \w\equiv \phit_z\big|_{z=\eta}$.
 }
 
 \subsection{The background flow}
+\label{sec:Phi}
 Classical potential flow constructs is here adopted to generate a potential flow field that satisfies the conditions
 \begin{subequations}
 \begin{alignat}{2}
@@ -99,33 +222,218 @@ Classical potential flow constructs is here adopted to generate a potential flow
 These flows can be constructed in three-dimensional domains, either as three-dimensional flows or as two-dimensional flows uniform an a third dimension.
 We will here consider demonstrate two-dimensional flows only.
 
-We construct the background flow by superposing elementary complex potential flow solutions $f(\zeta)$.
-These are defined by $f(\zeta) = \Phi(x,z) + \ii\Psi(x,z)$, $\zeta = x + \ii z$, $\Psi$ being the stream function.
-We mirror each solution about the plane $z=0$ by adding the conjugate solution $f^*(\zeta^*)$. This ensures that no streamlines crosses the plane $z=0$.
-\begin{equation}
-f(\zeta) = \sum_j \big[ A_j\ln(\zeta-\zeta_j) + A_j^*\ln(\zeta-\zeta_j^*) \big]
-\label{eq:f}
-\end{equation}
-where real positive/negative $A_j$ constitutes a source/sink at $\zeta_j$ and imaginary positive/negative $A_j$ constitutes a clockwise/counter-clockwise rotating line vortex at $\zeta_j$.
-The  derivative
-\begin{equation}
-f'(\zeta) = \sum_j \bigg[ \frac{A_j}{\zeta-\zeta_j} + \frac{A_j^*}{\zeta-\zeta_j^*} \bigg] = U^*(\zeta)
-\label{eq:df}
-\end{equation}
-directly yields the velocity field $U$. In real coordinates, $\Phi_x = \rm{Re}[f'(x+\ii z)$], $\Phi_z = -\rm{Im}[f'(x+\ii z)]$.
-We normalize the intensities $A_j$ according to the velocity intensity brought about at $z=0$ by the element relative to the phase velocity:
-\[
-F_j = \frac{2A_j}{c_p |\mr{Im}\zeta_j|}
-\]
-One can also impose doublets
-\begin{equation}
-f_j^\mr{d} = \frac{B_j}{\zeta-\zeta_j}+\frac{B_j^*}{\zeta-\zeta_j^*},\quad (f^\mr{d}_j)' = -\frac{B_j}{(\zeta-\zeta_j)^2}-\frac{B_j^*}{(\zeta-\zeta_j^*)^2},
-\label{eq:doublet}
-\end{equation}
-where the angle of $B_j$ dictates the doublet direction and its magnitude the intensity.
+We construct the background flow by superposing elementary complex potential flow solutions 
+\[f(\zeta) = U\_{c}\zeta + \sum_jf_j(\zeta).\]
+The complex potential is defined by $f(\zeta) = \Phi(x,z) + \ii\Psi(x,z)$, $\zeta = x + \ii z$, $\Psi$ being the stream function.
+We require the uniform current $U\_{c}$ to be real (horizontal) and mirror each element $f_j$ about the plane $z=0$ by adding the conjugate element $f_j^*(\zeta^*)$ such that no streamlines crosses the plane $z=0$.
+Sources, sinks line vortices and doublets are used as flow elements: 
+\begin{align}
+f_j &= 
+\begin{cases}
+A_j\ln(\zeta-\zeta_j) + A_j^*\ln(\zeta-\zeta_j^*) & \text{element $j$ is source/sink/vortex,}\\
+-A_j/(\zeta-\zeta_j)-A_j^*/(\zeta-\zeta_j^*) & \text{element $j$ is doublet.}
+\end{cases}
+\intertext{with derivative}
+f_j' &= 
+\begin{cases}
+ A_j(\zeta-\zeta_j) + A_j^*/(\zeta-\zeta_j^*) & \text{element $j$ is source/sink/vortex,}\\
+A_j/(\zeta-\zeta_j)^2+A_j^*/(\zeta-\zeta_j^*)^2 & \text{element $j$ is doublet.}
+\end{cases}
+\label{eq:}
+\end{align}
+Real positive/negative $A_j$ constitutes a source/sink at $\zeta_j$ and imaginary positive/negative $A_j$ constitutes a clockwise/counter-clockwise rotating line vortex at $\zeta_j$.
+If element $j$ is a doublet then angle of $A_j$ dictates the doublet discharge direction and its magnitude the intensity.
 Periodic boundaries in the horizontal plane are closely approximated by repeating the domain a number of times in the horizontal direction:
 %$\{A_j\}:=\{\ldots,\{A_j\},\{A_j\},\{A_j\},\ldots\}$, $\{\zeta_j\}:=\{\ldots,\{\zeta_j-L_x\},\{\zeta_j\},\{\zeta_j+L_x\},\ldots\}$
-$\{A_j\}\coloneqq\bigcup_{n=-N}^N \{A_j\}$, $\{\zeta_j\}\coloneqq\bigcup_{n=-N}^N\{\zeta_j + n L_x \}$.
+$\{A_j\}\coloneqq\bigcup_{n=-M}^M \{A_j\}$, $\{\zeta_j\}\coloneqq \bigcup_{m=-M}^M\{\zeta_j + m L_x \}$.
+
+The velocity field is directly obtained form
+\begin{equation}
+f'(\zeta) = U^*(\zeta).
+\label{eq:df}
+\end{equation}
+ In real coordinates, $\Phi_x = \Re[f'(x+\ii z)$], $\Phi_z = -\Im[f'(x+\ii z)]$.
+We normalize the intensities $A_j$ according to the velocity intensity brought about at $z=0$ by the element relative to the phase velocity:
+\begin{equation}
+F_j = 
+\begin{cases}
+%\frac{2A_j}{\cp |\Im\zeta_j|} & \text{element $j$ is source/sink/vortex,}\\
+%\frac{2A_j}{\cp |\Im\zeta_j|^2}  & \text{element $j$ is doublet.}
+2A_j/(\cp |\Im\zeta_j|) & \text{element $j$ is source/sink/vortex,}\\
+2A_j/(\cp |\Im\zeta_j|^2)  & \text{element $j$ is doublet.}
+\end{cases}
+\label{eq:F_j}
+\end{equation}
+%
+
+\section{Taylor expansion near the numerical stability limit}
+\label{sec:Taylor}
+The system \eqref{eq:BCS} defined at the free surface is closed but for the vertical velocity $\w=\phi_z\big|_{z=\eta}$. This quantity connects the free surface to the below body of water whose motion is governed by the Laplace equation.
+The efficiency of the HOS method lies in algebraically coupling the surface potential $\phi\S(\rr,t)$ to a field potential $\phi(\rr,z,t)$ composed of Fourier modes with kernel $\exp(kz +\ii \bm k \cdot \bm r)$. The letter obeys the Laplace equation and readily provides $z$-derivatives of all orders.
+
+\newcommand{\proj}{\wp_0^{-1}}
+Quickly summarised, the HOS method uses a Stokes expansion 
+\begin{subequations}
+\begin{align}
+\phi &= \sum_{n=1}^N \phi\oo{n}, & \w &= \sum_{n=1}^N \w\oo{n}
+\label{eq:Stokes}
+\end{align}
+combined with a Taylor expansion from $z=0$ to explicitly map the field potential to the surface potential.
+Matching the magnitude orders, one finds
+\begin{align}
+\phi\oo n &= 
+\begin{cases}
+%\phi\S & m=1\\
+\proj \phi\S & n=1\\
+-\proj\sum_{m=1}^{n-1} \frac{\eta^m}{m!}\partial_z^{m}\phi\oo{n-m} & n>1
+\end{cases},
+&
+\w\oo n &= 
+\sum_{m=0}^{n-1} \frac{\eta^m}{m!}\partial_z^{m+1}\phi\oo{n-m}\Big|_{z=0}.
+\label{eq:Taylor}
+\end{align}%
+\label{eq:StokesTaylor}%
+\end{subequations}%
+The inverse field projection from $z=0$ is
+%\[\proj f(\rr,z) = \mc{F}^{-1}\big\{\mc{F} [f(\rr,0)] \ee^{k z}\big\}\]
+\[\proj f = \mc{F}^{-1}\big[\mc{F} \big(f|_{z=0}\big) \ee^{k z}\big]\]
+with $k$ being the wavenumber modulus for the Fourier transform $\mc F$.
+A cut-off filter at $k>(N+5)k_0$, $2\pi/k_0$ being the initial wavelength, is placed on the Fourier operators to improve the numerical robustness to high-wavenumber oscillations.  
+For an altogether less convoluted description, see \citet{SFo2018_HOS}.
+\\
+
+
+Surface potential $\phi\S$ is compared to its projected field potential $\phi|_{z=\eta}$ in the centre panels of figure~\ref{fig:Taylor}.
+%In figure~\ref{fig:Taylor} we compare the surface potential $\phi\S$ to its projected field potential $\phi|_{z=\eta}$, and the vertical velocity $\w$ from the same expansion to the corresponding vertical derivative 
+%$ \phi_z\big|_{z=\eta} = \mc{F}^{-1}[k\mc{F}(\phi|_{z=0})\ee^{k\eta} ] $ of the projected field.
+Surface potential and elevation is taken form the simulations presented in figure~\ref{fig:vortex:ka02} and \ref{fig:vortex:ka01} with displayed times near the point of numerical instability.
+In figure~\ref{fig:Taylor:ka02} we see that the match between surface and field potentials  appears precise. 
+Figure~\ref{fig:Taylor:ka01} shows a surface potential under the onset of numerical instability. 
+The resulting mapped potential is however smoothened by the wavenumber cut-off at $k>(N+5)k_0$.
+
+The vertical velocity $\w$ from \eqref{eq:Taylor} (a Taylor expansion back form $z=0$ to $z=\eta$) is compared to  the corresponding vertical field derivative evaluated directly at the interface 
+$ \phi_z\big|_{z=\eta} = \mc{F}^{-1}[k\mc{F}(\phi|_{z=0})\ee^{k\eta} ]$ in the bottom panels of fiugre~\ref{fig:Taylor}. 
+$\w$ form the Taylor expansion \eqref{eq:Taylor} avoids some high-wavenumber oscillations observed in the field potential derivative.
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[ref.\ figure~\ref{fig:vortex:ka02}, $ka=0.2$]{
+%\includegraphics[width=.5\columnwidth]{./figures/vortexka0p2_M5_Nw20_dt1T_Taylor/t_17.pdf}%
+\includegraphics[width=.5\columnwidth]{./figures/vortexka0p2_M5_Nw20_dt1T_Taylor/t_22.pdf}%
+\label{fig:Taylor:ka02}
+}%
+\subfloat[ref.\ figure~\ref{fig:vortex:ka01}, $ka=0.1$]{
+%\includegraphics[width=.5\columnwidth]{./figures/vortexka0p1_M5_Nw20_dt7p5T_Taylor/t_132.pdf}%
+\includegraphics[width=.5\columnwidth]{./figures/vortexka0p1_M5_Nw20_dt7p5T_Taylor/t_170.pdf}
+\label{fig:Taylor:ka01}
+}%
+\caption{
+Comparison of the surface potential $\phi\S$ to its corresponding field potential $\phi|_{z=\eta}$ mapped by Taylor expansion \eqref{eq:StokesTaylor}. 
+Time panels near the point of numerical instability.
+ }%
+\label{fig:Taylor}%
+\end{figure}
+
+\section{Steady state solver}
+We can seek a steady state solution $\phit_t=0$ to the problem at hand, giving the waveless surface profile modulated by the presence of the sub-surface current.
+As a primitive routine we iterate on the system
+\begin{subequations}
+\begin{align}
+\w &\coloneqq - \frac1{|\nabla\xi|^2} \big(\nabla\phi\S +\bU\big)\cdot \nabla \xi,
+\\
+\eta &\coloneqq -\frac1{2g} \big(\big|\nabla\phi\S +\bU\big|^2 - |\w\nabla\xi|^2\big).
+\end{align}%
+\label{eq:steadyState}%
+\end{subequations}%
+where the procedure described in \SSS\ref{sec:Taylor} has been inversed\footnote{Starting off with $\phi\oo1 = \mc{F}^{-1}[\frac1k\mc{F}(\w)\ee^{kz}]$.} to yield $\phi\S$ as function of $\w$ and $\eta$.
+Initial convergence is obtained for relatively weak surface modulations, before high-wavenumber divergence sets in. Aborting the iterations at a suitable stage we obtain approximate solutions.
+
+An example of a steady state solution is shown in figure~\ref{fig:steadyState}.
+This example concerns a pair of co-rotating vortices. 
+No surface waves are present so the vortex intensities are instead scaled by a surface speed Froude number $Fr_j = 2A_j/\sqrt{g|\Im \zeta_j|^3}$.
+Plotted surface elevation together with streamlines\footnote{Net stream function $\tilde\psi = \Im f(x+\ii z) + \mc{F}^{-1}[\ii\, \mr{sgn}(k_x) \mc{F}(\phi|_{z=0})\ee^{k z}]$ in the $xz$-plane.}
+show visual conformity to the kinematic boundary condition.
+The normalized error in the boundary conditions \eqref{eq:BC0}, normalized by $|\Phi_x|\_{max}$ and $\frac12|\Phi_x|\_{max}^2$ at $z=0$, indicates that the solution is accurate.
+Note that the axes of the contour plot are scaled unequally and that the surface undulation is quite small.
+\\
+
+Numerics involved in finding a steady state solution can likely be improved considerably to achieve better convergence. This, however, falls outside the scope of the present work, the point of the steady state problem being to validate our methodology.
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Backround current profile]{\includegraphics[width=.5\columnwidth]{./figures/curr_steady_2vortex_M10.pdf}}
+\subfloat[Surface and streamlines of solution]{\includegraphics[width=.5\columnwidth]{./figures/sl_steady_2vortex_M10.pdf}}
+\\
+\subfloat[Boundary condition error.]{\includegraphics[width=.6\columnwidth]{./figures/steady_2vortex_M10.pdf}}%
+\caption{Predicted surface modulation under the influence of a set of co-rotating vortices---solution and error.
+Vortices are defined by $\zeta_j = \{0.3-0.05\ii, +.7-0.05\ii\}L_x$, $Fr_j = \{0.2\ii,0.15\ii\}$.
+$M=10$ with $2^{10}$ points/modes.
+}%
+\label{fig:steadyState}%
+\end{figure}
+
+%\appendix
+\section{Attempted basin simulation}
+
+An attempt has been made at simulating flow over a vortex similar in magnitude to that which has been predicted through CDF for the current system design of the Ocean Basin of Ocean Space Center. 
+This attempt is based on the sharepoint presentation \textit{CFD long domain study},\footnote{{\textbackslash}OSC - Current system CFD simulations folder - Dokumenter{\textbackslash}BasinDesignSep2021{\textbackslash}CFD{\underscore}results}
+images from which is copied in figure~\ref{fig:OB}.
+Based on these slides, the following estimates are made:
+\begin{center}
+\begin{tabular}{lc}
+vortex position $(x,z)$ & $(7.0,-3.5)$\,m,\\
+vortex length		& $13$\,m,\\
+domain length 	& $>130$\,m,\\
+surface velocity above vortex & $0.05$\,m/s,\\
+surface velocity downstream & $0.17$\,m/s.
+\end{tabular}
+\end{center}
+We model this with a single vortex combined with a uniform current, as shown in figure~\ref{fig:basinCurr}. 
+The vortex is here placed in the centre of the domain since boundaries in any case are periodic.
+We state again that we have available HOS codes for closed basin domains, and that extension of the present method to these codes is believed to require little effort.
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.8\columnwidth]{./figures/pptSnap_xz1.png}
+\includegraphics[width=.8\columnwidth]{./figures/pptSnap_xz2.png}
+\caption{Images from preliminary presentation \textit{CFD long domain study}.
+%\footnote{\verb|\OSC - Current system CFD simulations folder - Dokumenter\BasinDesignSep2021\CFD_results|}
+}%
+\label{fig:OB}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Streamlines]{\includegraphics[width=\columnwidth]{./figures/basin_L130/curr_L130.pdf}}\\
+\subfloat[Horizontal velocity at $z=0$.]{\includegraphics[width=.5\columnwidth]{./figures/basin_L130/Usruf_L130.pdf}}%
+\caption{Current profile used in basin simulation.
+$U\_c=0.17$, $\zeta_1=65-3.5\ii$, $2A_1/|\Im\zeta_1|=-(0.7+U\_c)\ii$.
+}%
+\label{fig:basinCurr}%
+\end{figure}
+
+
+Results for periods $T\approx 1.0$, $2.0$, $2.9$ and $4.0$ are shown in figures~\ref{fig:basinSimT1.0}--\ref{fig:basinSimT4.0}.
+Steepness is determined based on a capacity curve principle, using a fixed steepness unless restricted by the maximum flap angle of the wavemaker. 
+A non-aggressive maximum steepness $ka=0.2$ is here chosen, along with a ten degree maximum flap angle.
+A red dashed line is drawn to indicate the wave train propagation based on the phase velocity.
+The vortex is seen to disturb the flow notably.
+Unfortunately, the numeriucal stability is not sufficient to consider the long term evolution at this point, and the periodic boundaries affect the evolution for long periods.
+Further numerical efforts is therefore required in order to lessen the uncertainties related to these simulations, foremost by extending the method to one of pre-existing code whose numerical stability is believed to be better.
+
+\newcommand{\basinPlot}[2]{
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{./figures/basin_L130/#2.pdf}%
+\caption{Wave basin simulation. $T\approx#1$.}%
+\label{fig:basinSimT#1}
+\end{figure}
+}
+\basinPlot{1.0}{T1p0_ka0p2_M5_Nw69_dt5T_L130_rePlot}
+\basinPlot{2.0}{T2p0_ka0p2_M5_Nw19_dt5T_L130_rePlot}
+\basinPlot{2.9}{T2p9_ka0p2_M5_Nw9_dt5T_L130_rePlot}
+\basinPlot{4.0}{T4p0_ka0p073_M5_Nw5_dt5T_L130_rePlot}
 
 \bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
 \bibliography{bib} %You need a file 'literature.bib' for this.

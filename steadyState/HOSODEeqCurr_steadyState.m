@@ -17,13 +17,13 @@ for it = 1:nIt
     
     maxChangeW = max(abs(WNew-W));
     maxChangeEta = max(abs(etaNew-eta));
-    fprintf('maxChangeW = %g, maxChangeEta = %g\n',maxChangeW,maxChangeEta);
+    fprintf('iteration %d: maxChangeW = %g, maxChangeEta = %g\n',it, maxChangeW,maxChangeEta);
     
 %     W = WNew;
 %     eta = etaNew;
     W = relax*WNew + (1-relax)*W;
     eta = relax*etaNew + (1-relax)*eta;
-    if maxChangeW < 1e-5 && maxChangeEta < 1e-5, break; end
+    if maxChangeW < 5e-5 && maxChangeEta < 5e-5, break; end
     
 %     WArr(:,it) = W;
 %     etaArr(:,it) = eta;

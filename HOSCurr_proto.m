@@ -8,17 +8,17 @@ M = 5; % solution order
 relTolODE = 1e-8;
 
 % Plot & export options
-PLOT_CURRENT = false; 
+PLOT_CURRENT = true; 
 PLOT_FINAL_VALOCITY_FIELD = false;
 DO_EXPORT = false;
 EXPORT_MATFILE = false;
-exportPrefix = 'vortex';
-exportPath = './doc/figures/';
+exportPrefix = 'AHA_';
+exportPath = './HOS_SFo_curr/figures/';
 
 % Wave specification
 NWaves = 10;
 lambda = 10;
-ka = .2;
+ka = .28;
 
 L = NWaves*lambda;
 initialCondition = 'linearWave'; % {'linearWave','Stokes3','wavePacket'} 
@@ -34,7 +34,7 @@ T = 2*pi/omega;
 c_p = 2*pi/T/k0;
 
 % Simulation/plotting time
-NT_dt = 1;
+NT_dt = 10;
 dt = NT_dt*T;
 t_end = 9*dt;
 
@@ -42,6 +42,7 @@ t_end = 9*dt;
 Tramp = 1*T;
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
 k_cut = (M+5)*k0;
+
 initialStepODE = 1e-3*T;
 
 %% Specify background current
@@ -54,12 +55,12 @@ nMirror = 3; % number of times the domain is repeated in x.
 
 
 % % % similar to basin, two vortices
-% zeta_j = [.6-.7i,  .1-.075i ]*L;% object centre
-% F_j    = [  .02i,   -.14i   ];% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
+zeta_j = [.6-.7i,  .1-.075i ]*L;% object centre
+F_j    = [  .02i,   -.14i   ];% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
 
-% % single vortex
+% single vortex
 % zeta_j = [.5-.075i  ]*L;% object centre
-% F_j    = [ -.2i  ];% object strength
+% F_j    = 0*[ -.2i  ];% object strength
 
 % % source + vortex + sink
 % zeta_j = [.25-.1i,.5-.1i ,.75-.1i   ]*L;% object centre
@@ -154,15 +155,18 @@ end
 
 ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 tic
-[t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS;eta],ODEoptions);
+% [t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS;eta],ODEoptions);
+[t,y] = ode45(@HOSODE45 ,0:dt:t_end,[phiS;eta],ODEoptions);
 CPUTime = toc;
 fprintf('CPU time (AHA): %gs\n',CPUTime);
 phiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
 % interpolate to perscribed times
-t_ip = (0:dt:t_end)';
-nPannel = length(t_ip);
+% t_ip = (0:dt:t_end)';
+% nPannel = length(t_ip);
 % phiS_ip = interp1(t,phiS,t_ip);
-eta_ip  = interp1(t,eta ,t_ip);
+% eta_ip  = interp1(t,eta ,t_ip);
+nPannel = size(eta,1);
+eta_ip = eta; t_ip = t;
 
 hf = figure('color','w','Position',[527  0  1056  1000],'name',sprintf('AHA ka=%.3g,M=%d,CPU=%.3g',ka,M,CPUTime));%[-1587 511 560 1000]
 for iP = 1:nPannel
@@ -172,7 +176,7 @@ for iP = 1:nPannel
     box off; grid on;
 end
 
-fileName = sprintf('%ska%.2g_M%d_Nw%d_dt%.3gT',exportPrefix,ka,M,NWaves,NT_dt); fileName(fileName=='.')='p';
+fileName = sprintf('%ska%.2g_M%d_Nw%d_dt%.3gT_nx%d',exportPrefix,ka,M,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
 if DO_EXPORT
     copyfile('./HOSCurr_proto.m',[exportPath,'/script_',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);

@@ -25,7 +25,7 @@ function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta)
             phi_jni(:,n,1) = phi_jni(:,n,1) - eta.^i.*phi_jni(:,n-i,i+1)/factorial(i);
         end
         % compute new derivatives
-        hphi_jn(:,n) = fft(phi_jni(:,n,1)).*(k<k_cut);% MB
+        hphi_jn(:,n) = fft(phi_jni(:,n,1)).*(k<k_cut);% NB
         for i = 1:(M-n+1)
             phi_jni(:,n,i+1) = ifft(k.^i.*hphi_jn(:,n));
         end        

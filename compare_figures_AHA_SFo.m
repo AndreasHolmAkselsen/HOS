@@ -1,8 +1,8 @@
 % name = 'waveField_Stokes_ka025_dt5T';
-name = 'waveField_Stokes_ka028_dt2T';
+name = 'ka0p25_M5_Nw10_dt1T_nx512';
 
-hfAHA = open(['./doc/figures/AHA_',name,'.fig']);
-hfSFo = open(['./doc/figures/SFo_',name,'.fig']);
+hfSFo = openfig(['./HOS_SFo_curr\figures/SFo_',name,'.fig']);
+hfAHA = openfig(['./HOS_SFo_curr/figures/AHA_',name,'.fig'],'invisible');
 
 hfSFo.Position=[527  0  1056  1000];
 
@@ -14,7 +14,8 @@ for i = 1:length(haSFo)
    set(hl,'LineStyle','--','Color','r','LineWidth',1);
    haAHA(i).Children.LineWidth = 1;
 end
+close(hfAHA)
+legend(haSFo(1),{'SFo','AHA'})
 
-
-savefig(hfSFo,['./doc/figures/AHAvsSFo_',name])
-export_fig(hfSFo,['./doc/figures/AHAvsSFo_',name],'-pdf')
+savefig(hfSFo,['./HOS_SFo_curr/figures/AHAvsSFo_',name])
+export_fig(hfSFo,['./HOS_SFo_curr/figures/AHAvsSFo_',name],'-pdf')

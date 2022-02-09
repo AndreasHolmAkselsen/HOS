@@ -4,24 +4,27 @@ g = 9.81;
 
 %% input
 % Resolution
-nx = 2^11;
+nx = 2^10;
 M = 5; % solution order
 relTolODE = 1e-8;
 
 % Plot & export options
 PLOT_CURRENT = true; 
-DO_EXPORT = false;
+DO_EXPORT = true;
 EXPORT_MATFILE = true;
 PLOT_FINAL_VALOCITY_FIELD = false;
 PLOT_WITH_SUBPLOT = false;
 
-exportPrefix = '';
-exportPath = './doc/figures/basin_L130/';
+% exportPrefix = '';
+% exportPath = './doc/figures/basin_L130/';
+
+exportPrefix = 'AHA_';
+exportPath = './HOS_SFo_curr/figures/';
 
 % Wave
 ka0 = .2; % steepness if not limited by flap angle
 % TLin = 1.5; %  target peroiod
-for TLin = 1:.5:5
+for TLin = 2% 1:.5:5
 
 % Basin
 L = 130;
@@ -35,7 +38,7 @@ NT_ramp = 1; % Number of periods in nonlinearity ramp.
 
 % Current
 zeta_j = []; U_j = []; U_curr = 0;
-% U_curr = .17;
+U_curr = .17;
 zeta_j = L/2-3.5i ;% object centre
 U_j    =  -(.07+U_curr)*1i ;% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
 nMirror = 3; % number of times the domain is repeated in x.
@@ -206,6 +209,7 @@ else
     ylim([min(eta_ip(1,:)),2*max(eta_ip(1,:))+z0])
     xlabel('x [m]'); ylabel('\eta [m]');
 end
+drawnow
 
 if DO_EXPORT
     copyfile('./HOSCurr_proto.m',[exportPath,'/script_',exportName,'.m']) 

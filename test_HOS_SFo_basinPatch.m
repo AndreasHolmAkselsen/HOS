@@ -11,14 +11,14 @@ relTolODE = 1e-8;
 PLOT_CURRENT = true; 
 DO_EXPORT = true;
 EXPORT_MATFILE = false;
-exportPrefix = 'SFoBasin_';
+exportPrefix = 'SFoBasinPatch_';
 exportPath = './HOS_SFo_curr/figures/';
 
 KEEP_ALL_TIMES = true;
 plotType = 'stacked';
 
 ka0 = .2; % steepness if not limited by flap angle
-TLins = 1%:4;
+TLins = 1:4;
 
 
 
@@ -35,17 +35,25 @@ wbl = 3; % hinge depth
 % Current
 U_curr = .17;
 zeta_j = L/2-3.5i ;% object centre
-U_j    =  -(.07+U_curr)*1i ;% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
+U_j    =  -1.6*(.07+U_curr)*1i ;% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
+patchWidth = 12;
+patchHeight = 2.5;
+nVortexes = [5,25];
+
+zeta_pathch = linspace(0,patchWidth,nVortexes(2))- patchWidth/2 + 1i*(linspace(0,patchHeight,nVortexes(1)).'-patchHeight/2);
+zeta_pathch = zeta_j + zeta_pathch(:).';
+
+
 nMirror = 3; % number of times the domain is repeated in x.
 % zeta_j = [7-3.5i,  50-100i ];% object centre
 % U_j    = [  -.25i,   .07i   ];% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
 
-U_j = shiftdim(U_j,-1); zeta_j = shiftdim(zeta_j,-1);% ID_j = shiftdim(ID_j,-1);
-zeta_j = zeta_j + L*shiftdim(-nMirror:nMirror,-2);
+U_j = shiftdim(U_j,-1); zeta_pathch = shiftdim(zeta_pathch,-1);% ID_j = shiftdim(ID_j,-1);
+zeta_pathch = zeta_pathch + L*shiftdim(-nMirror:nMirror,-2);
 % % vortex/source/sink
-A_j = .5*U_j.*abs(imag(zeta_j));
-f  = @(zeta) sum(A_j.*log(zeta-zeta_j) + conj(A_j.*log(conj(zeta)-zeta_j)),3:4) + U_curr.*zeta;
-df = @(zeta) sum(A_j./(zeta-zeta_j) + conj(A_j./(conj(zeta)-zeta_j)),3:4) + U_curr ;
+A_j = .5*U_j.*abs(imag(zeta_j))/prod(nVortexes);
+f  = @(zeta) sum(A_j.*log(zeta-zeta_pathch) + conj(A_j.*log(conj(zeta)-zeta_pathch)),3:4) + U_curr.*zeta;
+df = @(zeta) sum(A_j./(zeta-zeta_pathch) + conj(A_j./(conj(zeta)-zeta_pathch)),3:4) + U_curr ;
 
 
 
@@ -97,6 +105,7 @@ if PLOT_CURRENT && ~isempty(U_j)
     
 end
 
+return
 
 
 for TLin = TLins
@@ -255,7 +264,7 @@ switch plotType
         for iBreak = 1:nBreak
             plot([0,L],[iBreak-1,iBreak]*TCut*dz/dt,'--r');
         end
-        plot([0,L*( tLineEnd/TCut-nBreak)  ],[nBreak*TCut,tLineEnd]*dz/dt,'--r');
+        plot([0,L*( tLineEnd/TCut-nBreak)  ],[iBreak*TCut,tLineEnd]*dz/dt,'--r');
         
         ylim([min(eta(1,:)),2*max(eta(1,:))+z0])
         xlabel('x [m]'); ylabel('\eta [m]');

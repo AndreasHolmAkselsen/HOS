@@ -133,7 +133,7 @@ fileName = sprintf('%ska%.2g_M%d_Nw%d_dt%.3gT_nx%d',exportPrefix,ka,M,NWaves,NT_
 if DO_EXPORT
     copyfile('./test_HOS_SFo_Curr_regWave.m',[exportPath,'/script_',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);
-    export_fig(hf,[exportPath,'/',fileName],'-pdf');
+    export_fig(hf,[exportPath,'/',fileName],'-pdf','-png');
 end
 if EXPORT_MATFILE
     clear hf hf_c

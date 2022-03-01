@@ -3,14 +3,14 @@ global h_s h_d Lxx
 close all
 PLOT_OTHER_PLANES = 0;
 
-h_s = .6;
+h_s = .5;
 h_d = 1;
 
 
 nLines = 10;
 nPoints = 100;%500;
 
-Lxx = 10*h_d;
+Lxx = 12*h_d;
 
 
 limZeta = [-10*h_d,10*h_d,-pi,.5];
@@ -79,8 +79,8 @@ box off
 xlabel('\xi');ylabel('i \sigma');
 set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
 return
-export_fig(hfz,'CCMei_step','-pdf');
-export_fig(hfzz,'CCMei_step_inv','-pdf');
+export_fig(hfz,'CCMei_doubleStep','-pdf');
+export_fig(hfzz,'CCMei_doubleStep_inv','-pdf');
 export_fig(hfLam,'CCMei_step_lambda','-pdf');
 export_fig(hfT,'CCMei_step_t','-pdf');
 

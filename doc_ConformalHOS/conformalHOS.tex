@@ -12,7 +12,9 @@
 \usepackage[font=normalsize]{subfig}
 \usepackage{float}
 \usepackage{hyperref}
-\usepackage{cprotect}%for \verb in captions
+%\usepackage{cprotect}%for \verb in captions
+%\usepackage{enumerate}
+\usepackage{enumitem}
 \hypersetup{colorlinks=true,
 			linkcolor=blue,
 			filecolor=blue,
@@ -39,6 +41,9 @@
 \newcommand{\w}{w}
 \newcommand{\bU}{\bm U}
 \newcommand{\h}{\hat}
+\newcommand{\rbr}[1]{\left(#1\right)}
+\newcommand{\sbr}[1]{\left[#1\right]}
+\newcommand{\cbr}[1]{\left\{#1\right\}}
 %\newcommand{\bU}{(\nabla\Phi)_{z=\eta}}
 
 
@@ -55,6 +60,9 @@
 \newcommand{\zz}{\zeta}
 \newcommand{\xx}{\xi}
 \newcommand{\yy}{\sigma}
+%\newcommand{\k}{k}
+\newcommand{\kk}{\kappa}
+
 \newcommand{\zmap}{f}
 %\newcommand{\zzmap}{\zmap^{-1}}
 \newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
@@ -190,7 +198,7 @@ A key feature of the problem at hand is however that we only require potential f
 
 
 \section{The conformal mapping technique in finite water depth}
-\label{sec:H}
+\label{sec:finiteDepth}
 Unsurprisingly, the conformal map suggested in equation \eqref{eq:map} turns out not to be original, with similar mappings fond in e.g.~\citet{chalikov2005modeling}, although its usefulness in deep-water application in the context described above appears to be unremarked.
 The deep water assumption may at first glance may look like a minor simplification, but it is in fact essential for the explicitness and simplicity of the above scheme. 
 Let's look at the problems faced by a finite depth.
@@ -198,7 +206,7 @@ Let's look at the problems faced by a finite depth.
 
 The conformal map, equivalent to \eqref{eq:map}, with a finite water depth $H$ is
 \begin{equation}
-z\mapsto \zmap(\zz) = \zz - \ii \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii k_j(\zz+\ii H)}}{\sinh kH}.
+z\mapsto \zmap(\zz) = \zz - \ii \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii \kk_j(\zz+\ii H)}}{\sinh kH}.
 \label{eq:map_H}
 \end{equation}
 This map does \textit{not} have the property \eqref{eq:mapXi} but rather
@@ -208,21 +216,24 @@ This map does \textit{not} have the property \eqref{eq:mapXi} but rather
 \end{equation}
 The difference is that $\zmap(\xx)$ comes with a stretching of the $x$-dimension where
 \begin{equation}
-\Re \zmap(\xx) \equiv x\S(\xx) = \xx -\ii  \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii k_j\xx}}{\tanh kH}
+\Re \zmap(\xx) \equiv x\S(\xx) = \xx -\ii  \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii \kk_j\xx}}{\tanh kH}
 \label{eq:mapXi}
 \end{equation}
 (the latter term also being real).
 This means that $\surf(\xx)$ in \eqref{eq:ImMapXi}, the surface boundary in the $\zz$-plane, is no functionally equivalent to the the surface $h(\x)$ in the physical plane, but rather
-$\eta(\xx)=h[x\S(\xx)]$, and it is the Fourier components of $\eta(\xx)$, not of $h(\x)$, that are required in \eqref{eq:map_H}.
+$\eta(\xx)=h[x\S(\xx)]$, and it is the Fourier components of $\eta(\xx)$, not of $h(\x)$, that are required in \eqref{eq:map_H}. 
+Likewise, $\kk_j$ are the wave numbers in the $\zz$-plane, as opposed to the wavenumbers $k_j$ in the $\z$-plane.
 In other words, the mapping \eqref{eq:map_H} is highly implicit in both directions.
 It is easily plotted reversely---given a function $\eta$ in the $\zz$-plane we can compute the map \eqref{eq:map_H} and see what physical surface $h(x)$ this corresponds to.
 An example is shown in \autoref{fig:map_H} for a sinusoidal $\eta(\xx)$. Note that the surface $h(x)$ in the physical plane is not sinusoidal.
+The mapping, being impractical viewed from the $\z$-plane, can still adopt for wave simulation by reformulating the boundary problem into the $\zz$-plane and performing the time integration in Fourier-space, as done by \citet{chalikov2005modeling}.
 
-Other parts of the scheme would be fairly similar; we have $\zzmap[x\S(\xx)+\ii\eta(\xx)]=\xx$, etc.
+
+We remark that similar to earlier we have $\zzmap[x\S(\xx)+\ii\eta(\xx)]=\xx$, etc.
 The complex potential of finite depth is in the $\zz$-plane is
 \begin{equation}
 %\ww(\zz) = \sum_{j=0}^\infty\h\ww_j \frac{\sin k_j(\zz+\ii H)}{\cosh k_j H}; \quad \h\ww_j\in\mathbb R,\; k_j\geq 0.
-\ww(\zz) = \sum_{j=-\infty}^\infty\h\ww_j \frac{\ee^{\ii k_j(\zz+\ii H)}}{\cosh k_j H}; \quad \h\ww_{-j}=\h\ww_{j}^*.
+\ww(\zz) = \sum_{j=-\infty}^\infty\h\ww_j \frac{\ee^{\ii \kk_j(\zz+\ii H)}}{\cosh \kk_j H}; \quad \h\ww_{-j}=\h\ww_{j}^*.
 \label{eq:wH}
 \end{equation}
 The stretching $x\S(\xx)$ further affects the mapping of $\phi\S(\x)$ into the coefficients $\{\h\ww_j\}$.
@@ -238,7 +249,7 @@ The stretching $x\S(\xx)$ further affects the mapping of $\phi\S(\x)$ into the c
 
 
 \section{Conformal mapping to emulate the presence to steep alterations in bathymetry}
-
+\label{sec:CS}
 Assume we have mapped a flat-bedded domain in the $\zz$-plane into a curvilinear $\z$ plane. 
 A common example such a mapping is the Schwarz--Christoffel  transformation $\z\mapsto \zmap(\zz)$ with
 \[
@@ -247,8 +258,8 @@ A common example such a mapping is the Schwarz--Christoffel  transformation $\z\
 in which the horizontal coordinate is bent stiff angles $\alpha_j$ at locations $\zeta=\xi_j$.
 Some particular mappings are analytically integrable, such as the orthogonal step which yields
 \begin{equation}
-\zmap(\zz) = \frac {H\_d-H\_s}\pi \left[  \sqrt{\zz-1}\sqrt{\zz+1} - 2\sinh^{-1}\! \sqrt{(\zz-1)/2} \right] - \ii H\_s,
-\label{eq:SC}
+\z\mapsto\zmap(\zz) = \frac {H\_d-H\_s}\pi \left[  \sqrt{\zz-1}\sqrt{\zz+1} - 2\sinh^{-1}\! \sqrt{(\zz-1)/2} \right] - \ii H\_s,
+\label{eq:mapSC}
 \end{equation}
 $H\_d$ and $H\_s$ being the deep and shallow sides of the step, respectively.%
 \footnote{This is mapping the plane into $\zz_1=-1$, $\zz_2=1$. A less streched map is obtained if mapping into, say, $\zz_1=-d$, $\zz_2=0$; $d=H\_d-H\_s$, yielding
@@ -256,15 +267,16 @@ $H\_d$ and $H\_s$ being the deep and shallow sides of the step, respectively.%
 \zmap(\zz) =   \frac {2d}\pi \left[  \sqrt{\zz/d}\sqrt{\zz/d+1} - \log\left(\sqrt{\zz/d} \sqrt{\zz/d+1}\right) \right] - \ii H\_s,
 \]
  }
-Map \eqref{eq:SC} cannot be analytically inverted.
+Map \eqref{eq:mapSC} cannot be analytically inverted.
 
 The complex potential with an impermeable surface at $\yy=0$ is
 \begin{equation}
-\ww(\zz) = \sum_{j=-\infty}^\infty\h\ww_j \ee^{\ii k_j\zz}; \quad \h\ww_{-j}=\h\ww_{j}^*.
-\label{eq:w0}
+\ww(\zz) = \sum_{j=-\infty}^\infty\h\ww_j \frac{\ee^{\ii \kk_j\zz}}{\cosh \kk_j \tilde H}; \quad \h\ww_{-j}=\h\ww_{j}^*.
+\label{eq:ww_logstrip}
 \end{equation}
+$\tilde H$ is a representative depth in the $\zeta$-plane introduced to numerically scale $\h\ww_j$.
 
-It is impractical in practice to map a transient free surface within a simulation routine, as noted in \autoref{sec:H}.
+It is impractical in practice to map a transient free surface within a simulation routine, as noted in \autoref{sec:finiteDepth}.
 We can however map $\zz$ to the reference plane $\y = 0$ which is fixed throughout the simulation, and from there use the traditional HOS technique of Taylor expansion.
 Let's call such a mapping $\zz_0(\x)$. It satisfies
 \[
@@ -277,7 +289,7 @@ Such a map is easily computed numerically using interpolation; the circles in \a
 \centering
 \subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/SC_step.pdf}}%
 \subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/SC_step_inv.pdf}}%
-\caption{A step mapped with the Schwarz--Christoffel transform \eqref{eq:SC}}%
+\caption{A step mapped with the Schwarz--Christoffel transform \eqref{eq:mapSC}}%
 \label{fig:SC_step}%
 \end{figure}
 
@@ -306,39 +318,41 @@ In terms of the complex potential $\w\oo n(\z)=\phi\oo n(\x,\y)+\ii \psi\oo n(\x
 \partial_y^m \phi\oo{n} = \Re\left\{ \mr{d}_\z^n\w(\z) \ee^{\ii \frac\pi2 n} \right\} .
 \label{eq:ppphi}
 \end{equation}
-It is straightforward to related the derivatives of $\w(\z)$ to the derivatives of $\ww(\zz)$ in \eqref{eq:w0} using the derivatives of \eqref{eq:SC} and the chain rule. 
+It is straightforward to related the derivatives of $\w(\z)$ to the derivatives of $\ww(\zz)$ in \eqref{eq:ww_logstrip} using the derivatives of \eqref{eq:mapSC} and the chain rule. 
 
 
 \section{Conformal step with flat surface $y=0$}
+\label{sec:SC_extended}
 The step map displayed in \autoref{fig:map_H} can be given a flat surface $y=0$ with some added complexity in the transformation function.
 We base such a map on the common presented task of finding a flow field over a step in a channel \citep[e.g.,][\SSS 4.3.2]{mei_2005}.
 The complex potential there created can itself be regarded as a conformal map.
 Accordingly, we have
 \begin{subequations}
 \begin{align}
-\lambda &= \exp(\zeta + \ii \pi),\label{eq:map_Hflat:lambda}\\
-%t &= \frac{^+\!\sqrt{\lambda-c^2}}{^+\!\sqrt{\lambda-1}},\label{eq:map_Hflat:t}\\
-t &= \sqrt{\frac{\lambda-c^2}{\lambda-1} },\label{eq:map_Hflat:t}\\
-z &\mapsto f(\zeta) = -\ii H\_s +\frac{H\_d}{\pi}\left[ 
-\frac1c \ln^+\frac{t-c}{t+c} - \ln\frac{t-1}{t+1}
-\right]\label{eq:map_Hflat:z},
+\lambda &= -\exp(\zeta),\label{eq:map_logstrip:lambda}\\
+%\tau &= \frac{^+\!\sqrt{\lambda-c^2}}{^+\!\sqrt{\lambda-1}},\label{eq:map_logstrip:t}\\
+\tau &= \sqrt{\frac{\lambda-c^2}{\lambda-1} },\label{eq:map_logstrip:t}\\
+z &\mapsto \zmap(\zeta) = -\ii H\_s +\frac{H\_d}{\pi}\left[ 
+\frac1c \ln^+\frac{\tau-c}{\tau+c} - \ln\frac{\tau-1}{\tau+1}
+\right]\label{eq:map_logstrip:z},
 \end{align}%
-\label{eq:map_Hflat}%
+\label{eq:map_logstrip}%
 \end{subequations}%
 with $c = H\_d/H\_s$.
-The map \eqref{eq:map_Hflat} goes via the map \eqref{eq:map_Hflat:lambda}, mapping $\zeta$ the polar plane $\lambda$ (normally considered a stream function source), and the right angled $t$-plane \eqref{eq:map_Hflat:t}.
+The map \eqref{eq:map_logstrip} goes via the map \eqref{eq:map_logstrip:lambda}, mapping $\zeta$ the polar plane $\lambda$ (normally considered a stream function source), and the right angled $\tau$-plane \eqref{eq:map_logstrip:t}.
 The flat-surface domain of $z=\x+\ii\y$, $\y\leq0$ is mapped by the strip $\zz=\xx+\ii\yy$, $-\pi<\yy\leq0$.
-With waves present it may be necessary to evaluate $\z$ at locations $\y>0$; $\yy>0$ for which care must be taken on order to choose the appropriate branches of the square roots and logarithms. 
-%Accordingly, we have in \eqref{eq:map_Hflat} introduced in the operators $^+\!\sqrt{\phantom{\cdot} }$ and $\ln^+$, the angles of which run from $0$ to $\pi$ and $0$ to $2\pi$, respectively.  
-Accordingly, we have in \eqref{eq:map_Hflat:z} introduced in the operator $\ln^+$, the angles of which run from $0$ to $2\pi$. 
-\autoref{fig:Mei_step} shows the adjusted map \eqref{eq:map_Hflat} for $-\pi\leq\yy\leq0.5$ with the intermediate planes $\lambda(\zz)$ and $t(\lambda)$ shown in \autoref{fig:Mei_step_lambda_t}.
+With waves present it may be necessary to evaluate $\z$ at locations $\y>0$; $\yy>0$ for which care must be taken to choose the appropriate branches of the logarithms;
+%Accordingly, we have in \eqref{eq:map_logstrip} introduced in the operators $^+\!\sqrt{\phantom{\cdot} }$ and $\ln^+$, the angles of which run from $0$ to $\pi$ and $0$ to $2\pi$, respectively.  
+we introduce in \eqref{eq:map_logstrip:z} the operator $\ln^+$, the angles of which runs from $0$ to $2\pi$. 
+\autoref{fig:Mei_step} shows the adjusted map \eqref{eq:map_logstrip} for $-\pi\leq\yy\leq0.5$ with the intermediate planes $\lambda(\zz)$ and $\tau(\lambda)$ shown in \autoref{fig:Mei_step_lambda_t}.
 Note that the free surface $\y=0$ is a straight line  $\yy=0$ in the $\zz$-plane, but that $\xx$ is contracted over the step transition.
 The direction of the step is reversed by flipping the abscissa; $z\mapsto-f(-\zeta)$.  
+\\
 \begin{figure}[h!ptb]%
 \centering
 \subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/CCMei_step.pdf}}%
 \subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/CCMei_step_inv.pdf}}%
-\caption{A step mapped with adjusted Schwarz--Christoffel transform \eqref{eq:map_Hflat}}%
+\caption{A step mapped with adjusted Schwarz--Christoffel transform \eqref{eq:map_logstrip}}%
 \label{fig:Mei_step}%
 \end{figure}
 
@@ -346,10 +360,168 @@ The direction of the step is reversed by flipping the abscissa; $z\mapsto-f(-\ze
 \centering
 \subfloat[$\lambda(\zz)$-plane]{\includegraphics[width=.37\columnwidth]{../conformalMapping/CCMei_step_lambda.pdf}}%
 \qquad
-\subfloat[$t(\lambda)$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/CCMei_step_t.pdf}}%
-\caption{The intermediate maps \eqref{eq:map_Hflat:lambda} and \eqref{eq:map_Hflat:t}}%
+\subfloat[$\tau(\lambda)$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/CCMei_step_t.pdf}}%
+\caption{The intermediate maps \eqref{eq:map_logstrip:lambda} and \eqref{eq:map_logstrip:t}}%
 \label{fig:Mei_step_lambda_t}%
 \end{figure}
+
+
+It is for many purposes desirable to include both forwards and backwards part of the step illustrated in \autoref{fig:Mei_step}.
+This can be done by extending the Schwarz--Christoffel transformation with another step, although the differential equation thus obtained does not integrate into any wieldy analytical expression. 
+It is possible to perform the integration numerically [section to come].
+An alternative is to mirror the domain around the $\y$-axis at a suitable distance form the step.
+\begin{equation}
+\z\mapsto\tilde \zmap(\zz) = 
+\begin{cases}
+-\zmap(-\zz - L_\xx) - L_\x; & \xx < 0,\\
++\zmap(+\zz - L_\xx) + L_\x; & \xx>0,
+\end{cases}
+\label{eq:map_double}
+\end{equation}
+where $L_\xx$ and $L_\x=-f(-L_\xx)$ is the step half-width in the $\zz$ and $\z$ planes, respectively. 
+This map will not be strictly conformal along the seam $\xx=0$, but approximately so provided there is some distance between the steps.
+An demonstration is shown in \autoref{fig:Mei_double}.
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/CCMei_doubleStep.pdf}}%
+\subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/CCMei_doubleStep_inv.pdf}}%
+\caption{A doubel step mapped with adjusted Schwarz--Christoffel transform \eqref{eq:map_double}}%
+\label{fig:Mei_double}%
+\end{figure}
+
+The complex potential of these flows can now in the $\zz$-plane be expressed
+\begin{equation}
+\ww(\zz) = \sum_{j=-\infty}^\infty \h\ww_j \frac{\ee^{\ii \kk_j(\zz+\ii\pi)}}{\cosh(\kk_j \pi)}; \quad \h\ww_{-j}=\h\ww_{j}^*.
+\label{eq:ww_double}
+\end{equation}
+We remark that despite the many mapping levels of \eqref{eq:map_logstrip}, computing mapping derivatives is a manageable task:
+\begin{equation}
+\begin{aligned}
+f'(\zz) &= \frac{H_d}{\pi\, \tau},  \\
+f''(\zz) &=- \frac{H_d \lambda\, \tau}{2\pi} \frac{c^2-\lambda}{\rbr{c^2-\lambda}^2},\\
+f'''(\zz) &= \frac{H_d \lambda\, \tau^3}{4\pi} \rbr{c^2\lambda + 2\lambda^2 - 2c^2-\lambda} \frac{c^2-1}{\rbr{c^2-\lambda}^4},\\
+&\ldots
+\end{aligned}
+\label{eq:}
+\end{equation}
+
+\section{A direct mapping technique for matching the surface potential.}
+\label{sec:directMapping}
+Even though the map \eqref{eq:map_double} cannot be inverted analytically, a numerical inversion function $\zzmap$ based on interpolation can easily be constructed. 
+Crucially, the bathymetry mapping is constant throughout any simulation, meaning that the minor computation associated with this inverse mapping is done in advance, 
+and the surface in the $\zz$-plane obtained at $\zz\S(\x)=\zzmap[\x+\ii h(\x)]$.
+The inverse map $\zzmap$ is composed from scattered interpolation of a structured rectangle in the $\zz$-plane, fitted to contain the surface $\zz\S$.
+The main challenge and goal of such a construct is then to be able to construct a complex potential $\ww(\zz)$ from \eqref{eq:ww_logstrip} or \eqref{eq:ww_double}, depending on map, whose real part coincides with $\phi\S(\x)$ at $\zz=\zz\S(\x)$.
+
+As discussed in \autoref{sec:finiteDepth}, the modes $\h\ww_j$ cannot explicitly be related to $\phi\S$ because the complex potential is also constructed to account for the impermeable lower boundary. 
+We can however express the system for the discrete points $\z_i,\zz_i$ which can easily be solved numerically.
+Incorporating the condition $\h\ww_{-j}=\h\ww_{j}^*$, the system is written
+\begin{equation}
+\h\phi_0 + 2\sum_{j=1}^J (\h\phi_j \cos\kk_j \xx_i - \h\psi_j \sin\kk_j \xx_i )\frac{\cosh \kk_j(\yy_i+\yy_0)}{\cosh\kk_j\tilde H} = \phi\S_i,
+%\Re\ww_0 + 2\sum_{j=1}^J \Re\left\{\h\ww_j \ee^{\ii \kk_j \xx_i}\right\}\frac{\cosh \kk_j(\yy_i+\yy_0)}{\cosh\kk_j\tilde H} = \phi\S_i,
+\label{eq:syst_ww}
+\end{equation}
+to be solved for the real and imaginary parts of 
+%$\h\ww_j$; $\Re\h\ww_j \ee^{\ii \kk_j \xx_i} = \h\phi_j \cos\kk_j \xx_i - \h\psi_j \sin\kk_j \xx_i $
+$\h\ww_j = \h\phi_j + \ii \h\psi_j$. 
+$\yy_0$ and $\tilde H$ both equal $\pi$ in the extended maps \eqref{eq:map_logstrip} and \eqref{eq:map_double}, and equals respectively zero and some representative height (e.g., $\Im \zzmap(0)$) with the simpler map \eqref{eq:mapSC}.
+The imaginary part of $\h\ww_0$ is left arbitrary.
+
+It is found numerically stabilizing to integrate $\phi\S(x)$ such that $\xx_i$ are equidistant.  
+This ensures that the system \eqref{eq:syst_ww} corresponds to a normal Fourier transform in the case of a flat surface $\yy_i=0$, such that $\h\ww_j = \h\phi_j\S \ee^{\ii k_j \x_0}$ ($\h\phi_j\S$ being the Fourier coefficients of $\phi\S(\x)$ after interpolation).
+Robustness of the method then gradually decreases with increasing surface amplitudes as the components in \eqref{eq:syst_ww} become less orthogonal.
+It is possible that robustness can be improved further by other interpolation choices or by over-determining system \eqref{eq:syst_ww}, including fewer wave modes than there are spatial points.
+\\
+
+Examples of thus computed potential fields are presented in this section for an arbitrary wave $h(\x) = a\cos(k_0 \x + \varphi)$ with an arbitrary surface potential $\phi\S(\x) = b\sin(k_0 \x + \varphi_1) + c\sin(2k_0 \x + \varphi_2)$ in the $\z$-plane.
+\autoref{fig:res:simple} shows results for the simpler transformation \eqref{eq:mapSC}.
+Dashed black lines indicate the interpolation domain included in the inverse mapping $\zzmap$.
+We see that a smooth potential field has been found in the right half of the domain. 
+The left half shows strong high-frequency variation. 
+This is because to solution obtained form solving \eqref{eq:syst_ww} relied on high-wavenumber modes in this region; it matches $\phi\S$ exactly at the interpolated discrete points, but fluctuates wildly in their neighbourhood.
+
+Better robustness is seen in \autoref{fig:res:logstip} showing the extended map \eqref{eq:map_logstrip} with the coinciding flat planes $\yy=0$ where $\y=0$. 
+Fairly large amplitudes can be imposed before fluctuations at the surface solution are observed. 
+Furthermore, robustness is fairly insensitive to the degree of depth transition.
+
+Several examples more are presented in \autoref{fig:res:double1}--\ref{fig:res:double3}, here for the double step \eqref{eq:map_double}.
+This map has the additional advantage that the domain becomes periodic in both $\zz$ and $\z$ planes.
+
+\input{resultFigures.tex}
+
+\section{Incorporating conformally mapped bathymetry into the HOS scheme}
+
+Several options based on the above theory are apparent.
+Let us list some.
+\renewcommand\labelitemi{--}
+\begin{enumerate}[label={\roman*)}]
+	\item Mapping back and forth between the $\z$- and $\zz$-planes at each time step.
+	\begin{itemize}
+		\item This  is the most direct approach, collecting surface velocities at the surface itself.
+		\item Involves usage of inverse mapping $\zzmap$ at each time step.
+		\item Involves interpolation of $\phi\S$ at each time step.
+		\item Involves solving system \eqref{eq:syst_ww} at each time step.
+		\item Subject to the robustness limitations explored above.
+	\end{itemize}
+	\item Perform the standard HOS simulation with Taylor expansion about $\yy=0$ from the $\zeta$-plane. \label{it:chosen}
+	\begin{itemize}
+		\item The boundary value problem is stated in the $\z$-plane. This must be restated in the $\zz$-plane.
+		\item No interpolation inverse mapping required during simulation.
+		\item Speedy use of FFT-algorithm.
+		\item A structured $\{\xx_j\}$ grid in the $\zz$-plane means scattered points in the $\z$-plane. Surface positions $\{\x_j\}$ change in time.
+	\end{itemize}
+	\item Perform time integration from the $\z$-plane and Taylor expansion form the $\zz$-plane.
+	\begin{itemize}
+		\item Requires structured horizontal grids in both planes.
+		\item Involves interpolation of $\phi\S$ to a structured $\{\xx_j\}$ grid at each time step for speedy FFT.
+		\item Inverse mapping needed, but can be circumvented by also integrating $\{ \partial_t\zz\S_j\} = \{  \partial_t h_j /\zmap'_j\}$.
+	\end{itemize}
+	\item Time integration and Taylor expansion in the $\z$-plane.
+	\begin{itemize}
+		\item Requires $M$ derivatives of $\w$ and $\zmap$. These are manageable for moderate $M$ (say 5), but can be tedious to implement.
+		\item Involves interpolation for speedy FFT.
+	\end{itemize}
+\end{enumerate}
+
+Option \ref{it:chosen} seems the most promising of these options.
+The boundary value problem 
+\begin{align*}
+h_t + \phi_x h_x&=\phi_y,\\
+\phi_t + \frac12\rbr{\phi_x^2+\phi_y^2}+gh&=0
+\end{align*}
+can be re-stated for for the surface coordinate
+\[
+%\z\S(\x,t)=\x+\ii h(\x,t) \mapsto f[\zz\S(\xx,t)];\quad \zz\S(\xx,t) = \xx+\ii \eta(\xx,t).
+\x+\ii h(\x,t) \mapsto f[\xx+\ii \eta(\xx,t)].
+\]
+Introducing
+\[\varphi(\xx,\yy,t)=\Re\ww(\zz,t) \]
+we get\footnote{
+Equation \eqref{eq:BC_zz:eta} is derived form the fundamental principle that a fluid particle follows the surface also in the $\zz$-plane; $\frac{\mr D}{\mr D t}(\eta-\yy)=0$. The particle velocity is 
+$\dd\zz t = \dd\z t \dd\zz\z =(\w')^*/f'=(\ww')^*\big/|f'|^2$.
+}
+\begin{subequations}
+\begin{align}
+\eta_t &= |\zmap|^{-2}  \rbr{ -  \varphi_\xx\eta_\xx  +  \varphi_\yy}, \label{eq:BC_zz:eta} \\
+\varphi_t &=   - \frac12 |\zmap|^{-2} \rbr{\varphi_\xx^2+\varphi_\yy^2}  - g h,
+\end{align}%
+\label{eq:BC_zz}%
+\end{subequations}%
+$|\zmap|^{2}$ being equivalent to the transformation Jacobian. 
+Finally, for utilization in a HOS scheme, the boundary conditions for the surface potential 
+\[
+\varphi\S(\xx,t)=\varphi[\xx+\ii\eta(\xx,t),t]
+\]
+become
+\begin{subequations}
+\begin{align}
+\eta_t &= |\zmap|^{-2} \sbr{-   \varphi\S_\xx\eta_\xx + (1+\eta_\xx^2) \varphi_\yy},\\
+\varphi\S_t  &= |\zmap|^{-2}\sbr{ - \frac12  \rbr{\varphi\S_\xx}^2 + \frac12 (1+\eta_\xx^2) \varphi_\yy^2 }  - g h,
+\end{align}%
+\end{subequations}%
+with  $\varphi_\yy$ evaluated at $\zz=\xx+\ii\eta$.
+$h=\Im \zmap(\xx+\ii\eta)$ is readily available. 
 
 \bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
 \bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.

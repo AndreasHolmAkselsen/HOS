@@ -3,13 +3,13 @@ global M x k_cut nonLinRamp df
 
 %% input
 % Resolution
-nx = 2^10;
+nx = 2^9;
 M = 5; % solution order
 relTolODE = 1e-8;
 
 % Plot & export options
 PLOT_CURRENT = true; 
-PLOT_FINAL_VALOCITY_FIELD = false;
+PLOT_FINAL_VALOCITY_FIELD = true;
 DO_EXPORT = false;
 EXPORT_MATFILE = false;
 exportPrefix = 'AHA_';
@@ -18,7 +18,7 @@ exportPath = './HOS_SFo_curr/figures/';
 % Wave specification
 NWaves = 10;
 lambda = 10;
-ka = .28;
+ka = .2;
 
 L = NWaves*lambda;
 initialCondition = 'linearWave'; % {'linearWave','Stokes3','wavePacket'} 
@@ -55,12 +55,12 @@ nMirror = 3; % number of times the domain is repeated in x.
 
 
 % % % similar to basin, two vortices
-zeta_j = [.6-.7i,  .1-.075i ]*L;% object centre
-F_j    = [  .02i,   -.14i   ];% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
+% zeta_j = [.6-.7i,  .1-.075i ]*L;% object centre
+% F_j    = [  .02i,   -.14i   ];% object strength-- +1:source, -1:sink, 1i:counter-clockwise vortex, -1i ...
 
 % single vortex
-% zeta_j = [.5-.075i  ]*L;% object centre
-% F_j    = 0*[ -.2i  ];% object strength
+zeta_j = [.5-.075i  ]*L;% object centre
+F_j    = [ -.2i  ];% object strength
 
 % % source + vortex + sink
 % zeta_j = [.25-.1i,.5-.1i ,.75-.1i   ]*L;% object centre
@@ -155,18 +155,21 @@ end
 
 ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 tic
-% [t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS;eta],ODEoptions);
-[t,y] = ode45(@HOSODE45 ,0:dt:t_end,[phiS;eta],ODEoptions);
+[t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS;eta],ODEoptions);
+% [t,y] = ode45(@HOSODE45 ,0:dt:t_end,[phiS;eta],ODEoptions);
 CPUTime = toc;
 fprintf('CPU time (AHA): %gs\n',CPUTime);
 phiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
 % interpolate to perscribed times
+
 % t_ip = (0:dt:t_end)';
-% nPannel = length(t_ip);
-% phiS_ip = interp1(t,phiS,t_ip);
-% eta_ip  = interp1(t,eta ,t_ip);
-nPannel = size(eta,1);
-eta_ip = eta; t_ip = t;
+t_ip = linspace(0,t(end),10)';
+nPannel = length(t_ip);
+phiS_ip = interp1(t,phiS,t_ip);
+eta_ip  = interp1(t,eta ,t_ip);
+
+% nPannel = size(eta,1);
+% eta_ip = eta; t_ip = t;
 
 hf = figure('color','w','Position',[527  0  1056  1000],'name',sprintf('AHA ka=%.3g,M=%d,CPU=%.3g',ka,M,CPUTime));%[-1587 511 560 1000]
 for iP = 1:nPannel

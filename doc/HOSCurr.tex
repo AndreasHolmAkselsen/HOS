@@ -18,6 +18,7 @@
 			filecolor=blue,
 			urlcolor=blue,
 			citecolor=blue}
+\usepackage{changepage}
 \newcommand{\mr}{\mathrm}
 \newcommand{\mc}{\mathcal}
 \let\SSS\S
@@ -49,97 +50,18 @@
 \tableofcontents
 
 \section{Introduction}
+The aim of this study is to provide a preliminary assessment of the effect that the basin current system will have on wave quality. To that end, the higher-order spectral method (HOS) is extended with a background flow field model, as described in the next section. Simulations are run based on flow field results obtained from CFD simulation that do not include a free surface.\\
+
 SINTEF Ocean has at their disposal HOS codes both the c++ and MATLAB languages.
-For a description on the code development up until now please see memo \citet{SFo2018_HOS}, as well as the mixed Eulearian-Lagrangien variation of the method published by \citep{fouques2020mixedHOS}.
-
-The HOS model discussed presently, described in \SSS\ref{sec:model}, has been implemented separately in the MATLAB language for development. Extension of pre-existing codes with support for current flows is believed to require little effort.
+For a description on the code development up until now please see memo \citet{SFo2018_HOS}, as well as the mixed Eulerian-Lagrangian variation of the method published by \citep{fouques2020mixedHOS}.
 
 
+We have in this project written a simple new HOS implementation in MATLAB for testing. This code runs notably faster but is somewhat less robust (appendix~\ref{sec:AHAvsSFO}).
+Numerical stability is however found to be paramount for in this study, and the method was implemented in the pre-existing MATLAB code and considered herein. 
 
-\section{Capabilities of flow field extended HOS}
-We begin by benchmarking and demonstrating the potential of extending the HOS method with a background flow field.
-
-\subsection{Benchmark against existing HOS code}
-We first compare the results of the pre-existing MATLAB HOS code \citep{SFo2018_HOS} with the present implementation without current for the purpose of benchmarking. 
-As describe in the cited memo, and reference there within, a ramping of the nonlinear terms is used to provide stable conformity between the initial conditions and the developing solution. 
-The ramp used is 
-\[w(t) = 1-\exp[-(t/T\_{ramp})^2]\];
-
-Figure~\ref{fig:stokes_ka025} shows the development of a Stokes wave for linear steepness $ka = 0.25$, $T\_{ramp}$ equalling one wave period.
-The match between codes seems precise. 
-Notice however that both codes predict an slow undulation in the shape of the Stokes wave, the Stokes wave alternately adopting a more and less nonlinear profile.  
-
-A steeper wave is demonstrated in figure~\ref{fig:stokes_ka028}, here with $ka = 0.28$. The time interval between each panel is here shorter. Good agreement is shown, but the new implementation becomes unstable after about 18 periods. This is not surprising as more effort has been put into the pre-existing with regard to simulation stability. On the other hand, the new implementation runs about twice as fast, the CPU time being 94\,s vs. 220\,s in the former example and 52\,s vs.\ 110\,s in the latter.
-
-\begin{figure}[h!ptb]%
-\centering
-\includegraphics[width=.75\columnwidth]{./figures/AHAvsSFo_waveField_Stokes_ka025_dt5T.pdf}%
-\caption{Benchmark, regular wave. Solid line: MATLAB HOS code \citep{SFo2018_HOS}, dashed line: presently implemented HOS code.
-Linear steepness $ka = 0.25$, five period time intervals, $T\_{ramp}=T$.
-}%
-\label{fig:stokes_ka025}%
-\end{figure}
-\begin{figure}[h!ptb]%
-\centering
-\includegraphics[width=.75\columnwidth]{./figures/AHAvsSFo_waveField_Stokes_ka028_dt2T.pdf}%
-\caption{Benchmark, regular wave. Solid line: MATLAB HOS code \citep{SFo2018_HOS}, dashed line: presently implemented HOS code.
-Linear steepness $ka = 0.28$, two period time intervals, $T\_{ramp}=T$.
-}%
-\label{fig:stokes_ka028}%
-\end{figure}
-
-\subsection{Examples with a background flow}
-Figure~\ref{fig:vortex:ka02} shows a simulation of a regular wave propagating over a opposing vortex (upper flow field directed against the wave propagation direction). 
-The vortex generates a counter current which causes stagnation in the wave train. 
-Consequently, a build-up in wave height is observed over the vortex, with a corresponding reduction in wave height observed in the region following.
-As a matter of precaution, the background flow field is ramped up with the same ramp as is used for the nonlinear terms. 
-Later tests have indicated that simulations remain stable also without this ramp.
-This simulation (or flow?) is not stable and crashes soon after the last shown frame.
-\\
-
-The simulations can be stabilized by reducing the wave steepness or vortex intensity, which allows us to look further on in time.
-This we do in figure~\ref{fig:vortex:ka01} where the steepness has been reduces to $ka = 0.1$ and the time interval between panels increased.
-The evolution of the wave field is worth inspection.
-There build-up of wave heigh noted earlier appears after a while to `break free' in the form of a large and irregular group propagating downstream. 
-The small-amplitude portion of the wave train is now to be found on the opposite side of the vortex.
-This larger wave group travels through the periodic boundary at re-engages with the vortex, soon after which the simulation breaks down. 
-Such a transient dynamic suggests that the presence of opposing vortices can serve to generate more extreme wave statistics.  
-\\
-
-\begin{figure}[H]%
-\centering
-\subfloat[Background flow field]{\includegraphics[width=.75\columnwidth]{./figures/flowField_vortex.pdf}}\\
-\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/waveField_vortex.pdf}}%
-\caption{Flow over a single line vortex. The vortex is centred at $\zeta_1 = (0.5+0.075\ii)L_x$ with intensity $F_1 = -0.2\ii$ (see \SSS\ref{sec:Phi}).
-The linear steepness of the shown wave is $ka = 0.2$, $M=5$ terms are used in the Taylor expansion and the number of points/modes is $2^{10}$. $T\_{ramp}=T$ with one period between each panel, is indicated in the ordinate labels.
-The Stokes wave period is about $2.48$ seconds.
-}%
-\label{fig:vortex:ka02}%
-\end{figure}
+%The HOS model discussed presently, described in \SSS\ref{sec:model}, has been implemented separately in the MATLAB language for development. Extension of pre-existing codes with support for current flows is believed to require little effort.
 
 
-\begin{figure}[H]%
-\centering
-\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/vortex_ka0p1_M5_Nw20_dt7p5T.pdf}}%
-\caption{
-Same as figure~\ref{fig:vortex:ka02} but with $ka=0.1$ and $7.5$ periods between each panel. 
-}%
-\label{fig:vortex:ka01}%
-\end{figure}
-
-As another example, we show in figure~\ref{fig:doublet:ka01} the evolution of a flow over an upwards-pointing doublet. 
-The ratio of the largest surface current speed to the phase velocity is for this case about $0.065$. 
-The steepness of the quiescent wave train is small ($ka=0.1$) as in the previous example, but the underlying doublet causes a focusing of wave energy such that the simulation breaks down at a later stage. 
-\begin{figure}[H]%
-\centering
-\subfloat[Background flow field]{\includegraphics[width=.75\columnwidth]{./figures/curr_upDoubletka0p1_M5_Nw20_dt7p5T.pdf}}\\
-\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/upDoubletka0p1_M5_Nw20_dt7p5T.pdf}}%
-\caption{
-Upwards-pointing doublet; $\zeta_1 = (0.5-0.15\ii)L_x$ with intensity $F_1 = 0.1\ii$ (see \SSS\ref{sec:Phi}).
- $ka=0.1$ and $7.5$ periods between each panel. 
-}%
-\label{fig:doublet:ka01}%
-\end{figure}
 
 
 
@@ -148,6 +70,7 @@ Upwards-pointing doublet; $\zeta_1 = (0.5-0.15\ii)L_x$ with intensity $F_1 = 0.1
 \label{sec:model}
 \subsection{Boundary conditions}
 \label{sec:BC}
+We were reformulate the HOS boundary conditions to account for a background velocity field $\nabla \Phi(\rr,z,t)$.
 The kinematic and dynamic boundary conditions respectively read
 \begin{subequations}
 \begin{align}
@@ -223,7 +146,10 @@ These flows can be constructed in three-dimensional domains, either as three-dim
 We will here consider demonstrate two-dimensional flows only.
 
 We construct the background flow by superposing elementary complex potential flow solutions 
-\[f(\zeta) = U\_{c}\zeta + \sum_jf_j(\zeta).\]
+\begin{equation}
+f(\zeta) = U\_{c}\zeta + \sum_jf_j(\zeta).
+\label{eq:f_elements}
+\end{equation}
 The complex potential is defined by $f(\zeta) = \Phi(x,z) + \ii\Psi(x,z)$, $\zeta = x + \ii z$, $\Psi$ being the stream function.
 We require the uniform current $U\_{c}$ to be real (horizontal) and mirror each element $f_j$ about the plane $z=0$ by adding the conjugate element $f_j^*(\zeta^*)$ such that no streamlines crosses the plane $z=0$.
 Sources, sinks line vortices and doublets are used as flow elements: 
@@ -239,7 +165,7 @@ f_j' &=
  A_j(\zeta-\zeta_j) + A_j^*/(\zeta-\zeta_j^*) & \text{element $j$ is source/sink/vortex,}\\
 A_j/(\zeta-\zeta_j)^2+A_j^*/(\zeta-\zeta_j^*)^2 & \text{element $j$ is doublet.}
 \end{cases}
-\label{eq:}
+\label{eq:f}
 \end{align}
 Real positive/negative $A_j$ constitutes a source/sink at $\zeta_j$ and imaginary positive/negative $A_j$ constitutes a clockwise/counter-clockwise rotating line vortex at $\zeta_j$.
 If element $j$ is a doublet then angle of $A_j$ dictates the doublet discharge direction and its magnitude the intensity.
@@ -255,7 +181,7 @@ f'(\zeta) = U^*(\zeta).
  In real coordinates, $\Phi_x = \Re[f'(x+\ii z)$], $\Phi_z = -\Im[f'(x+\ii z)]$.
 We normalize the intensities $A_j$ according to the velocity intensity brought about at $z=0$ by the element relative to the phase velocity:
 \begin{equation}
-F_j = 
+F_j(\zeta) = 
 \begin{cases}
 %\frac{2A_j}{\cp |\Im\zeta_j|} & \text{element $j$ is source/sink/vortex,}\\
 %\frac{2A_j}{\cp |\Im\zeta_j|^2}  & \text{element $j$ is doublet.}
@@ -266,26 +192,432 @@ F_j =
 \end{equation}
 %
 
+An alternative to point vortices is Rankine vortices which we can define 
+\begin{equation}
+f_j'(\zeta)=
+\begin{cases}
+A_j/(\zeta-\zeta_j)+ A_j^*/(\zeta-\zeta_j^*); & |\zeta-\zeta_j|\geq R,\\
+[A_j(\zeta^*-\zeta_j^*) + A_j^*(\zeta^*-\zeta_j)]/R^2;  & |\zeta-\zeta_j|<R.
+\end{cases}
+\label{eq:Rankine}
+\end{equation}
+$R$ is here the inner radius. Note that the Rankine vortex is rotational and non-analytic in the core $|\zeta-\zeta_j|<R$.
+
+
+
+\subsection{Simulation examples with a background flow}
+\autoref{fig:vortex:ka02} shows a simulation of a regular wave propagating over a opposing vortex (upper flow field directed against the wave propagation direction). 
+The vortex generates a counter current which causes stagnation in the wave train. 
+Consequently, a build-up in wave height is observed over the vortex, with a corresponding reduction in wave height observed in the region following.
+As a matter of precaution, the background flow field is ramped up with the same ramp as is used for the nonlinear terms. 
+Later tests have indicated that simulations remain stable also without this ramp.
+This simulation (or flow?) is not stable and crashes soon after the last shown frame.
+\\
+
+The simulations can be stabilized by reducing the wave steepness or vortex intensity, which allows us to look further on in time.
+This we do in \autoref{fig:vortex:ka01} where the steepness has been reduces to $ka = 0.1$ and the time interval between panels increased.
+The evolution of the wave field is worth inspection.
+There build-up of wave heigh noted earlier appears after a while to `break free' in the form of a large and irregular group propagating downstream. 
+The small-amplitude portion of the wave train is now to be found on the opposite side of the vortex.
+This larger wave group travels through the periodic boundary at re-engages with the vortex, soon after which the simulation breaks down. 
+Such a transient dynamic suggests that the presence of opposing vortices can serve to generate more extreme wave statistics.  
+\\
+
+\begin{figure}[H]%
+\centering
+\subfloat[Background flow field]{\includegraphics[width=.75\columnwidth]{./figures/flowField_vortex.pdf}}\\
+\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/waveField_vortex.pdf}}%
+\caption{Flow over a single line vortex. The vortex is centred at $\zeta_1 = (0.5+0.075\ii)L_x$ with intensity $F_1 = -0.2\ii$ (see \SSS\ref{sec:Phi}).
+The linear steepness of the shown wave is $ka = 0.2$, $M=5$ terms are used in the Taylor expansion and the number of points/modes is $2^{10}$. $T\_{ramp}=T$ with one period between each panel, is indicated in the ordinate labels.
+The Stokes wave period is about $2.48$ seconds.
+}%
+\label{fig:vortex:ka02}%
+\end{figure}
+
+
+\begin{figure}[H]%
+\centering
+\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/vortex_ka0p1_M5_Nw20_dt7p5T.pdf}}%
+\caption{
+Same as \autoref{fig:vortex:ka02} but with $ka=0.1$ and $7.5$ periods between each panel. 
+}%
+\label{fig:vortex:ka01}%
+\end{figure}
+
+As another example, we show in \autoref{fig:doublet:ka01} the evolution of a flow over an upwards-pointing doublet. 
+The ratio of the largest surface current speed to the phase velocity is for this case about $0.065$. 
+The steepness of the quiescent wave train is small ($ka=0.1$) as in the previous example, but the underlying doublet causes a focusing of wave energy such that the simulation breaks down at a later stage. 
+\begin{figure}[H]%
+\centering
+\subfloat[Background flow field]{\includegraphics[width=.75\columnwidth]{./figures/curr_upDoubletka0p1_M5_Nw20_dt7p5T.pdf}}\\
+\subfloat[Transient wave field]{\includegraphics[width=.75\columnwidth]{./figures/upDoubletka0p1_M5_Nw20_dt7p5T.pdf}}%
+\caption{
+Upwards-pointing doublet; $\zeta_1 = (0.5-0.15\ii)L_x$ with intensity $F_1 = 0.1\ii$ (see \SSS\ref{sec:Phi}).
+ $ka=0.1$ and $7.5$ periods between each panel. 
+}%
+\label{fig:doublet:ka01}%
+\end{figure}
+
+
+
+
+
+%\appendix
+\section{Simulation scaled to the basin}
+
+An attempt has been made at simulating flow over a vortex similar in magnitude to that which has been predicted through CDF for the current system design of the Ocean Basin of Ocean Space Center. 
+This attempt is based on the sharepoint presentation \textit{CFD long domain study},\footnote{{\textbackslash}OSC - Current system CFD simulations folder - Dokumenter{\textbackslash}BasinDesignSep2021{\textbackslash}CFD{\underscore}results}
+images from which is copied in \autoref{fig:OB}.
+Based on these slides, the following estimates are made:
+\begin{center}
+\begin{tabular}{lc}
+%basin depth & 15\,m,\\
+%vortex position $(x,z)$ & $(7.0,-3.5)$\,m,\\
+vortex position $(x,z)$ & $(7.0,-2.1)$\,m,\\
+vortex length		& $13.5$\,m,\\
+vortex height & 4.2\,m\\
+domain length 	& $>130$\,m,\\
+surface velocity above vortex & $-0.05$\,m/s,\\
+surface velocity downstream & $0.17$\,m/s.
+\end{tabular}
+\end{center}
+
+Before considering simulations we quickly do some back-of-the-envelope estimates of the effect of such a current based on the horizontal velocities at the surface.
+Waves will be blocked from passing the recirculation zone if the still-water phase speed is less than the backflow velocity. 
+This corresponds for the values quoted above to period of $T=0.128$\,s or a wavelength of $6.7$\,cm in the downstream zone, which is on the edge of what we consider the gravity-dominated regime. 
+\autoref{fig:lambda_envelope} shows the wavelength ratio for a range of periods;
+The ratio of wavelengths is about $0.775$ for $T=1.0$\,s and $0.875$ for $T=2.0$\,s.
+This estimate does not take into account of the current variation through the water column nor the effect that the current gradients have on wave stability.
+\\
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.4\columnwidth]{./figures/lambda_envelope.pdf}%
+\caption{Back-of-the-envelope estimate of wavelength in the recirculation zone and the downstream zone based on the estimates $U\_{min} = -0.05$\,m/s, $U_\infty=0.17$\,m/s.}%
+\label{fig:lambda_envelope}%
+\end{figure}
+
+
+
+A simple model of the recirculation zone is made as 
+%We model this with 
+a single vortex combined with a uniform current, as shown in \autoref{fig:basinCurr}. 
+The vortex is here placed in the centre of the domain since boundaries in any case are periodic.
+%We state again that we have available HOS codes for closed basin domains, and that extension of the present method to these codes is believed to require little effort.
+%
+Results for periods $T\approx 1.0$, $2.0$, $2.9$ and $4.0$ are shown in 
+\autoref{fig:basinSimT1.0}--\ref{fig:basinSimT4.0}.
+Steepness is determined based on a capacity curve principle, using a fixed steepness unless restricted by the maximum flap angle of the wavemaker. 
+A non-aggressive maximum steepness $ka=0.2$ is here chosen, along with a ten degree maximum flap angle.
+A red dashed line is drawn to indicate the wave train propagation based on the phase velocity.
+The vortex is seen to disturb the flow notably.
+This is however influenced by the periodic boundaries, with wave crests passes the vortex several times over for the longer periods (dashed red line).
+Wave stability also appears to be jeopardized by the initial condition, which is not suited to the underlying vortex. 
+This is seen as a wave packet travelling form the domain centre.
+It is the edges of this packet that in the end crash the simulations.
+%Unfortunately, the numeriucal stability is not sufficient to consider the long term evolution at this point, and the periodic boundaries affect the evolution for long periods.
+%Further numerical efforts is therefore required in order to lessen the uncertainties related to these simulations, foremost by extending the method to one of pre-existing code whose numerical stability is believed to be better.
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.8\columnwidth]{./figures/pptSnap_xz1.png}
+\includegraphics[width=.8\columnwidth]{./figures/pptSnap_xz2.png}
+\caption{Images from preliminary presentation \textit{CFD long domain study}.
+%\footnote{\verb|\OSC - Current system CFD simulations folder - Dokumenter\BasinDesignSep2021\CFD_results|}
+}%
+\label{fig:OB}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Streamlines]{\includegraphics[width=\columnwidth]{../HOS_SFo_curr/figures/curr_SFoBasin_L130.pdf}}\\
+\subfloat[Horizontal velocity at $z=0$.]{\includegraphics[width=.5\columnwidth]{../HOS_SFo_curr/figures/Usruf_SFoBasin_L130.pdf}}%
+\caption{Current profile used in basin simulation; single vortex.
+$U\_c=0.17$, $\zeta_1=65-3.5\ii$, $2A_1/|\Im\zeta_1|=-(0.7+U\_c)\ii$.
+}%
+\label{fig:basinCurr}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Streamlines]{\includegraphics[width=\columnwidth]{../HOS_SFo_curr/figures/curr_SFoBasinPatch_L130.pdf}}\\
+\subfloat[Horizontal velocity at $z=0$.]{\includegraphics[width=.5\columnwidth]{../HOS_SFo_curr/figures/Usruf_SFoBasinPatch_L130.pdf}}%
+\caption{Current profile used in basin simulation; vortex patch.
+}%
+\label{fig:basinCurr}%
+\end{figure}
+
+
+
+\newcommand{\basinPlot}[3]{
+\begin{figure}[h!ptb]%
+%\begin{adjustwidth}{.01\paperwidth}{.01\paperwidth} 
+%\centering
+\hspace{-.05\columnwidth}
+\subfloat[Point vortex]{\includegraphics[width=.55\columnwidth]{#2.pdf}}%
+\subfloat[Vortex patch]{\includegraphics[width=.55\columnwidth]{#3.pdf}}%
+\caption{Wave basin simulation. $T\approx#1$.}%
+\label{fig:basinSimT#1}
+%\end{adjustwidth}
+\end{figure}
+}
+%\basinPlot{1.0}{./figures/basin_L130/T1p0_ka0p2_M5_Nw69_dt5T_L130_rePlot}
+\basinPlot{1.0}{../HOS_SFo_curr/figures/SFoBasin_T1p0_ka0p2_M5_Nw69_dt15T_L130_nx1024}{../HOS_SFo_curr/figures/SFoBasinPatch_T1p0_ka0p2_M5_Nw69_dt15T_L130_nx1024}
+%\basinPlot{2.0}{./figures/basin_L130/T2p0_ka0p2_M5_Nw19_dt5T_L130_rePlot}
+\basinPlot{2.0}{../HOS_SFo_curr/figures/SFoBasin_T2p0_ka0p2_M5_Nw19_dt15T_L130_nx1024}{../HOS_SFo_curr/figures/SFoBasinPatch_T2p0_ka0p2_M5_Nw19_dt15T_L130_nx1024}
+%\basinPlot{2.9}{./figures/basin_L130/T2p9_ka0p2_M5_Nw9_dt5T_L130_rePlot}
+\basinPlot{2.9}{../HOS_SFo_curr/figures/SFoBasin_T2p9_ka0p2_M5_Nw9_dt15T_L130_nx1024}{../HOS_SFo_curr/figures/SFoBasinPatch_T2p9_ka0p2_M5_Nw9_dt15T_L130_nx1024}
+%\basinPlot{4.0}{./figures/basin_L130/T4p0_ka0p073_M5_Nw5_dt5T_L130_rePlot}
+\basinPlot{4.0}{../HOS_SFo_curr/figures/SFoBasin_T4p0_ka0p073_M5_Nw5_dt15T_L130_nx1024}{../HOS_SFo_curr/figures/SFoBasinPatch_T4p0_ka0p073_M5_Nw5_dt15T_L130_nx1024}
+
+
+
+\section{Closed domain basin}
+We have available a closed-domain numerical wavetank code that imposes wave motion in one end according to linear (or second order?) wavemaker theory, and that dissipates wave energy in the other end to represent the presence of a beach. [References.]
+This code is easily extended with a background current that matches the dimensions of the basin.
+
+\subsection{A model of the basin wavemaker and recirculation region}
+We here model the inlet region of the basing with
+\begin{itemize}
+	\item An impermeable boundary in the upper-left corned down to a prescribed depth $d$.
+	\item A inlet flow of prescribed horizontal velocity in the region $-d>z>-h$.
+	\item A vortex patch in the upper-left corner to generate a recirculating field. 
+\end{itemize}
+For the first two points we seek a background flow potential $\Phi$ subject to 
+\begin{align*}
+\nabla^2\phi&=0,\\
+\Phi_z &= 0 \quad \text{at } z=0,-h\\
+\Phi &\text{ not exponentially increasing in }x\to+\infty,\\
+\Phi_x &= U\_I(z) \quad \text{at } x=0.
+\end{align*}
+This can be constructed as
+\begin{equation}
+\Phi =U_0 x+ \sum_{j=1}^\infty \hat\Phi_j \cos(k_j z)\ee^{-k_j x}, \quad k_j>0,
+\label{eq:phiBackgroundWall}
+\end{equation}
+or, generalized,
+\begin{equation}
+f(\zeta) = U_0 \zeta+ \sum_{j=1}^\infty \hat\Phi_j \ee^{-k_j\zeta}, \quad k_j>0.
+\label{eq:f_wall}
+\end{equation}
+$\cos(k_\ell z)$ is a basis for \eqref{eq:phiBackgroundWall} such that
+\[
+\hat\Phi_j = -\frac{\Gamma(k_j)}{\frac12 k_j h + \frac14\sin2k_jh}
+\]
+with
+\begin{equation}
+\Gamma(k) = \int_{-h}^0 \!U\_I(z)\cos(k z)\,\mr d z
+\label{eq:Gamma}
+\end{equation}
+and $U_0$ determined form the limit $k\to0$ of $\Gamma(k)$.
+We're free to choose the horizontal inlet function $U\_I(z)$.%
+\footnote{Presumably, we can make a more precise condition for the inlet vector velocity, although that seems to be significantly more complicated. As a first step, we prescribe only the horizontal component.}
+ Here are a few examples:
+\begin{equation}
+\begin{tabular}{c|ccc}
+& Uniform & Linear & Flip-linear \\\hline
+$U\_I(z)/\tilde U\_I$ & 
+$\mc H(z) $&
+$\frac{h+z}{h-d}\mc H(z)$&
+$-\frac{d+z}{h-d}\mc H(z)$\\
+%$\begin{cases}0;&z>-d,\\1;&z<-d. \end{cases}$ &
+%$\begin{cases}0;&z>-d,\\\frac{h+z}{h-d};&z<-d. \end{cases}$ &
+%$\begin{cases}0;&z>-d,\\-\frac{d+z}{h-d};&z<-d. \end{cases}$\\
+$\Gamma(k)/\tilde U\_I$&
+$-\frac{\sin kd}k$&
+$\frac{\cos kd-\cos kh -k(h-d)\sin kd}{k^2(h-d)}$ &
+$\frac{\cos kh-\cos kd }{k^2(h-d)}$\\
+$U_0/\tilde U\_I$ &
+$1-\frac hd$ &
+$\frac12(1-\frac hd)$ &
+$\frac12(1-\frac hd)$
+\end{tabular}
+\label{eq:Gammas}
+\end{equation}
+$\mc H(z)$ being unity for $z<-d$ and zero otherwise. $\tilde U\_I$ is the peak horizontal wall velocity and $U_0$ is the uniform horizontal velocity which we will observe far away form the inlet. 
+\\
+
+The recirculation patch \eqref{eq:f_elements} is added to this current flow and mirrored about its extended vertical and horizontal domain sufficiently many times.%
+%A full basin flow field in now obtained by mirroring \eqref{eq:f_elements} about its extended vertical and horizontal domain sufficiently many times%
+\footnote{$f$ in \eqref{eq:f} is already mirrored about $z=0$. We in turn mirror $\tilde f(\zeta)=f(\zeta)+f(-\zeta)$ and $\tilde{\tilde f}(\zeta)= \tilde f(\zeta) + \tilde f(\zeta+2\ii h)+ \tilde f(\zeta+4\ii h)+ \tilde f(\zeta-2\ii h)$.}
+ %and adding it to \eqref{eq:f_wall}. %An extensive vortex patch is used to generate the circulation region close to the wavemaker. 
+The vortices themselves constitutes singular points which we here avoid by placing them equidistantly in between the numerical grid. Alternatively, one can use spatial smearing or Rankine vortices \eqref{eq:Rankine}. 
+Examples are shown in \autoref{fig:basinPatch:uniform} and \ref{fig:basinPatch:flipLinear}.
+ 
+
+\begin{figure}[h!ptb]%
+\centering
+%../HOS_SFo_curr/basinCurrfigures//u_basin_uniform_nVort1x2_dimVort15x3p5_Uj0p55.pdf
+%../HOS_SFo_curr/basinCurrfigures//basin_uniform_nVort1x2_dimVort15x3p5_Uj0p55.pdf
+%C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec/u_uniform_Lh50x15_nx256nk512_dimVort15x3p5_Uj0p55_posZ0.pdf
+\subfloat[Velocities along wall and surface]{\includegraphics[width=1\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec/u_uniform_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1.pdf}}\\
+\subfloat[Streamlines and horizontal velocity contour]{\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec//uniform_Lh50x15_nx256nk512_dimVort15x3p5_Uj0p55_posZ0.pdf}}%
+\caption{Background current for basin configuration with uniform current profile. A rectangular $20\times80$ patch of vortices applied in the upper-left corner to generate a wide vortex, as indicated with small black dots. The vortex patch is mirrored about horizontal and vertical axes and the mirrored domain in turn mirrored in each direction. }%
+\label{fig:basinPatch:uniform}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+%../HOS_SFo_curr/basinCurrfigures//u_basin_flipLinear_nVort1x2_dimVort15x3p5_Uj0p55.pdf
+%../HOS_SFo_curr/basinCurrfigures//basin_flipLinear_nVort1x2_dimVort15x3p5_Uj0p55.pdf
+%C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec/u_flipLinear_Lh50x15_nx256nk512_dimVort15x3p5_Uj0p55_posZ0.pdf
+\subfloat[Velocities along wall and surface]{\includegraphics[width=1\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec/u_flipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1.pdf}}\\
+\subfloat[Streamlines and horizontal velocity contour]{\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec//flipLinear_Lh50x15_nx256nk512_dimVort15x3p5_Uj0p55_posZ0.pdf}}%
+\caption{Similar to \autoref{fig:basinPatch:uniform} but with the `flip-linear' current profile.}%
+\label{fig:basinPatch:flipLinear}%
+\end{figure}
+
+
+\subsection{Closed domain basin simulation}
+We here present some preliminary closed domain results. 
+The closed domain code seems somewhat less numerically robust than does the periodic domain code, so wave steepness is here limited to $(ka)\oo1=0.2$.\footnote{Steepness according to linear wavemaker theory, which is an overestimate of the observed steepness.}
+The nonlinearity order is kept at $M=3$ and the spatial resolution reduced to limit high-wavenumber instability.
+\autoref{fig:res:T075CM0}--\ref{fig:res:T075CM2} shows simulations carried out at period $T=0.75$\,s in the current domain shown in \autoref{fig:basinPatch:flipLinear} with no current, depicted current and twice the depicted current, respectively. 
+The wave pattern takes on a multi-harmonic appearance due to spurious waves generated from the mismatch between the linear wavemaker excitation and the harmonics of a Stokes wave. 
+These spurious waves propagate more slowly such that the wave train profile is untainted in front region.
+
+The current is seen to cause a contraction of the wave train in the recirculation region and a stretching thereafter, as expected. 
+No effects of the transition region is observed. Indications of numerical instability is observed in the latter simulation.
+
+
+
+Similar simulations for period $T=1.00$\,s are presented in \autoref{fig:res:T1CM0}--\ref{fig:res:T1CM2}, yielding similar observations.
+
+The period is $T=2.00$\,s in \autoref{fig:res:T2CM0}--\ref{fig:res:T2CM2} 
+and $2.50$\,s in \autoref{fig:res:T2p5CM0}--\ref{fig:res:T2p5CM2}.
+These waves are less affected by the current except for right up close to the wavemaker where the backflow is strongest.
+
+Comparing the amplitudes of these wavetrains with the surface velocity curves in \autoref{fig:basinPatch:flipLinear}, we see that the 0.75 and 1.00\,s periods mainly experience an alternation of horizontal velocity. 
+The longer periods feel also a current variation in vertical velocity, albeit an order of magnitude smaller than the horizontal variation.
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T0p75_kaLin0p20_ka0p18_wbl3p0_nx513_M3_CM0__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=0.75$\,s, no current.}%
+\label{fig:res:T075CM0}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T0p75_kaLin0p20_ka0p15_wbl3p0_nx513_M3_CM1__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=0.75$\,s, current as shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T075CM1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T0p75_kaLin0p20_ka0p14_wbl3p0_nx513_M3_CM2__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=0.75$\,s, twice the current shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T075CM2}%
+\end{figure}
+
+
+
+
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T1p00_kaLin0p20_ka0p17_wbl3p0_nx513_M3_CM0__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=1.00$\,s, no current.}%
+\label{fig:res:T1CM0}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T1p00_kaLin0p20_ka0p15_wbl3p0_nx513_M3_CM1__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=1.00$\,s, current as shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T1CM1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T1p00_kaLin0p20_ka0p14_wbl3p0_nx513_M3_CM2__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=1.00$\,s, twice the current shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T1CM2}%
+\end{figure}
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T2p00_kaLin0p20_ka0p00_wbl3p0_nx513_M3_CM0__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=2.00$\,s, no current.}%
+\label{fig:res:T2CM0}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T2p00_kaLin0p20_ka0p16_wbl3p0_nx513_M3_CM1__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=2.00$\,s, current as shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T2CM1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T2p00_kaLin0p20_ka0p16_wbl3p0_nx513_M3_CM2__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=2.00$\,s, twice the current shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T2CM2}%
+\end{figure}
+
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T2p50_kaLin0p20_ka0p00_wbl3p0_nx513_M3_CM0__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=2.50$\,s, no current.}%
+\label{fig:res:T2p5CM0}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T2p50_kaLin0p20_ka0p17_wbl3p0_nx513_M3_CM1__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=2.50$\,s, current as shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T2p5CM1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/T2p50_kaLin0p20_ka0p00_wbl3p0_nx513_M3_CM2__bSpecflipLinear_Lh50x0p5_nx1024nk512_dimVort15x3p5_Uj0p55_posZ1/snaps.pdf}%
+\caption{$T=2.50$\,s, twice the current shown in \autoref{fig:basinPatch:flipLinear}.}%
+\label{fig:res:T2p5CM2}%
+\end{figure}
+
+
+
+\subsection{Preliminary summary}
+On the whole, the simulations agrees well with the crude estimate made in \autoref{fig:lambda_envelope} based on phase velocity, with no obvious restriction to wave stability other than that the wave stability is limited to the state within the recirculation zone where waves are steeper. 
+We stress that this is a preliminary and uncertain observation, particularly limited numerical stability of the closed domain code.
+%There is however great uncertainties because the present numerical stability of the closed domain simulations puts a limit on permissible wave amplitudes.
+
+
+\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
+\bibliography{bib} %You need a file 'literature.bib' for this.
+
+
+
+\appendix
+
+
 \section{Taylor expansion near the numerical stability limit}
 \label{sec:Taylor}
 The system \eqref{eq:BCS} defined at the free surface is closed but for the vertical velocity $\w=\phi_z\big|_{z=\eta}$. This quantity connects the free surface to the below body of water whose motion is governed by the Laplace equation.
-The efficiency of the HOS method lies in algebraically coupling the surface potential $\phi\S(\rr,t)$ to a field potential $\phi(\rr,z,t)$ composed of Fourier modes with kernel $\exp(kz +\ii \bm k \cdot \bm r)$. The letter obeys the Laplace equation and readily provides $z$-derivatives of all orders.
+The efficiency of the HOS method lies in algebraically coupling the surface potential $\phi\S(\rr,t)$ to a field potential $\phi(\rr,z,t)$ composed of Fourier modes with kernel $\exp(kz +\ii \bm k \cdot \bm r)$. The latter obeys the Laplace equation.
+% and readily provides $z$-derivatives of all orders.
 
 \newcommand{\proj}{\wp_0^{-1}}
 Quickly summarised, the HOS method uses a Stokes expansion 
 \begin{subequations}
 \begin{align}
-\phi &= \sum_{n=1}^N \phi\oo{n}, & \w &= \sum_{n=1}^N \w\oo{n}
+%\phi &= \sum_{n=1}^N \phi\oo{n}, & \w &= \sum_{n=1}^N \w\oo{n}
+(\phi,\w) &= \sum_{n=1}^N \big(\phi\oo{n},\w\oo{n}\big)
 \label{eq:Stokes}
 \end{align}
 combined with a Taylor expansion from $z=0$ to explicitly map the field potential to the surface potential.
 Matching the magnitude orders, one finds
 \begin{align}
-\phi\oo n &= 
+%\phi\oo n &= 
+%\begin{cases}
+%\proj \phi\S & n=1\\
+%-\proj\sum_{m=1}^{n-1} \frac{\eta^m}{m!}\partial_z^{m}\phi\oo{n-m} & n>1
+%\end{cases},
+\phi\oo n(\bm r,0,t) &= 
 \begin{cases}
-%\phi\S & m=1\\
-\proj \phi\S & n=1\\
--\proj\sum_{m=1}^{n-1} \frac{\eta^m}{m!}\partial_z^{m}\phi\oo{n-m} & n>1
+\phi\S & n=1\\
+-\sum_{m=1}^{n-1} \frac{\eta^m}{m!}\partial_z^{m}\phi\oo{n-m}\Big|_{z=0} & n>1
 \end{cases},
 &
 \w\oo n &= 
@@ -294,21 +626,25 @@ Matching the magnitude orders, one finds
 \end{align}%
 \label{eq:StokesTaylor}%
 \end{subequations}%
-The inverse field projection from $z=0$ is
-%\[\proj f(\rr,z) = \mc{F}^{-1}\big\{\mc{F} [f(\rr,0)] \ee^{k z}\big\}\]
-\[\proj f = \mc{F}^{-1}\big[\mc{F} \big(f|_{z=0}\big) \ee^{k z}\big]\]
-with $k$ being the wavenumber modulus for the Fourier transform $\mc F$.
+The full field is expressed by
+\[\phi(\bm r,z,t) = \mc{F}^{-1}\big\{\mc{F} \big[\phi(\bm r,0,t) \big] \ee^{k z}\big\},\]
+$k$ being the wavenumber modulus for the Fourier transform $\mc F$,
+readily yielding all $z$-derivatives.
+%The inverse field projection from $z=0$ is
+%%\[\proj f(\rr,z) = \mc{F}^{-1}\big\{\mc{F} [f(\rr,0)] \ee^{k z}\big\}\]
+%\[\proj f = \mc{F}^{-1}\big[\mc{F} \big(f|_{z=0}\big) \ee^{k z}\big]\]
+%with $k$ being the wavenumber modulus for the Fourier transform $\mc F$.
 A cut-off filter at $k>(N+5)k_0$, $2\pi/k_0$ being the initial wavelength, is placed on the Fourier operators to improve the numerical robustness to high-wavenumber oscillations.  
 For an altogether less convoluted description, see \citet{SFo2018_HOS}.
 \\
 
 
-Surface potential $\phi\S$ is compared to its projected field potential $\phi|_{z=\eta}$ in the centre panels of figure~\ref{fig:Taylor}.
-%In figure~\ref{fig:Taylor} we compare the surface potential $\phi\S$ to its projected field potential $\phi|_{z=\eta}$, and the vertical velocity $\w$ from the same expansion to the corresponding vertical derivative 
+Surface potential $\phi\S$ is compared to its projected field potential $\phi|_{z=\eta}$ in the centre panels of \autoref{fig:Taylor}.
+%In \autoref{fig:Taylor} we compare the surface potential $\phi\S$ to its projected field potential $\phi|_{z=\eta}$, and the vertical velocity $\w$ from the same expansion to the corresponding vertical derivative 
 %$ \phi_z\big|_{z=\eta} = \mc{F}^{-1}[k\mc{F}(\phi|_{z=0})\ee^{k\eta} ] $ of the projected field.
-Surface potential and elevation is taken form the simulations presented in figure~\ref{fig:vortex:ka02} and \ref{fig:vortex:ka01} with displayed times near the point of numerical instability.
-In figure~\ref{fig:Taylor:ka02} we see that the match between surface and field potentials  appears precise. 
-Figure~\ref{fig:Taylor:ka01} shows a surface potential under the onset of numerical instability. 
+Surface potential and elevation is taken form the simulations presented in \autoref{fig:vortex:ka02} and \ref{fig:vortex:ka01} with displayed times near the point of numerical instability.
+In \autoref{fig:Taylor:ka02} we see that the match between surface and field potentials  appears precise. 
+\autoref{fig:Taylor:ka01} shows a surface potential under the onset of numerical instability. 
 The resulting mapped potential is however smoothened by the wavenumber cut-off at $k>(N+5)k_0$.
 
 The vertical velocity $\w$ from \eqref{eq:Taylor} (a Taylor expansion back form $z=0$ to $z=\eta$) is compared to  the corresponding vertical field derivative evaluated directly at the interface 
@@ -317,12 +653,12 @@ $\w$ form the Taylor expansion \eqref{eq:Taylor} avoids some high-wavenumber osc
 
 \begin{figure}[h!ptb]%
 \centering
-\subfloat[ref.\ figure~\ref{fig:vortex:ka02}, $ka=0.2$]{
+\subfloat[ref.\ \autoref{fig:vortex:ka02}, $ka=0.2$]{
 %\includegraphics[width=.5\columnwidth]{./figures/vortexka0p2_M5_Nw20_dt1T_Taylor/t_17.pdf}%
 \includegraphics[width=.5\columnwidth]{./figures/vortexka0p2_M5_Nw20_dt1T_Taylor/t_22.pdf}%
 \label{fig:Taylor:ka02}
 }%
-\subfloat[ref.\ figure~\ref{fig:vortex:ka01}, $ka=0.1$]{
+\subfloat[ref.\ \autoref{fig:vortex:ka01}, $ka=0.1$]{
 %\includegraphics[width=.5\columnwidth]{./figures/vortexka0p1_M5_Nw20_dt7p5T_Taylor/t_132.pdf}%
 \includegraphics[width=.5\columnwidth]{./figures/vortexka0p1_M5_Nw20_dt7p5T_Taylor/t_170.pdf}
 \label{fig:Taylor:ka01}
@@ -333,6 +669,8 @@ Time panels near the point of numerical instability.
  }%
 \label{fig:Taylor}%
 \end{figure}
+
+
 
 \section{Steady state solver}
 We can seek a steady state solution $\phit_t=0$ to the problem at hand, giving the waveless surface profile modulated by the presence of the sub-surface current.
@@ -348,7 +686,7 @@ As a primitive routine we iterate on the system
 where the procedure described in \SSS\ref{sec:Taylor} has been inversed\footnote{Starting off with $\phi\oo1 = \mc{F}^{-1}[\frac1k\mc{F}(\w)\ee^{kz}]$.} to yield $\phi\S$ as function of $\w$ and $\eta$.
 Initial convergence is obtained for relatively weak surface modulations, before high-wavenumber divergence sets in. Aborting the iterations at a suitable stage we obtain approximate solutions.
 
-An example of a steady state solution is shown in figure~\ref{fig:steadyState}.
+An example of a steady state solution is shown in \autoref{fig:steadyState}.
 This example concerns a pair of co-rotating vortices. 
 No surface waves are present so the vortex intensities are instead scaled by a surface speed Froude number $Fr_j = 2A_j/\sqrt{g|\Im \zeta_j|^3}$.
 Plotted surface elevation together with streamlines\footnote{Net stream function $\tilde\psi = \Im f(x+\ii z) + \mc{F}^{-1}[\ii\, \mr{sgn}(k_x) \mc{F}(\phi|_{z=0})\ee^{k z}]$ in the $xz$-plane.}
@@ -372,71 +710,38 @@ $M=10$ with $2^{10}$ points/modes.
 \label{fig:steadyState}%
 \end{figure}
 
-%\appendix
-\section{Attempted basin simulation}
 
-An attempt has been made at simulating flow over a vortex similar in magnitude to that which has been predicted through CDF for the current system design of the Ocean Basin of Ocean Space Center. 
-This attempt is based on the sharepoint presentation \textit{CFD long domain study},\footnote{{\textbackslash}OSC - Current system CFD simulations folder - Dokumenter{\textbackslash}BasinDesignSep2021{\textbackslash}CFD{\underscore}results}
-images from which is copied in figure~\ref{fig:OB}.
-Based on these slides, the following estimates are made:
-\begin{center}
-\begin{tabular}{lc}
-vortex position $(x,z)$ & $(7.0,-3.5)$\,m,\\
-vortex length		& $13$\,m,\\
-domain length 	& $>130$\,m,\\
-surface velocity above vortex & $-0.05$\,m/s,\\
-surface velocity downstream & $0.17$\,m/s.
-\end{tabular}
-\end{center}
-We model this with a single vortex combined with a uniform current, as shown in figure~\ref{fig:basinCurr}. 
-The vortex is here placed in the centre of the domain since boundaries in any case are periodic.
-We state again that we have available HOS codes for closed basin domains, and that extension of the present method to these codes is believed to require little effort.
 
+
+\section{Benchmark testing-HOS code against original}
+\label{sec:AHAvsSFO}
+We first compare the results of the pre-existing MATLAB HOS code \citep{SFo2018_HOS} with the present implementation without current for the purpose of benchmarking. 
+As describe in the cited memo, and reference there within, a ramping of the nonlinear terms is used to provide stable conformity between the initial conditions and the developing solution. 
+The ramp used is 
+$1-\exp[-(t/T\_{ramp})^2]$.
+
+\autoref{fig:stokes_ka025} shows the development of a Stokes wave for linear steepness $ka = 0.25$, $T\_{ramp}$ equalling one wave period.
+The match between codes seems precise. 
+Notice however that both codes predict an slow undulation in the shape of the Stokes wave, the Stokes wave alternately adopting a more and less nonlinear profile.  
+
+A steeper wave is demonstrated in \autoref{fig:stokes_ka028}, here with $ka = 0.28$. The time interval between each panel is here shorter. Good agreement is shown, but the new implementation becomes unstable after about 18 periods. This is not surprising as more effort has been put into the pre-existing with regard to simulation stability. On the other hand, the new implementation runs about twice as fast, the CPU time being 94\,s vs. 220\,s in the former example and 52\,s vs.\ 110\,s in the latter.
 
 \begin{figure}[h!ptb]%
 \centering
-\includegraphics[width=.8\columnwidth]{./figures/pptSnap_xz1.png}
-\includegraphics[width=.8\columnwidth]{./figures/pptSnap_xz2.png}
-\caption{Images from preliminary presentation \textit{CFD long domain study}.
-%\footnote{\verb|\OSC - Current system CFD simulations folder - Dokumenter\BasinDesignSep2021\CFD_results|}
+\includegraphics[width=.75\columnwidth]{./figures/AHAvsSFo_waveField_Stokes_ka025_dt5T.pdf}%
+\caption{Benchmark, regular wave. Solid line: MATLAB HOS code \citep{SFo2018_HOS}, dashed line: presently implemented HOS code.
+Linear steepness $ka = 0.25$, five period time intervals, $T\_{ramp}=T$.
 }%
-\label{fig:OB}%
+\label{fig:stokes_ka025}%
 \end{figure}
-
 \begin{figure}[h!ptb]%
 \centering
-\subfloat[Streamlines]{\includegraphics[width=\columnwidth]{./figures/basin_L130/curr_L130.pdf}}\\
-\subfloat[Horizontal velocity at $z=0$.]{\includegraphics[width=.5\columnwidth]{./figures/basin_L130/Usruf_L130.pdf}}%
-\caption{Current profile used in basin simulation.
-$U\_c=0.17$, $\zeta_1=65-3.5\ii$, $2A_1/|\Im\zeta_1|=-(0.7+U\_c)\ii$.
+\includegraphics[width=.75\columnwidth]{./figures/AHAvsSFo_waveField_Stokes_ka028_dt2T.pdf}%
+\caption{Benchmark, regular wave. Solid line: MATLAB HOS code \citep{SFo2018_HOS}, dashed line: presently implemented HOS code.
+Linear steepness $ka = 0.28$, two period time intervals, $T\_{ramp}=T$.
 }%
-\label{fig:basinCurr}%
+\label{fig:stokes_ka028}%
 \end{figure}
-
-
-Results for periods $T\approx 1.0$, $2.0$, $2.9$ and $4.0$ are shown in figures~\ref{fig:basinSimT1.0}--\ref{fig:basinSimT4.0}.
-Steepness is determined based on a capacity curve principle, using a fixed steepness unless restricted by the maximum flap angle of the wavemaker. 
-A non-aggressive maximum steepness $ka=0.2$ is here chosen, along with a ten degree maximum flap angle.
-A red dashed line is drawn to indicate the wave train propagation based on the phase velocity.
-The vortex is seen to disturb the flow notably.
-Unfortunately, the numeriucal stability is not sufficient to consider the long term evolution at this point, and the periodic boundaries affect the evolution for long periods.
-Further numerical efforts is therefore required in order to lessen the uncertainties related to these simulations, foremost by extending the method to one of pre-existing code whose numerical stability is believed to be better.
-
-\newcommand{\basinPlot}[2]{
-\begin{figure}[h!ptb]%
-\centering
-\includegraphics[width=\columnwidth]{./figures/basin_L130/#2.pdf}%
-\caption{Wave basin simulation. $T\approx#1$.}%
-\label{fig:basinSimT#1}
-\end{figure}
-}
-\basinPlot{1.0}{T1p0_ka0p2_M5_Nw69_dt5T_L130_rePlot}
-\basinPlot{2.0}{T2p0_ka0p2_M5_Nw19_dt5T_L130_rePlot}
-\basinPlot{2.9}{T2p9_ka0p2_M5_Nw9_dt5T_L130_rePlot}
-\basinPlot{4.0}{T4p0_ka0p073_M5_Nw5_dt5T_L130_rePlot}
-
-\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
-\bibliography{bib} %You need a file 'literature.bib' for this.
 
 
 \end{document}

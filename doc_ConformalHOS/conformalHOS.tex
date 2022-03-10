@@ -160,11 +160,12 @@ Accordingly, we match the functions
 Equations \eqref{eq:invMap} and \eqref{eq:wProj} were here invoked to demonstrate the matching.
 The deep water
 %\footnote{In intermediate depth $h$, $\ww(\zz) = \sum_{j=0}^\infty a_j \frac{\sin k_j(\zz+\ii h)}{\cosh k_j h}$.}
- complex potential is  in the rectangular plane defined as a combination of positive wavenumber Fourier modes
+ complex potential is in the rectangular plane defined as a combination of positive wavenumber Fourier modes
 \begin{equation}
-\ww(\zz) = \sum_{j=0}^\infty \h\ww_j \ee^{\ii k_j \zz}; \quad k_j\geq 0.
+\ww(\zz) = \sum_{j=0}^\infty \h\ww_j \ee^{-\ii k_j \zz}; \quad k_j\geq 0
 \label{eq:w}
-\end{equation}
+\end{equation} 
+that decay in the positive $\yy$ direction.
 Matching condition \eqref{eq:wMatch} yields
 \begin{equation}
 \h\ww_0 = \h\phi_0\S, \quad \h\ww_j = 2\big(\h\phi\S_j\big)^*;\; j>0, 
@@ -186,6 +187,11 @@ U^*(\x+\ii\surf) = \frac{1}{\ii- \surf_{\x}}\sum_{j=0}^\infty  k_j \h\ww_j \ee^{
 \label{eq:U}
 \end{equation}
 with, of course, $\surf_\x=\sum_{j=-\infty}^\infty\ii k_j\h\surf_j\ee^{\ii k_j \x}$.
+Expression \eqref{eq:aj} and \eqref{eq:U} is all that is needed to compute the vertical velocity at the surface in deep water. Written in terms of efficient FFT and iFFT algorithms:
+\begin{equation}
+U_j^* = \frac{-2\ii}{N} \frac{  \mr{FFT}\{k_j [\mr{FFT}(\phi_j\S)]^* \delta_{j}^+\}}{ 1-\mr{iFFT}[k_j \mr{FFT}(\eta_j)]}
+\end{equation}
+with $N$ being the number of points/modes and $\delta_{j}^+=1$ for $k_j>0$ and zero otherwise.
 \\
 
 We remark on the unexpected explicitness of this approach. 
@@ -206,7 +212,7 @@ Let's look at the problems faced by a finite depth.
 
 The conformal map, equivalent to \eqref{eq:map}, with a finite water depth $H$ is
 \begin{equation}
-z\mapsto \zmap(\zz) = \zz - \ii \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii \kk_j(\zz+\ii H)}}{\sinh kH}.
+z\mapsto \zmap(\zz) = \zz - \ii \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii \kk_j(\zz+\ii H)}}{\sinh \kk_jH}.
 \label{eq:map_H}
 \end{equation}
 This map does \textit{not} have the property \eqref{eq:mapXi} but rather
@@ -216,8 +222,8 @@ This map does \textit{not} have the property \eqref{eq:mapXi} but rather
 \end{equation}
 The difference is that $\zmap(\xx)$ comes with a stretching of the $x$-dimension where
 \begin{equation}
-\Re \zmap(\xx) \equiv x\S(\xx) = \xx -\ii  \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii \kk_j\xx}}{\tanh kH}
-\label{eq:mapXi}
+\Re \zmap(\xx) \equiv x\S(\xx) = \xx -\ii  \sum_{j=-\infty}^\infty \h\eta_j \frac{\ee^{\ii \kk_j\xx}}{\tanh \kk_j H}
+\label{eq:mapXi2}
 \end{equation}
 (the latter term also being real).
 This means that $\surf(\xx)$ in \eqref{eq:ImMapXi}, the surface boundary in the $\zz$-plane, is no functionally equivalent to the the surface $h(\x)$ in the physical plane, but rather
@@ -503,12 +509,12 @@ $\dd\zz t = \dd\z t \dd\zz\z =(\w')^*/f'=(\ww')^*\big/|f'|^2$.
 }
 \begin{subequations}
 \begin{align}
-\eta_t &= |\zmap|^{-2}  \rbr{ -  \varphi_\xx\eta_\xx  +  \varphi_\yy}, \label{eq:BC_zz:eta} \\
-\varphi_t &=   - \frac12 |\zmap|^{-2} \rbr{\varphi_\xx^2+\varphi_\yy^2}  - g h,
+\eta_t &= |\zmap'|^{-2}  \rbr{ -  \varphi_\xx\eta_\xx  +  \varphi_\yy}, \label{eq:BC_zz:eta} \\
+\varphi_t &=   - \frac12 |\zmap'|^{-2} \rbr{\varphi_\xx^2+\varphi_\yy^2}  - g h,
 \end{align}%
 \label{eq:BC_zz}%
 \end{subequations}%
-$|\zmap|^{2}$ being equivalent to the transformation Jacobian. 
+$|\zmap'|^{2}$ being equivalent to the transformation Jacobian. 
 Finally, for utilization in a HOS scheme, the boundary conditions for the surface potential 
 \[
 \varphi\S(\xx,t)=\varphi[\xx+\ii\eta(\xx,t),t]
@@ -516,8 +522,8 @@ Finally, for utilization in a HOS scheme, the boundary conditions for the surfac
 become
 \begin{subequations}
 \begin{align}
-\eta_t &= |\zmap|^{-2} \sbr{-   \varphi\S_\xx\eta_\xx + (1+\eta_\xx^2) \varphi_\yy},\\
-\varphi\S_t  &= |\zmap|^{-2}\sbr{ - \frac12  \rbr{\varphi\S_\xx}^2 + \frac12 (1+\eta_\xx^2) \varphi_\yy^2 }  - g h,
+\eta_t &= |\zmap'|^{-2} \sbr{-   \varphi\S_\xx\eta_\xx + (1+\eta_\xx^2) \varphi_\yy},\\
+\varphi\S_t  &= |\zmap'|^{-2}\sbr{ - \frac12  \rbr{\varphi\S_\xx}^2 + \frac12 (1+\eta_\xx^2) \varphi_\yy^2 }  - g h,
 \end{align}%
 \end{subequations}%
 with  $\varphi_\yy$ evaluated at $\zz=\xx+\ii\eta$.

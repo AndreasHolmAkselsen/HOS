@@ -7,17 +7,24 @@ close all
 
 k0 = pi/2;
 
-A = .1*exp(1i*30*pi/180 );
+A = .15*exp(1i*30*pi/180 );
 L = pi;
 h = 1;
 
 
-heta = shiftdim( .75*(A+A') ,-1);
-k = shiftdim( [1,-1]*k0  ,-1);
+heta = .5*[A,A'];
+kx = [1,-1]*k0;
+kx3 =  shiftdim( kx ,-1);
+heta3 = shiftdim(heta ,-1);
+
+% f =@(zeta) zeta + 1i*sum( heta3.*exp(1i*kx3.*zeta) ,3);  % non-decaying
+% f =@(zeta) zeta + 1i*conj(A).*exp(-1i*k0.*zeta); % decaying
 
 
-f =@(zeta) zeta + 1i*sum( heta.*exp(1i*k.*zeta) ,3);
-eta =@(x) sum( heta.*exp(1i*k.*x) ,3);
+f =@(zeta) zeta + 2i*sum( conj(heta3).*(kx3>0).*exp(-1i*kx3.*zeta) ,3); % decaying
+
+
+eta =@(x) sum( heta3.*exp(1i*kx3.*x) ,3);
 
 hf = figure('color','w');
 [x,y]= meshgrid(linspace(-L,L,10),linspace(-h,h,100));

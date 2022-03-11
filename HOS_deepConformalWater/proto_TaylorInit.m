@@ -19,15 +19,12 @@ NWaves = 6;
 lambda = 10;
 ka = .25;
 % surfaceMethod = 'decayingConformal'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
-surfaceMethod = 'Taylor'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
+% surfaceMethod = 'Taylor'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
+
 
 L = NWaves*lambda;
 g = 9.81;
 k0 = 2*pi/lambda;
-
-% sourceAmplification = 0.1;
-% etaCap =.05/k0; 
-% ka = .000001;
 
 
 
@@ -37,17 +34,20 @@ T = 2*pi/omega;
 c_p = 2*pi/T/k0;
 
 
-
-
 % Simulation/plotting time
-NT_dt = .1;
+NT_dt = 1.6;
 dt = NT_dt*T;
 t_end = 9*dt;
 
+    
 % stability
-Tramp = 0;
-% Tramp = 1*T;
+Tramp = 1*T;
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
+k_cutTaylor = (M+5)*k0;
+k_cut_conformal = (nx*pi/L)/4;
+
+T_init = 2*Tramp;
+t0 = 0;
 
 
 initialStepODE = 1e-3*T;
@@ -60,56 +60,49 @@ x = (0:nx-1)'*dx;
 %% Simulation
 xk0 = k0.*x;
 phaseAng = 30*pi/180;
-% switch initialCondition
-%     case 'Stokes3'
-% %         eq. 6 and 7 in HOS-memo
-%         phiS = ka.*omega/k0^2*(sin(xk0)+.5*ka*sin(2*xk0) + ka^2/8*(3*sin(3*xk0)-9*sin(xk0)));
-%         eta = ka/k0*(cos(xk0)+.5*ka*cos(2*xk0)+3/8*ka^2*(cos(3*xk0)-cos(xk0)));
-%         % phi0 = ka.*omega/k0^2.*(sin(xk0)+.5*ka*sin(2*xk0) + ka^2/8*(3*sin(3*xk0)-9*sin(xk0))); %.*exp(k0*z)
-%         % [~,psi] = getStreamFunction(dx,z,fft(phi0));
-%     case 'linearWave'
-%         phiS = ka.*sqrt(g*k0)/k0^2*(sin(xk0-phaseAng));
-%         eta = ka/k0*(cos(xk0-phaseAng));
-%     case 'wavePacket'
-%         packet = exp(-(min(abs(x-x0),L-abs(x-x0))/packetWidth).^2);
-%         phiS = ka.*sqrt(g*k0)/k0^2*(sin(xk0)).*packet;
-%         eta = ka/k0*(cos(xk0)).*packet; 
-%     otherwise
-%         
-% end
+ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 
 phiS0 = ka.*sqrt(g*k0)/k0^2*(sin(xk0-phaseAng));
 eta0 = ka/k0*(cos(xk0-phaseAng));
+k_cut = k_cutTaylor;
+
 if strcmp(surfaceMethod,'decayingConformal')
-    eta_adj = initializeInitCond(x,eta0,5);
+    surfaceMethod = 'Taylor';
+    tic
+    [tInit,yInit] = ode45(@HOSODE45 ,[t0,t0+T_init],[phiS0;eta0],ODEoptions);
+    fprintf('CPU time init stage: %gs\n',toc);
+    surfaceMethod = 'decayingConformal';
+    phiS = yInit(end,1:nx).'; eta = yInit(end,nx+1:2*nx).';
+    t0 = tInit(end);
+    
+    eta_adj = initializeInitCond(x,eta,5);
     xi = x; kx = getKx(xi);
-    k_cut = max(kx)/2;
+    k_cut = k_cut_conformal;
     FFTeta = fft(eta_adj)/nx;
     f =  xi + 2i*fft(conj(fft(eta_adj)/nx).*(abs(kx)<k_cut&kx>0),[],1)+1i*FFTeta(1);
-    phiS_adj = ka.*sqrt(g*k0)/k0^2*(sin(real(f)*k0-phaseAng));
+    phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f));
+%     figure, plot(x,phiS,'-',real(f),phiS_adj,'--','linewidth',1.5)
     
     % figure('color','w');
     % f0 =  xi + 2i*fft(conj(fft(eta0)/nx).*(abs(kx)<k_cut&kx>0),[],1);
     % subplot(2,1,1); plot(x,eta0,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
     % subplot(2,1,2); plot(x,phiS0,'-',real(f),phiS_adj,'--','linewidth',1.5);ylabel('\phi^S');
 else
-    eta_adj=eta0;    phiS_adj=phiS0;
-    k_cut = (M+5)*k0;
+    [phiS_adj,eta_adj] = deal(phiS0,eta0);
+    [tInit,yInit] = deal([]);
 end
 
 % phiS_ip = phiS;
 % eta_ip = eta;
 
 
-ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 tic
-[t,y] = ode45(@HOSODE45 ,[0,t_end],[phiS_adj;eta_adj],ODEoptions);
-iNaN = find(isnan(y(:,1)),1,'first');
-if ~isempty(iNaN), t(iNaN:end)=[]; y(iNaN:end,:)=[]; end
+[t2,y2] = ode45(@HOSODE45 ,[t0,t_end],[phiS_adj;eta_adj],ODEoptions);
+fprintf('CPU time: %gs\n',toc);
 
-% [t,y] = ode45(@HOSODE45 ,0:dt:t_end,[phiS;eta],ODEoptions);
-CPUTime = toc;
-fprintf('CPU time (AHA): %gs\n',CPUTime);
+iNaN = find(isnan(y2(:,1)),1,'first');
+if ~isempty(iNaN), t2(iNaN:end)=[]; y2(iNaN:end,:)=[]; end
+t = [tInit(1:end-1);t2]; y = [yInit(1:end-1,:);y2];
 phiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
 % interpolate to perscribed times
 
@@ -142,12 +135,12 @@ else
 end
 
 
-[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814]),[],[0,0]);
+[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('%s Tramp%g ka=%.3g,M=%d',surfaceMethod,Tramp,ka,M)),[],[0,0]);
 ha=flipud(ha); set([ha(2:end).XAxis],'Visible','off');% if plotting bottom-to-top
 % set([ha(1:end-1).XAxis],'Visible','off');% if plotting top-to-bottom
 for i=1:nPannel
     plot(ha(i),x_ip(:,i),eta_ip(:,i),'k');
-    ylabel(ha(i),sprintf('%.1fs',t_ip(i)));
+    ylabel(ha(i),sprintf('t = %.2fs\nw_{nl} = %.2f',t_ip(i),nonLinRamp(t_ip(i))))
     grid(ha(i),'on');
 %     axis(ha(i),'equal')
 end

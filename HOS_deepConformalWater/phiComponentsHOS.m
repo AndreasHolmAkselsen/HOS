@@ -1,5 +1,5 @@
-function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta)
-    global M x k_cut
+function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta,M)
+    global x k_cut
     assert(iscolumn(phiS) && iscolumn(eta));
     
     % indices:

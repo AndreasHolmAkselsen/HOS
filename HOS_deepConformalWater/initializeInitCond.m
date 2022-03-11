@@ -1,10 +1,8 @@
 function eta = initializeInitCond(x_target,eta_target,nIt)
-k_cut =inf; % (M+5)*k0;
+k_cut = inf; % (M+5)*k0;
 
-% init. guess
 xi = x_target;
 eta = eta_target;
-
 kx = getKx(xi);
 
 

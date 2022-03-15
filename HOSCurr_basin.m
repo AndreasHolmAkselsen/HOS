@@ -1,5 +1,5 @@
 clear
-global M x k_cut nonLinRamp df
+global M h x k_cut nonLinRamp df
 g = 9.81;
 
 %% input
@@ -11,14 +11,14 @@ relTolODE = 1e-8;
 % Plot & export options
 PLOT_CURRENT = true; 
 DO_EXPORT = true;
-EXPORT_MATFILE = true;
+EXPORT_MATFILE = false;
 PLOT_FINAL_VALOCITY_FIELD = false;
 PLOT_WITH_SUBPLOT = false;
 
 % exportPrefix = '';
 % exportPath = './doc/figures/basin_L130/';
 
-exportPrefix = 'AHA_';
+exportPrefix = 'AHA_shallow_';
 exportPath = './HOS_SFo_curr/figures/';
 
 % Wave

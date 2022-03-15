@@ -1,0 +1,26 @@
+function z = fConformal(zeta,eta,H,k_cut)
+xi = real(zeta);
+nx = numel(xi);
+kx = getKx(xi);
+k = abs(kx);
+% argH = exp(-kx.*H)./sinh(kx.*H); argH(1) = 0; argH(kx*H<-10) = -2;
+argH = 2./(exp((2*kx.*H))-1-2*(k==0));% argH(1) = 0;
+
+
+FFTeta = fft(eta,[],1);
+if isfinite(H)
+    z = zeta - 1i*ifft(FFTeta.*argH.*exp(-kx.*imag(zeta)).*(k<k_cut),[],1)+1i*FFTeta(1)/nx;
+else
+    z =  zeta + 2i*fft(conj(FFTeta/nx).*exp(kx.*imag(zeta)).*(k<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
+end
+
+% nx = numel(xi);
+% kx = getKx(xi);
+% argH = exp(-kx.*H)./sinh(kx.*H); argH(1) = 0;
+% 
+% FFTeta = fft(eta,[],1);
+% if isfinite(H)
+%     z = xi - 1i*ifft(FFTeta.*argH.*(abs(kx)<k_cut),[],1)+1i*FFTeta(1)/nx;
+% else
+%     z =  xi + 2i*fft(conj(FFTeta/nx).*(abs(kx)<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
+% end

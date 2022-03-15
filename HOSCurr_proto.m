@@ -1,5 +1,5 @@
 clear
-global M x k_cut nonLinRamp df
+global M h x k_cut nonLinRamp df
 
 %% input
 % Resolution

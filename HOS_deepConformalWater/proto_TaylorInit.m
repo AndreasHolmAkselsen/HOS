@@ -1,5 +1,5 @@
 clear
-global M x k_cut nonLinRamp  surfaceMethod timeReached t_end
+global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H
 timeReached = 0;
 
 %% input
@@ -9,17 +9,18 @@ M = 5; % solution order
 relTolODE = 1e-8;
 
 % Plot & export options
-DO_EXPORT = false;
-EXPORT_MAT = false;
+DO_EXPORT = true;
+EXPORT_MAT = true;
 exportPrefix = '';
 exportPath = './figures/';
 
 % Wave specification
 NWaves = 6;
 lambda = 10;
-ka = .25;
-% surfaceMethod = 'decayingConformal'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
-% surfaceMethod = 'Taylor'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
+ka = .1;
+surfaceMethod = 'decayingConformal'; 
+% surfaceMethod = 'Taylor'; 
+H = .1*lambda;
 
 
 L = NWaves*lambda;
@@ -67,19 +68,23 @@ eta0 = ka/k0*(cos(xk0-phaseAng));
 k_cut = k_cutTaylor;
 
 if strcmp(surfaceMethod,'decayingConformal')
-    surfaceMethod = 'Taylor';
-    tic
-    [tInit,yInit] = ode45(@HOSODE45 ,[t0,t0+T_init],[phiS0;eta0],ODEoptions);
-    fprintf('CPU time init stage: %gs\n',toc);
-    surfaceMethod = 'decayingConformal';
-    phiS = yInit(end,1:nx).'; eta = yInit(end,nx+1:2*nx).';
-    t0 = tInit(end);
+    if T_init>0
+        surfaceMethod = 'Taylor';
+        tic
+        [tInit,yInit] = ode45(@HOSODE45 ,[t0,t0+T_init],[phiS0;eta0],ODEoptions);
+        fprintf('CPU time init stage: %gs\n',toc);
+        surfaceMethod = 'decayingConformal';
+        phiS = yInit(end,1:nx).'; eta = yInit(end,nx+1:2*nx).';
+        t0 = tInit(end);
+    else
+        [phiS,eta] = deal(phiS0,eta0); [tInit,yInit] = deal([]);
+    end
     
-    eta_adj = initializeInitCond(x,eta,5);
-    xi = x; kx = getKx(xi);
+    eta_adj = initializeInitCond(x,eta,H,5);
     k_cut = k_cut_conformal;
-    FFTeta = fft(eta_adj)/nx;
-    f =  xi + 2i*fft(conj(fft(eta_adj)/nx).*(abs(kx)<k_cut&kx>0),[],1)+1i*FFTeta(1);
+    f = fConformal(x,eta_adj,H,k_cut);
+    
+    
     phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f));
 %     figure, plot(x,phiS,'-',real(f),phiS_adj,'--','linewidth',1.5)
     
@@ -114,19 +119,17 @@ phiS_ip = interp1(t,phiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
 if strcmp(surfaceMethod,'decayingConformal')
-    xi = x;
-    kx = getKx(x);
-    f =  xi + 2i*fft(conj(fft(eta_ip,[],1)/nx).*(abs(kx)<k_cut&kx>0),[],1); 
-%     max(abs(imag(f)-eta_ip)) % test 
+    f = fConformal(x,eta_ip,H,k_cut);
     
 %     it = 4;
 %     hf = figure('color','w'); hold on
-%     [xi2,sig2]= ndgrid(xi,linspace(-(x(end)/NWaves),0,100));
-%     f2 = xi2+1i*sig2 + 2i*fft( conj(fft(eta_ip(:,it),[],1)/nx).*(kx>0).*exp(kx.*sig2) ,[],1); 
-%     contour(real(f2),imag(f2),xi2,'r'); hold on
+%     if isfinite(H), y0 = -H; else y0 = -x(end)/NWaves/2; end
+%     [xi2,sig2]= ndgrid(x,linspace(y0,0,100));
+%     f2 = fConformal(xi2+1i*sig2,eta_ip(:,it),H,k_cut);
+%     contour(real(f2),imag(f2),xi2,30,'r'); hold on
 %     contour(real(f2),imag(f2),sig2,'b');
 %     plot(real(f(:,it)),imag(f(:,it)),'k','linewidth',2)
-%     axis equal
+%     axis equal off
 
     x_ip = real(f);
 %     eta_ip = imag(f); %per definition
@@ -135,21 +138,24 @@ else
 end
 
 
-[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('%s Tramp%g ka=%.3g,M=%d',surfaceMethod,Tramp,ka,M)),[],[0,0]);
-ha=flipud(ha); set([ha(2:end).XAxis],'Visible','off');% if plotting bottom-to-top
+[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('%s Tramp%g ka=%.3g,M=%d,H=%.1f',surfaceMethod,Tramp,ka,M,H)),[],[0,0]);
+ha = flipud(ha); set([ha(2:end).XAxis],'Visible','off');% if plotting bottom-to-top
+hp = 0*t_ip;
 % set([ha(1:end-1).XAxis],'Visible','off');% if plotting top-to-bottom
 for i=1:nPannel
-    plot(ha(i),x_ip(:,i),eta_ip(:,i),'k');
+    hp(i) = plot(ha(i),x_ip(:,i),eta_ip(:,i),'k');
     ylabel(ha(i),sprintf('t = %.2fs\nw_{nl} = %.2f',t_ip(i),nonLinRamp(t_ip(i))))
     grid(ha(i),'on');
 %     axis(ha(i),'equal')
 end
-linkaxes(ha)
+% linkaxes(ha)
 % ylim(max(res.eta(:))*[-1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
-xlim(x([1,end]));%set(ha,'XLim',x([1,end]));
+xlim(ha,x([1,end]));%set(ha,'XLim',x([1,end]));
+set(hp(t_ip<T_init),'LineStyle','--');
+
     
-fileName = sprintf('%s%ska%.2g_M%d_Nw%d_dt%.3gT_nx%d',exportPrefix,surfaceMethod,ka,M,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
+fileName = sprintf('%s%ska%.2g_M%d_H%.2f_Nw%d_dt%.3gT_nx%d',exportPrefix,surfaceMethod,ka,M,H,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
 if DO_EXPORT
     copyfile('./proto.m',[exportPath,'/script_',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);

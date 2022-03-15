@@ -14,8 +14,9 @@ nx = 200;
 nz = 100;
 
 x = linspace(0,50,nx);
-z = linspace(0,-1,nz).';
+% z = linspace(0,-1,nz).';
 
+z = linspace(0,-15,nz).';
 
 % [xx,zz] = meshgrid(linspace(min(x),max(x),200),linspace(min(z),max(z),100));
 [xx,zz] = meshgrid(x,z);

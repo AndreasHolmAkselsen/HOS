@@ -9,18 +9,18 @@ M = 5; % solution order
 relTolODE = 1e-8;
 
 % Plot & export options
-DO_EXPORT = true;
-EXPORT_MAT = true;
+DO_EXPORT = 1;
+EXPORT_MAT = 0;
 exportPrefix = '';
 exportPath = './figures/';
 
 % Wave specification
-NWaves = 6;
+NWaves = 5;
 lambda = 10;
 ka = .1;
-surfaceMethod = 'decayingConformal'; 
-% surfaceMethod = 'Taylor'; 
-H = .1*lambda;
+% surfaceMethod = 'decayingConformal'; 
+surfaceMethod = 'Taylor'; 
+H = .15*lambda;
 
 
 L = NWaves*lambda;
@@ -30,13 +30,14 @@ k0 = 2*pi/lambda;
 
 
 % some computations...
-omega = (1+.5*ka^2)*sqrt(g*k0);
+% omega = (1+.5*ka^2)*sqrt(g*k0*tanh(k0*H));
+omega = sqrt(g*k0*tanh(k0*H));
 T = 2*pi/omega;
 c_p = 2*pi/T/k0;
 
 
 % Simulation/plotting time
-NT_dt = 1.6;
+NT_dt = 1;
 dt = NT_dt*T;
 t_end = 9*dt;
 
@@ -45,7 +46,7 @@ t_end = 9*dt;
 Tramp = 1*T;
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
 k_cutTaylor = (M+5)*k0;
-k_cut_conformal = (nx*pi/L)/4;
+k_cut_conformal = (nx*pi/L)/2;
 
 T_init = 2*Tramp;
 t0 = 0;
@@ -60,10 +61,13 @@ x = (0:nx-1)'*dx;
 
 %% Simulation
 xk0 = k0.*x;
-phaseAng = 30*pi/180;
+phaseAng = 0*pi/180;
 ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 
-phiS0 = ka.*sqrt(g*k0)/k0^2*(sin(xk0-phaseAng));
+% phiS0 = ka.*sqrt(g*k0)/k0^2*(sin(xk0-phaseAng));
+% eta0 = ka/k0*(cos(xk0-phaseAng));
+
+phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
 eta0 = ka/k0*(cos(xk0-phaseAng));
 k_cut = k_cutTaylor;
 
@@ -80,18 +84,17 @@ if strcmp(surfaceMethod,'decayingConformal')
         [phiS,eta] = deal(phiS0,eta0); [tInit,yInit] = deal([]);
     end
     
-    eta_adj = initializeInitCond(x,eta,H,5);
+    eta_adj = initializeInitCond(x,eta,H,10);
     k_cut = k_cut_conformal;
     f = fConformal(x,eta_adj,H,k_cut);
     
     
     phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f));
-%     figure, plot(x,phiS,'-',real(f),phiS_adj,'--','linewidth',1.5)
     
-    % figure('color','w');
-    % f0 =  xi + 2i*fft(conj(fft(eta0)/nx).*(abs(kx)<k_cut&kx>0),[],1);
-    % subplot(2,1,1); plot(x,eta0,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
-    % subplot(2,1,2); plot(x,phiS0,'-',real(f),phiS_adj,'--','linewidth',1.5);ylabel('\phi^S');
+%     figure('color','w');
+%     f0 = fConformal(x,eta,H,k_cut);
+%     subplot(2,1,1); plot(x,eta,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
+%     subplot(2,1,2); plot(x,phiS,'-',real(f),phiS_adj,'--','linewidth',1.5);ylabel('\phi^S');
 else
     [phiS_adj,eta_adj] = deal(phiS0,eta0);
     [tInit,yInit] = deal([]);
@@ -120,6 +123,8 @@ eta_ip  = interp1(t,eta ,t_ip).';
 
 if strcmp(surfaceMethod,'decayingConformal')
     f = fConformal(x,eta_ip,H,k_cut);
+    
+%     fH = fConformal(x-1i*H,eta_ip,H,k_cut);
     
 %     it = 4;
 %     hf = figure('color','w'); hold on

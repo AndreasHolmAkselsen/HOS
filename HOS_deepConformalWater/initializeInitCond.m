@@ -13,12 +13,12 @@ kx = getKx(xi);
 x = x_target;
 nx = numel(x);
 L = (x(2)-x(1))*nx; assert(all(diff(x,2)==0));
-% argH = exp(-kx.*H)./sinh(kx.*H); argH(1) = 0; argH(kx*H<-10) = -2;
-argH = 2./(exp((2*kx.*H))-1); argH(1) = 0;
 for i = 1:nIt
     FFTeta = fft(eta);
     if isfinite(H)
-        f = xi - 1i*ifft(FFTeta.*argH.*(abs(kx)<k_cut),[],1)+1i*FFTeta(1)/nx;
+        Lsin = -2./(exp((2*kx.*H))-1-2*(kx==0));
+        % argH = 2./(exp((2*kx.*H))-1); argH(1) = 0;
+        f = xi + 1i*ifft(FFTeta.*Lsin.*(abs(kx)<k_cut),[],1);
     else
         f =  xi + 2i*fft(conj(FFTeta/nx).*(abs(kx)<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
     end

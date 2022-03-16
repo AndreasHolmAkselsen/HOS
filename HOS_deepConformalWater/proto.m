@@ -1,5 +1,5 @@
 clear
-global M x k_cut nonLinRamp  surfaceMethod timeReached t_end
+global M H x k_cut nonLinRamp  surfaceMethod timeReached t_end
 timeReached = 0;
 
 %% input
@@ -9,17 +9,18 @@ M = 5; % solution order
 relTolODE = 1e-8;
 
 % Plot & export options
-DO_EXPORT = false;
-EXPORT_MAT = false;
-exportPrefix = '';
+DO_EXPORT = true;
+EXPORT_MAT = true;
+exportPrefix = 'proto_';
 exportPath = './figures/';
 
 % Wave specification
 NWaves = 6;
 lambda = 10;
-ka = .25;
+ka = .1;%.25;
 % surfaceMethod = 'decayingConformal'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
 surfaceMethod = 'Taylor'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
+H = 10*lambda;
 
 L = NWaves*lambda;
 g = 9.81;
@@ -40,7 +41,7 @@ c_p = 2*pi/T/k0;
 
 
 % Simulation/plotting time
-NT_dt = .1;
+NT_dt = 1.6;
 dt = NT_dt*T;
 t_end = 9*dt;
 

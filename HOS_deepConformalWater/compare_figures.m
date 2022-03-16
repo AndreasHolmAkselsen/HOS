@@ -1,16 +1,21 @@
-% name = 'waveField_Stokes_ka025_dt5T';
-name = 'ka0p25_M5_Nw10_dt1T_nx512';
 
 % prefix = {'Taylor','phiS_x','phi_x'};
 % for i = 1:length(prefix)
 %     hf(i) = openfig(['./figures/',prefix{i},'ka0p28_M1_Nw10_dt1T_nx512.fig'],'invisible');
 % end
 % hf(1).Visible = 'on';
+% 
 
-hf(1) = openfig(['./figures/Taylorka0p28_M5_Nw10_dt1T_nx512.fig']);
-hf(2) = openfig(['./figures/phiS_xka0p28_M1_Nw10_dt1T_nx512.fig'],'invisible');
-hf(3) = openfig(['./figures/phi_xka0p28_M1_Nw10_dt1T_nx512.fig'],'invisible');
-legendNames = {'Taylor','phiS_x','phi_x'};
+hf(1) = openfig(['./figures/decayingConformalka0p1_M5_H1p50_Nw5_dt1T_nx512.fig']);
+hf(2) = openfig(['./figures/Taylorka0p1_M5_H1p50_Nw5_dt1T_nx512.fig'],'invisible');
+hf(3) = openfig(['./figures/SFoka0p1H1p50.fig'],'invisible');
+legendNames = {'AHA conformal','AHA Taylor','SFo'};
+
+% hf(1) = openfig(['./figures/Taylorka0p28_M5_Nw10_dt1T_nx512.fig']);
+% hf(2) = openfig(['./figures/phiS_xka0p28_M1_Nw10_dt1T_nx512.fig'],'invisible');
+% hf(3) = openfig(['./figures/phi_xka0p28_M1_Nw10_dt1T_nx512.fig'],'invisible');
+% legendNames = {'Taylor','phiS_x','phi_x'};
+
 lineStyles = {'-','--',':'};
 colors = {'k','r','b'}
 hf(1).Position=[527  0  1056  1000];

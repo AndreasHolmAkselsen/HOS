@@ -45,29 +45,51 @@ function [phiS_t,eta_t] = HOSODEeq(t,phiS,eta)
 %                 f0 = hb(1)+1i*sum(imag(hb.*conj(heta)).*kx./(sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
 %                 tf =  1i*f0 -1i*ifft(hb.*argH)*nx;
 
-                argH = 2./(exp((2*kx.*H))-1-2*(k==0)).*(k<k_cut);
+
+                Lsin = -2./(exp(2*kx.*H)-1-2*(k==0)).*(k<k_cut);
+                Lcos = 2./(exp(2*kx.*H)+1).*(k<k_cut);
+%                 L = -exp(-kx.*H)./(sinh(kx*H)-(k==0)).*(k<k_cut);
                 heta = fft(eta)/nx;
-                df =  1 + ifft( kx.*heta.*argH)*nx;
+                df =  1 - ifft( kx.*heta.*Lsin)*nx;
                 if any(real(df) < 0)% downward mapping -> wave breaking
                     [eta_t,phiS_t] = deal(nan(size(k)));  return
                 end
                 JInv = abs(df).^(-2);
-                U = conj(ifft(-1i.*kx.*fft(phiS).*argH));
+                U = conj(ifft(1i.*kx.*fft(phiS).*Lcos));
                 hb = fft(JInv.*imag(U))/nx;
-                f0 = 1i*sum(imag(hb.*conj(heta)).*kx./(sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
-                tf =  1i*f0 -1i*ifft(hb.*argH)*nx;
+                f0 =  1i*sum(imag(hb.*conj(heta)).*kx./(sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
+                tf =  1i*f0 + 1i*ifft(hb.*Lsin.*(k~=0))*nx;
 
-                
 %                 x0_t = mean(real(df.*tf))
-% %                 f = x - 1i*ifft(fft(eta).*argH.*(k<k_cut))+1i*mean(eta); 
-% %                 figure;plot(x,imag(f),'-',x,eta,'--','linewidth',1.5)
+%                 y0_t = mean(imag(df.*tf))
+                
+
+%                 f = x + 1i*ifft(fft(eta).*Lsin); 
+%                 figure;plot(x,imag(f),'-',x,eta,'--','linewidth',1.5)
 %                 max(abs(  imag(f)-eta  ))./max(abs( eta ))
-%                 w = ifft(            -fft(phiS).*argH.*(k<k_cut))+mean(phiS); 
-% %                 figure;plot(x,real(w),'-',x,phiS,'--','linewidth',1.5)
+%                 w = ifft(            fft(phiS).*Lcos); 
+%                 figure;plot(x,real(w),'-',x,phiS,'--','linewidth',1.5)
 %                 max(abs( real(w) - phiS )) ./max(abs( phiS ))
-% %                 figure;plot(x,imag(tf),'-',x,JInv.*imag(U),'--','linewidth',1.5)
+%                 figure;plot(x,imag(tf),'-',x,JInv.*imag(U),'--','linewidth',1.5)
 %                 max(abs(  imag(tf)-JInv.*imag(U)  ))./max(abs( JInv.*imag(U)  ))
 
+%                 [xx,yy] = ndgrid(x,linspace(-H,0,50));
+% %                 w = ifft(  fft(phiS).*exp(-yy.*kx).Lsin); 
+%                 w = ifft(  fft(phiS).*exp(-yy.*kx).*2./(exp(2*kx.*H)+1).*(k<k_cut)); 
+%                 figure;contourf(xx,yy,real(w),20)
+%                 figure;contourf(xx,yy,imag(w),20)
+%                 w = ifft(  fft(phiS).*Lcos); 
+%                 w_mH = ifft(  fft(phiS).*exp(H.*kx).*Lcos); 
+%                 figure;plot(x,real(w),'-',x,phiS,'--','linewidth',1.5)
+%                 figure;plot(x,imag(w_mH),'-','linewidth',1.5)
+%                 dfmH =  1 - ifft( kx.*fft(eta).*exp(H.*kx).*Lsin);
+
+%                 tfmH =  1i*f0 + 1i*ifft(fft(JInv.*imag(U)).*exp(H.*kx).*Lsin); % either the bottom moves an the surface eq is exact
+%                 tfmH =  1i*f0 + 1i*ifft(fft(JInv.*imag(U)).*exp(H.*kx).*Lsin.*(k~=0)); % or the surface eq as a uniform error
+%                 y_y_mH = imag(dfmH.*tfmH)
+
+                tfmH =  1i*f0 + 1i*ifft(fft(JInv.*imag(U)).*exp(H.*kx).*Lsin); mean(imag(tfmH))
+                tf0 =  1i*f0 + 1i*ifft(fft(JInv.*imag(U)).*Lsin); mean(imag(tf0))
 
             else
                 df =  1 + 2*fft(kx.*conj(fft(eta)).*(kx>0&k<k_cut)/nx);
@@ -79,9 +101,9 @@ function [phiS_t,eta_t] = HOSODEeq(t,phiS,eta)
                 hb = fft(JInv.*imag(U))/nx;
                 tf =  fft(2i*conj(hb).*(kx>0&k<k_cut)) + 1i*hb(1);
             end
-            eta_t = real(df).*imag(tf) + imag(df).*real(tf);
+            eta_t = imag(tf.*df);
             phiS_t = real(tf).*real(U) - .5*JInv.*real(U.^2) - g*eta; % phi_t = "phiS_t"
-            
+
 %             
 %             max(abs(df_-df))/max(abs(df_))
 %             max(abs(U_-U))/max(abs(U_))

@@ -7,7 +7,7 @@ surfaceMethod = 'decayingConformal'; % Chalikov method
 % surfaceMethod = 'Taylor';  % normal HOS
 
 % Resolution
-nx = 2^10;
+nx__wave = 2^9;
 M = 5; % solution order for Taylor method
 relTolODE = 1e-8;
 N_SSGW = 2000; % number of modes in SSGW solution
@@ -22,7 +22,7 @@ i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
 % Wave specification
 NWaves = 1;
 lambda = 10;
-ka = .21; % linear wave steepness
+ka = .2; % linear wave steepness
 
 h = .1*lambda; % water depth. NB: there will be a slight differnece between H and the actual water depth when using the Chalikov method.
                 % H is the water depth in the rectangular zeta-plane in this case.
@@ -36,10 +36,11 @@ k0 = 2*pi/lambda;
 omega = sqrt(g*k0*tanh(k0*h));
 T = 2*pi/omega;
 c_p = 2*pi/T/k0;
+nx = nx__wave*NWaves;
 
 
 % Simulation/plotting time
-NT_dt = .1;
+NT_dt = .25;
 dt = NT_dt*T;
 t_end = 9*dt;
 
@@ -57,9 +58,8 @@ T_init = 2*Tramp; % For the Chalikov method; the simulation will first run for t
 
 
 %% Simulation
-
 dx = L/nx;
-x = (0:nx-1)'*dx - L/2;
+x = (0:nx-1)'*dx;% - L/2;
 t0 = 0;
 initialStepODE = 1e-3*T;
 xk0 = k0.*x;
@@ -77,20 +77,29 @@ out.hk = PP(1)*PP(2);
 out.c_e = PP(4)*sqrt(g*h); % phase velocity observed from where the meam velocity at the bed is zero
 out.c_s = PP(5)*sqrt(g*h); % mean flow velocity (phase velocity in frame without mean flow)
 out.k = PP(2)/h;
-z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
-dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
+
+
+% z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
+% z = z*h;
+% dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
+% z = reshape(repmat(z,1,NWaves) + L*(floor(-NWaves/2+1):floor(NWaves/2)),[],1);
+
 z = z*h;
-% z = (z-z(1))*h;
+z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1);
+dwdz = repmat(dwdz,NWaves,1);
 dwdz = dwdz*sqrt(g*h);
 
-n = 2*N_SSGW;
+n = 2*N_SSGW*NWaves;
 z_m = .5*(z(1:n-1)+z(2:n));
 dwdz0_m = .5*(dwdz(1:n-1)+dwdz(2:n))+out.c_e;
 w = [0;cumsum( dwdz0_m.*diff(z))];
 w = w-mean(w);
 
-eta = interp1(real(z),imag(z),x,'linear',nan);
-phiS = interp1(real(z),real(w),x,'linear',nan);
+% if z(1)<2*eps&&z(1)>-2*eps, z(1)=1i*imag(z(1));end
+z_ = [z(end)-L;z;z(1)+L]; % extend with ghost nodes
+w_ = [w(end);w;w(end)];
+eta = interp1(real(z_),imag(z_),x,'linear',nan);
+phiS = interp1(real(z_),real(w_),x,'linear',nan);
 
 
 phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
@@ -101,10 +110,10 @@ v0 =  ka/k0.*g/omega*k0*sin(xk0-phaseAng)*tanh(k0*h);
 eta0 = ka/k0*(cos(xk0-phaseAng));
 k_cut = k_cutTaylor;
 
-figure('color','w')
-subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
-subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
-subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
+% figure('color','w')
+% subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
+% subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
+% subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
 
 fftEta = fftshift(fft(eta));
 if sum(abs(fftEta(1:floor(end/4))))>.01*sum(abs(fftEta))
@@ -115,7 +124,7 @@ if strcmp(surfaceMethod,'decayingConformal')
     [eta_adj,H] = initializeInitCond(x,eta,h,10);
     k_cut = k_cut_conformal;
     f = fConformal(x,eta_adj,H,inf);
-    phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f));
+    phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f),'linear',nan);
     
 %     figure('color','w');
 %     f0 = fConformal(x,eta,H,inf);

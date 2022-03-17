@@ -25,7 +25,7 @@ for i = 1:nIt
     x_new = real(f);
 %     plot(x_new,eta,'.','DisplayName',"Iteration "+i)
     
-    eta = interp1([x-L;x;x+L],[eta;eta;eta],x_new);
+    eta = interp1([x-L;x;x+L],[eta;eta;eta],x_new,'linear',nan);
     x = x_new;
     H = h_target+mean(eta);
 end

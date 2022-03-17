@@ -3,35 +3,36 @@ global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H
 timeReached = 0;
 
 %% input
+surfaceMethod = 'decayingConformal'; % Chalikov method
+% surfaceMethod = 'Taylor';  % normal HOS
+
 % Resolution
 nx = 2^9;
-M = 5; % solution order
+M = 5; % solution order for Taylor method
 relTolODE = 1e-8;
 
 % Plot & export options
-DO_EXPORT = 1;
+DO_EXPORT = 0;
 EXPORT_MAT = 0;
 exportPrefix = '';
 exportPath = './figures/';
+i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
 
 % Wave specification
 NWaves = 5;
 lambda = 10;
-ka = .1;
-% surfaceMethod = 'decayingConformal'; 
-surfaceMethod = 'Taylor'; 
-H = .15*lambda;
+ka = .25; % linear wave steepness
 
-
-L = NWaves*lambda;
-g = 9.81;
-k0 = 2*pi/lambda;
-
+h = .2*lambda; % water depth. NB: there will be a slight differnece between H and the actual water depth when using the Chalikov method.
+                % H is the water depth in the rectangular zeta-plane in this case.
 
 
 % some computations...
+L = NWaves*lambda;
+g = 9.81;
+k0 = 2*pi/lambda;
 % omega = (1+.5*ka^2)*sqrt(g*k0*tanh(k0*H));
-omega = sqrt(g*k0*tanh(k0*H));
+omega = sqrt(g*k0*tanh(k0*h));
 T = 2*pi/omega;
 c_p = 2*pi/T/k0;
 
@@ -46,20 +47,20 @@ t_end = 9*dt;
 Tramp = 1*T;
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
 k_cutTaylor = (M+5)*k0;
-k_cut_conformal = (nx*pi/L)/2;
+k_cut_conformal = (nx*pi/L)/4;
 
-T_init = 2*Tramp;
-t0 = 0;
-
-
-initialStepODE = 1e-3*T;
+T_init = 2*Tramp; % For the Chalikov method; the simulation will first run for time T_init with normal Taylor-HOS to generate an good initial condition.
 
 
-%% Plot background current
-dx = L/nx;
-x = (0:nx-1)'*dx;
+
+
 
 %% Simulation
+
+dx = L/nx;
+x = (0:nx-1)'*dx;
+t0 = 0;
+initialStepODE = 1e-3*T;
 xk0 = k0.*x;
 phaseAng = 0*pi/180;
 ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
@@ -73,7 +74,7 @@ k_cut = k_cutTaylor;
 
 if strcmp(surfaceMethod,'decayingConformal')
     if T_init>0
-        surfaceMethod = 'Taylor';
+        surfaceMethod = 'Taylor'; H = h;
         tic
         [tInit,yInit] = ode45(@HOSODE45 ,[t0,t0+T_init],[phiS0;eta0],ODEoptions);
         fprintf('CPU time init stage: %gs\n',toc);
@@ -84,20 +85,22 @@ if strcmp(surfaceMethod,'decayingConformal')
         [phiS,eta] = deal(phiS0,eta0); [tInit,yInit] = deal([]);
     end
     
-    eta_adj = initializeInitCond(x,eta,H,10);
+    [eta_adj,H] = initializeInitCond(x,eta,h,10);
     k_cut = k_cut_conformal;
-    f = fConformal(x,eta_adj,H,k_cut);
-    
+    f = fConformal(x,eta_adj,H,inf);
     
     phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f));
     
 %     figure('color','w');
-%     f0 = fConformal(x,eta,H,k_cut);
+%     f0 = fConformal(x,eta,H,inf);
+%     fH = fConformal(x-1i*H,eta_adj,H,inf);
+%     -imag(fH(1,:))
 %     subplot(2,1,1); plot(x,eta,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
 %     subplot(2,1,2); plot(x,phiS,'-',real(f),phiS_adj,'--','linewidth',1.5);ylabel('\phi^S');
 else
     [phiS_adj,eta_adj] = deal(phiS0,eta0);
     [tInit,yInit] = deal([]);
+    H = h;
 end
 
 % phiS_ip = phiS;
@@ -123,18 +126,34 @@ eta_ip  = interp1(t,eta ,t_ip).';
 
 if strcmp(surfaceMethod,'decayingConformal')
     f = fConformal(x,eta_ip,H,k_cut);
-    
+        
 %     fH = fConformal(x-1i*H,eta_ip,H,k_cut);
+%     -imag(fH(1,:))
+%     figure, plot(x/lambda,(real(fH)-x)/lambda)
     
-%     it = 4;
-%     hf = figure('color','w'); hold on
-%     if isfinite(H), y0 = -H; else y0 = -x(end)/NWaves/2; end
-%     [xi2,sig2]= ndgrid(x,linspace(y0,0,100));
-%     f2 = fConformal(xi2+1i*sig2,eta_ip(:,it),H,k_cut);
-%     contour(real(f2),imag(f2),xi2,30,'r'); hold on
-%     contour(real(f2),imag(f2),sig2,'b');
-%     plot(real(f(:,it)),imag(f(:,it)),'k','linewidth',2)
-%     axis equal off
+    for it = i_detailedPlot
+        hfCont = figure('color','w'); hold on
+        y0 = max(-x(end)/NWaves/2,-H);
+        if y0>-H,nan_ = nan; else nan_=1; end
+        
+        [xi2,sig2]= ndgrid(x,linspace(y0,0,100));
+        f2 = fConformal(xi2+1i*sig2,eta_ip(:,it),H,k_cut);
+        haCont(1) = subplot(2,1,1);
+        contour(real(f2),imag(f2),xi2,30,'r'); hold on
+        contour(real(f2),imag(f2),sig2,'b');
+        plot([f(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
+
+        haCont(2) = subplot(2,1,2);
+        kx = getKx(x);
+        omega = ifft(  fft(phiS_ip(:,it)).*exp(-sig2.*kx).*2./(exp(2*kx.*H)+1).*(abs(kx)<k_cut));
+        contourf(real(f2),imag(f2),real(omega),20); hold on
+        contour(real(f2),imag(f2),imag(omega),20,'k')
+        plot([f(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
+        axis(haCont,'equal','off')
+        
+        if isfinite(H), title(haCont(1), sprintf('H[\\zeta] = %.4g, H[z] = %.4g',H,-imag(f2(1,1)))); end
+        
+    end
 
     x_ip = real(f);
 %     eta_ip = imag(f); %per definition
@@ -160,7 +179,7 @@ xlim(ha,x([1,end]));%set(ha,'XLim',x([1,end]));
 set(hp(t_ip<T_init),'LineStyle','--');
 
     
-fileName = sprintf('%s%ska%.2g_M%d_H%.2f_Nw%d_dt%.3gT_nx%d',exportPrefix,surfaceMethod,ka,M,H,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
+fileName = sprintf('%s%ska%.2g_M%d_h%.2f_Nw%d_dt%.3gT_nx%d',exportPrefix,surfaceMethod,ka,M,h,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
 if DO_EXPORT
     copyfile('./proto.m',[exportPath,'/script_',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);

@@ -17,7 +17,7 @@ legendNames = {'AHA conformal','AHA Taylor','SFo'};
 % legendNames = {'Taylor','phiS_x','phi_x'};
 
 lineStyles = {'-','--',':'};
-colors = {'k','r','b'}
+colors = {'k','r','b'};
 hf(1).Position=[527  0  1056  1000];
 
 ha0 = hf(1).Children;

@@ -15,12 +15,8 @@ function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta,h,M)
     phi_jni(:,1) = phiS;
     hphi_jn = zeros(nx,M);
 
-    H_ji = zeros(nx,M+1); % [j,i+1] where i is the i'th derivative in z.
-    H_ji(:,1:2:M+1) = k.^(0:2:M);
-    H_ji(:,2:2:M+1) = k.^(1:2:M).*tanh(k*h);
-    
-%     H_ji = k.^(0:M);
-%     H_ji(2:2:M+1) = H_ji(2:2:M+1).*tanh(k*h);
+    H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
+    if isfinite(h), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*h); end
     
     for n = 1:M
         % Compute phi^(n)

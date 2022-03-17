@@ -7,9 +7,10 @@ surfaceMethod = 'decayingConformal'; % Chalikov method
 % surfaceMethod = 'Taylor';  % normal HOS
 
 % Resolution
-nx = 2^9;
-M = 100; % solution order for Taylor method
+nx = 2^10;
+M = 5; % solution order for Taylor method
 relTolODE = 1e-8;
+N_SSGW = 2000; % number of modes in SSGW solution
 
 % Plot & export options
 DO_EXPORT = 0;
@@ -21,7 +22,7 @@ i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
 % Wave specification
 NWaves = 1;
 lambda = 10;
-ka = .20; % linear wave steepness
+ka = .21; % linear wave steepness
 
 h = .1*lambda; % water depth. NB: there will be a slight differnece between H and the actual water depth when using the Chalikov method.
                 % H is the water depth in the rectangular zeta-plane in this case.
@@ -47,7 +48,7 @@ t_end = 9*dt;
 Tramp = 0*1*T;
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
 k_cutTaylor = (M+5)*k0;
-k_cut_conformal =  (M+5)*k0;%(nx*pi/L)/2;
+k_cut_conformal =  (nx*pi/L)/2;
 
 T_init = 2*Tramp; % For the Chalikov method; the simulation will first run for time T_init with normal Taylor-HOS to generate an good initial condition.
 
@@ -69,20 +70,20 @@ ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 
 
 %% init with SSGW:
-N = 500;
-[z,dwdz,PP] = SSGW(k0*h,ka,N);
+
+[z,dwdz,PP] = SSGW(k0*h,ka,N_SSGW);
 
 out.hk = PP(1)*PP(2);
 out.c_e = PP(4)*sqrt(g*h); % phase velocity observed from where the meam velocity at the bed is zero
 out.c_s = PP(5)*sqrt(g*h); % mean flow velocity (phase velocity in frame without mean flow)
 out.k = PP(2)/h;
-z = [ z(N+1:end)-2*pi/(k0*h) ; z(1:N) ];
-dwdz = [ dwdz(N+1:end); dwdz(1:N) ];
+z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
+dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
 z = z*h;
 % z = (z-z(1))*h;
 dwdz = dwdz*sqrt(g*h);
 
-n = 2*N;
+n = 2*N_SSGW;
 z_m = .5*(z(1:n-1)+z(2:n));
 dwdz0_m = .5*(dwdz(1:n-1)+dwdz(2:n))+out.c_e;
 w = [0;cumsum( dwdz0_m.*diff(z))];
@@ -100,11 +101,15 @@ v0 =  ka/k0.*g/omega*k0*sin(xk0-phaseAng)*tanh(k0*h);
 eta0 = ka/k0*(cos(xk0-phaseAng));
 k_cut = k_cutTaylor;
 
-% figure('color','w')
-% subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
-% subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
-% subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
+figure('color','w')
+subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
+subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
+subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
 
+fftEta = fftshift(fft(eta));
+if sum(abs(fftEta(1:floor(end/4))))>.01*sum(abs(fftEta))
+    warning('Initial conition may not have been found. Verify that solution exists.')
+end
 if strcmp(surfaceMethod,'decayingConformal')
     
     [eta_adj,H] = initializeInitCond(x,eta,h,10);

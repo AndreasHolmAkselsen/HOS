@@ -9,7 +9,7 @@ relTolODE = 1e-8;
 
 % Plot & export options
 PLOT_CURRENT = true; 
-PLOT_FINAL_VALOCITY_FIELD = true;
+PLOT_FINAL_VALOCITY_FIELD = false;
 DO_EXPORT = false;
 EXPORT_MATFILE = false;
 exportPrefix = 'AHA_';
@@ -29,12 +29,13 @@ initialCondition = 'linearWave'; % {'linearWave','Stokes3','wavePacket'}
 % some computations...
 g = 9.81;
 k0 = 2*pi/lambda;
-omega = (1+.5*ka^2)*sqrt(g*k0);
+% omega = (1+.5*ka^2)*sqrt(g*k0);
+omega = sqrt(g*k0);
 T = 2*pi/omega;
 c_p = 2*pi/T/k0;
 
 % Simulation/plotting time
-NT_dt = 10;
+NT_dt = .25;
 dt = NT_dt*T;
 t_end = 9*dt;
 

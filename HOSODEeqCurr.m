@@ -1,7 +1,8 @@
 function [phiS_t,eta_t] = HOSODEeqCurr(t,phiS,eta)
     global nonLinRamp x df k_cut
     wNl = nonLinRamp(t); 
-    wCurr = wNl;
+%     wCurr = wNl;
+    wCurr = 1;%wNl;
     g = 9.81;
     
 %     % temp!

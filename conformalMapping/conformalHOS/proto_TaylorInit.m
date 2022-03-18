@@ -181,7 +181,7 @@ set(hp(t_ip<T_init),'LineStyle','--');
     
 fileName = sprintf('%s%ska%.2g_M%d_h%.2f_Nw%d_dt%.3gT_nx%d',exportPrefix,surfaceMethod,ka,M,h,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
 if DO_EXPORT
-    copyfile('./proto.m',[exportPath,'/script_',fileName,'.m']) 
+    copyfile('./proto_TaylorInit.m',[exportPath,'/script_',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);
     export_fig(hf,[exportPath,'/',fileName],'-pdf','-png');
 end

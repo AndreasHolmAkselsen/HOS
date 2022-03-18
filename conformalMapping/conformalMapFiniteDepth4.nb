@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[     25045,        733]
-NotebookOptionsPosition[     24256,        706]
-NotebookOutlinePosition[     24635,        722]
-CellTagsIndexPosition[     24592,        719]
+NotebookDataLength[     25662,        747]
+NotebookOptionsPosition[     24705,        715]
+NotebookOutlinePosition[     25252,        736]
+CellTagsIndexPosition[     25209,        733]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -373,7 +373,11 @@ Cell[BoxData[{
          RowBox[{" ", 
           RowBox[{"Im", "[", 
            RowBox[{
-            SubscriptBox["F", "j"], "[", "\[Eta]", "]"}], "]"}]}], 
+            RowBox[{
+             SubscriptBox["F", "j"], "[", "\[Eta]", "]"}], 
+            SuperscriptBox["\[ExponentialE]", 
+             RowBox[{"\[ImaginaryI]", " ", 
+              SubscriptBox["k", "j"], "\[Xi]"}]]}], "]"}]}], 
          RowBox[{"Sinh", "[", 
           RowBox[{
            SubscriptBox["k", "j"], "H"}], "]"}]]}]}]}], ")"}]}]}]}]}], "Text",
@@ -381,7 +385,7 @@ Cell[BoxData[{
    3.8563314229403214`*^9, 3.8563314364538736`*^9}, {3.8563338795134897`*^9, 
    3.8563338882009673`*^9}, {3.8563421396741467`*^9, 3.856342209299446*^9}, 
    3.85641584368402*^9, {3.8564158774111977`*^9, 3.8564159245011625`*^9}, {
-   3.85641596497779*^9, 3.8564159789992948`*^9}}],
+   3.85641596497779*^9, 3.8564159789992948`*^9}, 3.8564363785636525`*^9}],
 
 Cell[BoxData[
  RowBox[{
@@ -467,11 +471,18 @@ Cell[BoxData[{
       SubscriptBox["\[Phi]", "\[Sigma]"], "2"]}], ")"}], 
    SuperscriptBox["J", 
     RowBox[{"-", "1"}]]}], "+", 
-  RowBox[{"g", " ", "\[Eta]"}]}]}], "Text",
+  RowBox[{"g", " ", "\[Eta]"}]}], "\[IndentingNewLine]", 
+ RowBox[{"J", " ", "=", " ", 
+  RowBox[{"|", 
+   RowBox[{"f", "'"}], 
+   SuperscriptBox["|", "2"], " ", 
+   RowBox[{"being", " ", "the", " ", 
+    RowBox[{"Jacobian", "."}]}]}]}]}], "Text",
  CellChangeTimes->{{3.856332101014387*^9, 3.8563321078188944`*^9}, {
    3.8563322044089985`*^9, 3.8563322066387377`*^9}, {3.8563323140688953`*^9, 
    3.8563323405143023`*^9}, 3.8563323939894333`*^9, 3.8563339047477655`*^9, {
-   3.856334115030068*^9, 3.8563341158543406`*^9}}],
+   3.856334115030068*^9, 3.8563341158543406`*^9}, {3.85642498587438*^9, 
+   3.8564250025384912`*^9}}],
 
 Cell[BoxData[{"Introduce", "\[IndentingNewLine]", 
  RowBox[{
@@ -495,7 +506,7 @@ Cell[BoxData[{"Introduce", "\[IndentingNewLine]",
       RowBox[{
        RowBox[{
         SubscriptBox["x", "t"], 
-        SubscriptBox["x", "\[Xi]"]}], "-", 
+        SubscriptBox["x", "\[Xi]"]}], "+", 
        RowBox[{
         SubscriptBox["y", "t"], 
         SubscriptBox["y", "\[Xi]"]}], "+", "  ", 
@@ -504,10 +515,10 @@ Cell[BoxData[{"Introduce", "\[IndentingNewLine]",
          RowBox[{
           RowBox[{
            SubscriptBox["y", "t"], 
-           SubscriptBox["x", "\[Xi]"]}], "-", 
+           SubscriptBox["x", "\[Xi]"]}], " ", "-", 
           RowBox[{
            SubscriptBox["x", "t"], 
-           SubscriptBox["y", "\[Xi]"]}]}], " ", ")"}]}]}], 
+           SubscriptBox["y", "\[Xi]"]}]}], ")"}]}]}], 
       ")"}]}]}]}]}], "\[IndentingNewLine]", 
  RowBox[{"such", " ", "that", " ", "kin", " ", "BC", " ", "can", " ", "be", 
   " ", "written"}], "\[IndentingNewLine]", 
@@ -518,10 +529,6 @@ Cell[BoxData[{"Introduce", "\[IndentingNewLine]",
    SuperscriptBox["J", 
     RowBox[{"-", "1"}]], 
    SubscriptBox["\[Phi]", "\[Sigma]"]}]}], "\[IndentingNewLine]", 
- RowBox[{
-  RowBox[{"JIm", "[", 
-   RowBox[{"tf", "[", "\[Xi]", "]"}], "]"}], "=", 
-  SubscriptBox["\[Phi]", "\[Sigma]"]}], "\[IndentingNewLine]", 
  RowBox[{
   RowBox[{
    RowBox[{"tf", " ", "must", " ", "decay", " ", 
@@ -541,7 +548,9 @@ Cell[BoxData[{"Introduce", "\[IndentingNewLine]",
  CellChangeTimes->{{3.856332131777532*^9, 3.856332208884761*^9}, {
   3.856332403095351*^9, 3.856332636857879*^9}, {3.8564090955544167`*^9, 
   3.8564092393117943`*^9}, {3.856409403247734*^9, 3.856409408751042*^9}, {
-  3.8564160471129684`*^9, 3.8564160472046733`*^9}}],
+  3.8564160471129684`*^9, 3.8564160472046733`*^9}, {3.8564249750976434`*^9, 
+  3.856424976444294*^9}, {3.8564899798202324`*^9, 3.856490013504639*^9}, {
+  3.8564903926209507`*^9, 3.8564903972522526`*^9}}],
 
 Cell[BoxData[{
  RowBox[{
@@ -705,7 +714,12 @@ Cell[BoxData[{
    3.8564168207592125`*^9}, {3.856417101762429*^9, 3.856417192306557*^9}}]
 },
 WindowSize->{1385, 833},
-WindowMargins->{{Automatic, 188}, {Automatic, 54}},
+WindowMargins->{{248, Automatic}, {Automatic, 54}},
+PrintingCopies->1,
+PrintingPageRange->{32000, 32000},
+PrintingOptions->{"Magnification"->1.,
+"PaperOrientation"->"Portrait",
+"PaperSize"->{595.1999999999999, 841.68}},
 Magnification:>1.4 Inherited,
 FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (September 21, 2016)",
 StyleDefinitions->"Default.nb"
@@ -721,20 +735,20 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[558, 20, 144, 2, 42, "Input"],
+Cell[558, 20, 144, 2, 43, "Input"],
 Cell[705, 24, 619, 14, 45, "Input"],
 Cell[1327, 40, 161, 2, 42, "Text"],
 Cell[1491, 44, 8326, 235, 466, "Text"],
 Cell[9820, 281, 1349, 34, 87, "Text"],
 Cell[11172, 317, 598, 13, 101, "Text"],
-Cell[11773, 332, 1933, 51, 233, "Text"],
-Cell[13709, 385, 829, 25, 75, "Text"],
-Cell[14541, 412, 89, 1, 72, "Input"],
-Cell[14633, 415, 1895, 58, 121, "Text"],
-Cell[16531, 475, 2313, 68, 242, "Text"],
-Cell[18847, 545, 1964, 58, 193, "Text"],
-Cell[20814, 605, 1311, 39, 208, "Text"],
-Cell[22128, 646, 2124, 58, 193, "Text"]
+Cell[11773, 332, 2123, 55, 247, "Text"],
+Cell[13899, 389, 829, 25, 75, "Text"],
+Cell[14731, 416, 89, 1, 72, "Input"],
+Cell[14823, 419, 2150, 65, 153, "Text"],
+Cell[16976, 486, 2317, 66, 213, "Text"],
+Cell[19296, 554, 1964, 58, 193, "Text"],
+Cell[21263, 614, 1311, 39, 208, "Text"],
+Cell[22577, 655, 2124, 58, 193, "Text"]
 }
 ]
 *)

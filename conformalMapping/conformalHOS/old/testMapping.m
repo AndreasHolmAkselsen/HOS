@@ -71,7 +71,7 @@ switch initialCondition
 end
 
 
-[W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta);
+[W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta,inf,M);
         
 [U,eta_x,homega,kxp] = phiComponentsConformal(phiS,eta);
 psiSConf = real(sum(homega.*exp(-1i*kxp.*x.'),1))';

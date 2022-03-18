@@ -1,5 +1,5 @@
-function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta)
-    global x k_cut M h
+function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta,h,M)
+    global x k_cut 
     assert(iscolumn(phiS) && iscolumn(eta));
     
     % indices:
@@ -17,7 +17,7 @@ function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta)
 
     H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
     if isfinite(h), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*h); end
-
+    
     for n = 1:M
         % Compute phi^(n)
         for i = 1:n-1
@@ -26,7 +26,7 @@ function [W_lin,W_nl,phiS_x,eta_x,hphi,kx] = phiComponentsHOS(phiS,eta)
         % compute new derivatives
         hphi_jn(:,n) = fft(phi_jni(:,n,1)).*(k<k_cut);% NB
         for i = 1:(M-n+1)
-            phi_jni(:,n,i+1) = ifft( H_ji(:,i+1).*hphi_jn(:,n)); % ifft(k.^i.*hphi_jn(:,n));
+            phi_jni(:,n,i+1) = ifft( H_ji(:,i+1).*hphi_jn(:,n));% ifft(k.^i.*hphi_jn(:,n)); %
         end        
         %compute W^(n)
         for i = 0:n-1

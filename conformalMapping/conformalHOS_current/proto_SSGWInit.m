@@ -1,5 +1,5 @@
 clear
-global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H
+global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H dW
 timeReached = 0;
 
 %% input
@@ -7,24 +7,24 @@ surfaceMethod = 'decayingConformal'; % Chalikov method
 % surfaceMethod = 'Taylor';  % normal HOS
 
 % Resolution
-nx__wave = 2^9;
+nx__wave = 2^9/5;
 M = 5; % solution order for Taylor method
 relTolODE = 1e-8;
 N_SSGW = 2000; % number of modes in SSGW solution
 
 % Plot & export options
-DO_EXPORT = 0;
+DO_EXPORT = 1;
 EXPORT_MAT = 0;
-exportPrefix = '';
+exportPrefix = 'vortex';
 exportPath = './figures/';
-i_detailedPlot = 6; %plot contour plots of frame i. Leave empty to skip
+i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
 
 % Wave specification
-NWaves = 1;
+NWaves = 10;
 lambda = 10;
 ka = .2; % linear wave steepness
 
-h = .1*lambda; % water depth. NB: there will be a slight differnece between H and the actual water depth when using the Chalikov method.
+h = 2*lambda; % water depth. NB: there will be a slight differnece between H and the actual water depth when using the Chalikov method.
                 % H is the water depth in the rectangular zeta-plane in this case.
 
 
@@ -40,17 +40,21 @@ nx = nx__wave*NWaves;
 
 
 % Simulation/plotting time
-NT_dt = 1;
+NT_dt = .25;
 dt = NT_dt*T;
 t_end = 9*dt;
 
     
 % stability
+DO_LIN_WAVE_INIT = false;
 Tramp = 0*1*T;
+
+% DO_LIN_WAVE_INIT = true;
+% Tramp = 1*T;
+
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
 k_cutTaylor = (M+5)*k0;
 k_cut_conformal =  (nx*pi/L)/2;
-
 
 
 
@@ -63,59 +67,85 @@ xk0 = k0.*x;
 phaseAng = 0*pi/180;
 ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
 
+%% Specify background current
+zeta_j = []; F_j = [];
+nMirror = 3; % number of times the domain is repeated in x.
+
+% single vortex
+zeta_j = [.5-.075i  ]*L;% object centre
+F_j    = [ -.2i  ];% object strength
 
 
+F_j = shiftdim(F_j,-1); zeta_j = shiftdim(zeta_j,-1);% ID_j = shiftdim(ID_j,-1);
+zeta_j = zeta_j + L*shiftdim(-nMirror:nMirror,-2);
+
+
+% % vortex/source/sink
+A_j = .5*F_j.*c_p.*abs(imag(zeta_j));
+f  = @(zz) sum(A_j.*log(zz-zeta_j) + conj(A_j.*log(conj(zz)-zeta_j)),3:4);
+dW = @(zz) sum(A_j./(zz-zeta_j) + conj(A_j./(conj(zz)-zeta_j)),3:4);
+
+% doublet
+% A_j = .5*F_j.*c_p.*abs(imag(zeta_j)).^2;
+% f = @(zz) sum(-A_j./(zz-zeta_j) - conj(A_j)./(zz-conj(zeta_j)),3:4);
+% dW = @(zz) sum(A_j./(zz-zeta_j).^2 + conj(A_j)./(zz-conj(zeta_j)).^2,3:4);
+
+if all(F_j==0), dW=@(zz)0; end
 
 %% init with SSGW:
 
-[z,dwdz,PP] = SSGW(k0*h,ka,N_SSGW);
-
-out.hk = PP(1)*PP(2);
-out.c_e = PP(4)*sqrt(g*h); % phase velocity observed from where the meam velocity at the bed is zero
-out.c_s = PP(5)*sqrt(g*h); % mean flow velocity (phase velocity in frame without mean flow)
-out.k = PP(2)/h;
-
-
-% z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
-% z = z*h;
-% dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
-% z = reshape(repmat(z,1,NWaves) + L*(floor(-NWaves/2+1):floor(NWaves/2)),[],1);
-
-z = z*h;
-z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1);
-dwdz = repmat(dwdz,NWaves,1);
-dwdz = dwdz*sqrt(g*h);
-
-n = 2*N_SSGW*NWaves;
-z_m = .5*(z(1:n-1)+z(2:n));
-dwdz0_m = .5*(dwdz(1:n-1)+dwdz(2:n))+out.c_e;
-w = [0;cumsum( dwdz0_m.*diff(z))];
-w = w-mean(w);
-
-% if z(1)<2*eps&&z(1)>-2*eps, z(1)=1i*imag(z(1));end
-z_ = [z(end)-L;z;z(1)+L]; % extend with ghost nodes
-w_ = [w(end);w;w(end)];
-eta = interp1(real(z_),imag(z_),x,'linear',nan);
-phiS = interp1(real(z_),real(w_),x,'linear',nan);
-
-
-phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
-
-% phi = ka/k0.*g/omega*sin(xk0-phaseAng)*cosh(k*(h+z))/cosh(k*h);
-u0 = ka/k0.*g/omega*k0*cos(xk0-phaseAng);
-v0 =  ka/k0.*g/omega*k0*sin(xk0-phaseAng)*tanh(k0*h);
-eta0 = ka/k0*(cos(xk0-phaseAng));
-k_cut = k_cutTaylor;
-
-% figure('color','w')
-% subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
-% subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
-% subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
-
-fftEta = fftshift(fft(eta));
-if sum(abs(fftEta(1:floor(end/4))))>.01*sum(abs(fftEta))
-    warning('Initial conition may not have been found. Verify that solution exists.')
+if DO_LIN_WAVE_INIT
+    eta = ka/k0*(cos(xk0-phaseAng));
+    phiS = ka/k0.*g/omega*sin(xk0-phaseAng);
+else
+    
+    [z,dwdz,PP] = SSGW(k0*h,ka,N_SSGW);
+    
+    out.hk = PP(1)*PP(2);
+    out.c_e = PP(4)*sqrt(g*h); % phase velocity observed from where the meam velocity at the bed is zero
+    out.c_s = PP(5)*sqrt(g*h); % mean flow velocity (phase velocity in frame without mean flow)
+    out.k = PP(2)/h;
+    
+    
+    % z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
+    % z = z*h;
+    % dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
+    % z = reshape(repmat(z,1,NWaves) + L*(floor(-NWaves/2+1):floor(NWaves/2)),[],1);
+    
+    z = z*h;
+    z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1);
+    dwdz = repmat(dwdz,NWaves,1);
+    dwdz = dwdz*sqrt(g*h);
+    
+    n = 2*N_SSGW*NWaves;
+    z_m = .5*(z(1:n-1)+z(2:n));
+    dwdz0_m = .5*(dwdz(1:n-1)+dwdz(2:n))+out.c_e;
+    w = [0;cumsum( dwdz0_m.*diff(z))];
+    w = w-mean(w);
+    
+    % if z(1)<2*eps&&z(1)>-2*eps, z(1)=1i*imag(z(1));end
+    z_ = [z(end)-L;z;z(1)+L]; % extend with ghost nodes
+    w_ = [w(end);w;w(end)];
+    eta = interp1(real(z_),imag(z_),x,'linear',nan);
+    phiS = interp1(real(z_),real(w_),x,'linear',nan);
+    
+    fftEta = fftshift(fft(eta));
+    if sum(abs(fftEta(1:floor(end/4))))>.01*sum(abs(fftEta))
+        warning('Initial conition may not have been found. Verify that solution exists.')
+    end
+    
+    % phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
+    % eta0 = ka/k0*(cos(xk0-phaseAng));
+    % % phi = ka/k0.*g/omega*sin(xk0-phaseAng)*cosh(k*(h+z))/cosh(k*h);
+    % u0 = ka/k0.*g/omega*k0*cos(xk0-phaseAng);
+    % v0 =  ka/k0.*g/omega*k0*sin(xk0-phaseAng)*tanh(k0*h);
+    % figure('color','w')
+    % subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
+    % subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
+    % subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
 end
+
+
 if strcmp(surfaceMethod,'decayingConformal')
     
     [eta_adj,H] = initializeInitCond(x,eta,h,10);
@@ -133,6 +163,7 @@ else
     [phiS_adj,eta_adj] = deal(phiS,eta);
     [tInit,yInit] = deal([]);
     H = h;
+    k_cut = k_cutTaylor;
 end
 
 % phiS_ip = phiS;
@@ -142,6 +173,8 @@ end
 tic
 [t,y] = ode45(@HOSODE45 ,[t0,t_end],[phiS_adj;eta_adj],ODEoptions);
 fprintf('CPU time: %gs\n',toc);
+
+if t(end) < t_end, return; end
 
 iNaN = find(isnan(y(:,1)),1,'first');
 if ~isempty(iNaN), t(iNaN:end)=[]; y(iNaN:end,:)=[]; end

@@ -282,23 +282,10 @@ surface velocity downstream & $0.17$\,m/s.
 \end{tabular}
 \end{center}
 
-Before considering simulations we quickly do some back-of-the-envelope estimates of the effect of such a current based on the horizontal velocities at the surface.
-Waves will be blocked from passing the recirculation zone if the still-water phase speed is less than the backflow velocity. 
-This corresponds for the values quoted above to period of $T=0.128$\,s or a wavelength of $6.7$\,cm in the downstream zone, which is on the edge of what we consider the gravity-dominated regime. 
-\autoref{fig:lambda_envelope} shows the wavelength ratio for a range of periods;
-The ratio of wavelengths is about $0.775$ for $T=1.0$\,s and $0.875$ for $T=2.0$\,s.
-This estimate does not take into account of the current variation through the water column nor the effect that the current gradients have on wave stability.
-\\
-
-\begin{figure}[h!ptb]%
-\centering
-\includegraphics[width=.4\columnwidth]{./figures/lambda_envelope.pdf}%
-\caption{Back-of-the-envelope estimate of wavelength in the recirculation zone and the downstream zone based on the estimates $U\_{min} = -0.05$\,m/s, $U_\infty=0.17$\,m/s.}%
-\label{fig:lambda_envelope}%
-\end{figure}
+\input{backOfTheEnvelope.tex}
 
 
-
+\par
 A simple model of the recirculation zone is made as 
 %We model this with 
 a single vortex combined with a uniform current, as shown in \autoref{fig:basinCurr}. 
@@ -593,7 +580,7 @@ We stress that this is a preliminary and uncertain observation, particularly lim
 
 
 \bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
-\bibliography{bib} %You need a file 'literature.bib' for this.
+\bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.
 
 
 

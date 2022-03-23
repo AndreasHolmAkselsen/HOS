@@ -1,65 +1,86 @@
 function [phiS_t,eta_t] = HOSODEeq(t,phiS,eta)
-    global nonLinRamp M surfaceMethod x k_cut timeReached t_end H dW
-    
-    if t-timeReached > 1
-        timeReached = floor(t);
-        fprintf('Time %ds reached (%.1f%%)\n',timeReached,100*timeReached/t_end);
-    end
-    g = 9.81;
-    
-    switch surfaceMethod
-        case 'Taylor'
-            wNl = nonLinRamp(t);
-            wCurr=1;
-            [w_lin,w_nl,phiS_x,eta_x] = phiComponentsHOS(phiS,eta,H,M);
-            w = w_lin+w_nl;
+global nonLinRamp surfaceMethod x k_cut timeReached t_end H dW kx DO_PADDING
+
+if t-timeReached > 1
+    timeReached = floor(t);
+    fprintf('Time %ds reached (%.1f%%)\n',timeReached,100*timeReached/t_end);
+end
+g = 9.81;
+
+switch surfaceMethod
+    case 'Taylor'
+        wNl = nonLinRamp(t);
+        wCurr = wNl;
+        [w_lin,w_nl] = phiComponentsHOS(phiS,eta);
+        
+        N = size(eta,1);
+        FFTeta = fft(eta);
+        dWS = dW(x + 1i*eta);
+        if DO_PADDING
+            Nd = N*(4+1)/2;
+            w_lin = ifftPad(fft(w_lin),Nd);
+            w_nl = ifftPad(fft(w_nl),Nd);
+            eta = ifftPad(FFTeta,Nd);
+            dWS = ifftPad(fft(dWS),Nd);
+        else
+            Nd = N;
+        end
+        eta_x  =  ifftPad(1i*kx.*FFTeta,Nd);
+        phiS_x =  ifftPad(1i*kx.*fft(phiS),Nd);
+        w = w_lin+w_nl;
+        
+        Phi_x =  real(dWS);
+        Phi_z = -imag(dWS);
+        eta_t  =   w_lin + wNl.*(  w_nl          + eta_x.^2.*w - phiS_x.*eta_x ) - wCurr.*(Phi_x.*eta_x-Phi_z);
+        phiS_t = - g*eta + wNl.*( -.5*phiS_x.^2  + .5*(1+eta_x.^2).*w.^2 )...
+            - wCurr.*( Phi_x.*phiS_x + .5*Phi_x.^2 + .5*Phi_z.^2 );
+        
+        % Lowpass filter and unpad:
+        if mod(Nd,2)==0
+            kFilter = [0:Nd/2-1,Nd/2:-1:1]'*kx(2)<k_cut;
+        else
+            kFilter = [0:(Nd-1)/2, (Nd-1)/2:-1:1]'*kx(2)<k_cut;
+        end
+        eta_t = real(ifftPad(kFilter.*fft(eta_t),N));
+        phiS_t = real(ifftPad(kFilter.*fft(phiS_t),N));
+        
+    case 'decayingConformal'
+        nx = numel(x);
+        kx = getKx(x); % x->xi
+        k = abs(kx);
+        if ~isfinite(H), H = realmax; end
+        Lsin = -2./(exp(2*kx.*H)-1); Lsin(1) = 1;
+        Lcos = 2./(exp(2*kx.*H)+1);
+        FFTeta = fft(eta).*(k<k_cut);
+        df =  1 - ifft( kx.*FFTeta.*Lsin);
+        if any(real(df) < 0)% downward mapping -> wave breaking
+            [eta_t,phiS_t] = deal(nan(size(k)));  return
+        end
+        JInv = abs(df).^(-2);
+        dww = ifft(1i.*kx.*fft(phiS).*(k<k_cut).*Lcos);
+        
+        if strcmp(func2str(dW),'@(zz)0') % re-state for efficiency
+            FFTb = fft(  -JInv.*imag(dww) ).*(k<k_cut);
+            f0 =  1i*sum(imag(FFTb.*conj(FFTeta)).*kx./(nx*sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
+            tf =  1i*f0 + 1i*ifft(FFTb.*Lsin.*(k~=0));
+            eta_t = imag(tf.*df);
+            phiS_t = real(tf).*real(dww) - .5*JInv.*real(dww.^2) - g*eta;
+        else
+            z = x + 1i*ifft(FFTeta.*Lsin,[],1);%+1i*FFTeta(1)/nx;
+            dWS = dW(z);
+            FFTb = fft(  -JInv.*(imag(dww)+imag(dWS.*df)) ).*(k<k_cut);
+            f0 =  1i*sum(imag(FFTb.*conj(FFTeta)).*kx./(nx*sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
+            tf =  1i*f0 + 1i*ifft(FFTb.*Lsin.*(k~=0));
+            eta_t = imag(tf.*df);
+            phiS_t = real(tf).*real(dww) - .5*JInv.*real(dww.^2) - g*eta - real(dWS./conj(df)).*real(dww) - .5*abs(dWS).^2;
             
-            dWS = dW(x + 1i*eta);
-            Phi_x =  real(dWS);
-            Phi_z = -imag(dWS);
-            eta_t  =   w_lin + wNl.*(  w_nl          + eta_x.^2.*w - phiS_x.*eta_x ) - wCurr.*(Phi_x.*eta_x-Phi_z);
-            phiS_t = - g*eta + wNl.*( -.5*phiS_x.^2  + .5*(1+eta_x.^2).*w.^2 )...
-                - wCurr.*( Phi_x.*phiS_x + .5*Phi_x.^2 + .5*Phi_z.^2 );
-%             eta_t  =   w_lin + wNl.*(  w_nl          + eta_x.^2.*w - phiS_x.*eta_x );
-%             phiS_t = - g*eta + wNl.*( -.5*phiS_x.^2  + .5*(1+eta_x.^2).*w.^2 );            
+            %                 phiS_t_ = real(dww.*tf) - .5*abs(dww./df+dWS).^2 - g*eta;
+            %                 max(abs(phiS_t-phiS_t_))
+        end
+        
+        
+end
 
-        case 'decayingConformal'  
-            nx = numel(x);
-            kx = getKx(x); % x->xi
-            k = abs(kx);
-            if ~isfinite(H), H = realmax; end
-            Lsin = -2./(exp(2*kx.*H)-1); Lsin(1) = 1;
-            Lcos = 2./(exp(2*kx.*H)+1);
-            FFTeta = fft(eta).*(k<k_cut);          
-            df =  1 - ifft( kx.*FFTeta.*Lsin);
-            if any(real(df) < 0)% downward mapping -> wave breaking
-                [eta_t,phiS_t] = deal(nan(size(k)));  return
-            end
-            JInv = abs(df).^(-2);
-            dww = ifft(1i.*kx.*fft(phiS).*(k<k_cut).*Lcos);
-
-            if strcmp(func2str(dW),'@(zz)0') % re-state for efficiency
-                FFTb = fft(  -JInv.*imag(dww) ).*(k<k_cut);
-                f0 =  1i*sum(imag(FFTb.*conj(FFTeta)).*kx./(nx*sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
-                tf =  1i*f0 + 1i*ifft(FFTb.*Lsin.*(k~=0));
-                eta_t = imag(tf.*df);
-                phiS_t = real(tf).*real(dww) - .5*JInv.*real(dww.^2) - g*eta;
-            else
-                z = x + 1i*ifft(FFTeta.*Lsin,[],1);%+1i*FFTeta(1)/nx;
-                dWS = dW(z);
-                FFTb = fft(  -JInv.*(imag(dww)+imag(dWS.*df)) ).*(k<k_cut);
-                f0 =  1i*sum(imag(FFTb.*conj(FFTeta)).*kx./(nx*sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0
-                tf =  1i*f0 + 1i*ifft(FFTb.*Lsin.*(k~=0));
-                eta_t = imag(tf.*df);
-                phiS_t = real(tf).*real(dww) - .5*JInv.*real(dww.^2) - g*eta - real(dWS./conj(df)).*real(dww) - .5*abs(dWS).^2;
-                
-%                 phiS_t_ = real(dww.*tf) - .5*abs(dww./df+dWS).^2 - g*eta;
-%                 max(abs(phiS_t-phiS_t_))    
-            end 
-            
-
-    end
-         
 end
 
 

@@ -6,9 +6,10 @@
 % hf(1).Visible = 'on';
 % 
 
-hf(1) = openfig(['./figures/vortexdecayingConformalka0p2_M5_h20p00_Nw10_dt0p25T_nx1024.fig']);
-hf(2) = openfig(['./figures/vortexTaylorka0p2_M5_h20p00_Nw10_dt0p25T_nx2560.fig'],'invisible');
-legendNames = {'conformal','Taylor'};
+hf(1) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw10_dt2p5T_nx1024_pad0_ikCut5.fig']);
+hf(2) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw10_dt2p5T_nx1024_pad1_ikCut5.fig'],'invisible');
+hf(3) = openfig(['./figures/SFo_ka0p4_M5_h100p00_nx1024_ikCut50.fig'],'invisible');
+legendNames = {'unpadded','padded','SFo'};
 
 
 lineStyles = {'-','--',':'};
@@ -21,22 +22,14 @@ for iF = 2:numel(hf)
     for i = 1:length(ha0)
         hl = copyobj(ha(i).Children,ha0(i));
         set(hl,'LineStyle',lineStyles{iF},'Color',colors{iF},'LineWidth',1);
-        ha(i).Children.LineWidth = 1;
     end
     close(hf(iF));
 end
-legend(ha0(1),legendNames)
-% 
-% haAHA = hfAHA.Children;
-% haSFo = hfSFo.Children;
-% 
-% for i = 1:length(haSFo)
-%    hl = copyobj(haAHA(i).Children,haSFo(i));
-%    set(hl,'LineStyle','--','Color','r','LineWidth',1);
-%    haAHA(i).Children.LineWidth = 1;
-% end
-% close(hfAHA)
-% legend(haSFo(1),{'SFo','AHA'})
+legend(ha0(end),legendNames)
 
-% savefig(hfSFo,['./HOS_SFo_curr/figures/AHAvsSFo_',name])
-% export_fig(hfSFo,['./HOS_SFo_curr/figures/AHAvsSFo_',name],'-pdf')
+
+return
+
+exportPath = ['./figures/vortex'];
+savefig(hf(1),exportPath)
+export_fig(hf(1),exportPath,'-pdf','-png')

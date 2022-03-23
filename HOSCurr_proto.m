@@ -19,6 +19,7 @@ exportPath = './HOS_SFo_curr/figures/';
 NWaves = 10;
 lambda = 10;
 ka = .2;
+h = inf;
 
 L = NWaves*lambda;
 initialCondition = 'linearWave'; % {'linearWave','Stokes3','wavePacket'} 

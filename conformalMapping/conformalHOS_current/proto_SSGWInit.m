@@ -1,32 +1,32 @@
 clear
-global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H dW
+global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H dW DO_PADDING kx
 timeReached = 0;
 
 %% input
-surfaceMethod = 'decayingConformal'; % Chalikov method
-% surfaceMethod = 'Taylor';  % normal HOS
+% surfaceMethod = 'decayingConformal'; % Chalikov method
+surfaceMethod = 'Taylor';  % normal HOS
+DO_PADDING = true;
 
 % Resolution
-nx__wave = 2^9/5;
+nx__wave = 2^10/10;
 M = 5; % solution order for Taylor method
-relTolODE = 1e-8;
+relTolODE = 1e-4;% 1e-8;
 N_SSGW = 2000; % number of modes in SSGW solution
 
 % Plot & export options
 DO_EXPORT = 1;
-EXPORT_MAT = 0;
-exportPrefix = 'vortex';
+EXPORT_MAT = 1;
+PLOT_CURRENT = false;
+exportPrefix = '';
 exportPath = './figures/';
 i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
 
 % Wave specification
 NWaves = 10;
 lambda = 10;
-ka = .2; % linear wave steepness
+ka = .4; % linear wave steepness
 
-h = 2*lambda; % water depth. NB: there will be a slight differnece between H and the actual water depth when using the Chalikov method.
-                % H is the water depth in the rectangular zeta-plane in this case.
-
+h = 100;%2*lambda; % water depth. 
 
 % some computations...
 L = NWaves*lambda;
@@ -40,20 +40,21 @@ nx = nx__wave*NWaves;
 
 
 % Simulation/plotting time
-NT_dt = .25;
+NT_dt = 2.5;
 dt = NT_dt*T;
 t_end = 9*dt;
 
     
 % stability
-DO_LIN_WAVE_INIT = false;
-Tramp = 0*1*T;
+% DO_LIN_WAVE_INIT = false;
+% Tramp = 0*1*T;
 
-% DO_LIN_WAVE_INIT = true;
-% Tramp = 1*T;
+DO_LIN_WAVE_INIT = true;
+Tramp = 10*T;
 
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
-k_cutTaylor = (M+5)*k0;
+% k_cutTaylor = (M+5)*k0;
+k_cutTaylor = 50*(2*pi/L);
 k_cut_conformal =  (nx*pi/L)/2;
 
 
@@ -73,7 +74,7 @@ nMirror = 3; % number of times the domain is repeated in x.
 
 % single vortex
 zeta_j = [.5-.075i  ]*L;% object centre
-F_j    = [ -.2i  ];% object strength
+F_j    = 0*[ -.2i  ];% object strength
 
 
 F_j = shiftdim(F_j,-1); zeta_j = shiftdim(zeta_j,-1);% ID_j = shiftdim(ID_j,-1);
@@ -82,7 +83,7 @@ zeta_j = zeta_j + L*shiftdim(-nMirror:nMirror,-2);
 
 % % vortex/source/sink
 A_j = .5*F_j.*c_p.*abs(imag(zeta_j));
-f  = @(zz) sum(A_j.*log(zz-zeta_j) + conj(A_j.*log(conj(zz)-zeta_j)),3:4);
+W  = @(zz) sum(A_j.*log(zz-zeta_j) + conj(A_j.*log(conj(zz)-zeta_j)),3:4);
 dW = @(zz) sum(A_j./(zz-zeta_j) + conj(A_j./(conj(zz)-zeta_j)),3:4);
 
 % doublet
@@ -91,6 +92,41 @@ dW = @(zz) sum(A_j./(zz-zeta_j) + conj(A_j./(conj(zz)-zeta_j)),3:4);
 % dW = @(zz) sum(A_j./(zz-zeta_j).^2 + conj(A_j)./(zz-conj(zeta_j)).^2,3:4);
 
 if all(F_j==0), dW=@(zz)0; end
+
+
+
+if PLOT_CURRENT && ~isempty(F_j)
+    z = 0:dx:.3*L; z = [-z(end:-1:2),z];
+    hf_c = figure('color','w'); ha = gca;
+    % plot velocity intensity |U|
+    absU = abs(dW(x+1i*z));
+    ULim = 2.5*max(abs(dW(x)));
+    hIm = imagesc(x',z',absU',[0,ULim]); 
+    hIm.AlphaData = (absU<ULim)';
+    % plot streamlines
+    hold on, axis equal xy
+    contour(x',z',imag(W(x+1i*z))',20,'k');
+    plot(ha.XLim,[0,0],'k')
+    ylim([z(1),0])
+    
+    % add quiver plot
+    zz_ip = linspace(x(1),x(end),10) + 1i*linspace(z(1),z(end),10)';
+    dW_ip = dW(zz_ip);
+    dW_ip(abs(dW_ip)>ULim) = nan;
+    quiver(real(zz_ip),imag(zz_ip),real(dW_ip),-imag(dW_ip),'r');
+    
+    ha.Visible='off';
+%     fprintf('c_p = %.3gm/s, max |U(0)| = %.3gm/s, fraction: %.3g\n',c_p,max(abs(dW(x))),max(abs(dW(x)))/c_p)
+    drawnow
+    
+    if DO_EXPORT
+        fileName = ['curr_',exportPrefix];
+        savefig(hf_c,[exportPath,'/',fileName]);
+        export_fig(hf_c,[exportPath,'/',fileName],'-pdf');
+    end
+    
+end
+
 
 %% init with SSGW:
 
@@ -101,10 +137,7 @@ else
     
     [z,dwdz,PP] = SSGW(k0*h,ka,N_SSGW);
     
-    out.hk = PP(1)*PP(2);
-    out.c_e = PP(4)*sqrt(g*h); % phase velocity observed from where the meam velocity at the bed is zero
-    out.c_s = PP(5)*sqrt(g*h); % mean flow velocity (phase velocity in frame without mean flow)
-    out.k = PP(2)/h;
+
     
     
     % z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
@@ -112,10 +145,17 @@ else
     % dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
     % z = reshape(repmat(z,1,NWaves) + L*(floor(-NWaves/2+1):floor(NWaves/2)),[],1);
     
-    z = z*h;
+    if isinf(PP(1)), L_scale = 1/k0; else, L_scale = h; end
+    
+    
+    out.c_e = PP(4)*sqrt(g*L_scale); % phase velocity observed from where the meam velocity at the bed is zero
+    out.c_s = PP(5)*sqrt(g*L_scale); % mean flow velocity (phase velocity in frame without mean flow)
+    out.k = PP(2)/L_scale;
+    z = z*L_scale;
+    
     z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1);
     dwdz = repmat(dwdz,NWaves,1);
-    dwdz = dwdz*sqrt(g*h);
+    dwdz = dwdz*sqrt(g*L_scale);
     
     n = 2*N_SSGW*NWaves;
     z_m = .5*(z(1:n-1)+z(2:n));
@@ -150,8 +190,8 @@ if strcmp(surfaceMethod,'decayingConformal')
     
     [eta_adj,H] = initializeInitCond(x,eta,h,10);
     k_cut = k_cut_conformal;
-    f = fConformal(x,eta_adj,H,inf);
-    phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f),'linear',nan);
+    W = fConformal(x,eta_adj,H,inf);
+    phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(W),'linear',nan);
     
 %     figure('color','w');
 %     f0 = fConformal(x,eta,H,inf);
@@ -165,7 +205,7 @@ else
     H = h;
     k_cut = k_cutTaylor;
 end
-
+kx = getKx(x);
 % phiS_ip = phiS;
 % eta_ip = eta;
 
@@ -174,7 +214,7 @@ tic
 [t,y] = ode45(@HOSODE45 ,[t0,t_end],[phiS_adj;eta_adj],ODEoptions);
 fprintf('CPU time: %gs\n',toc);
 
-if t(end) < t_end, return; end
+% if t(end) < t_end, return; end
 
 iNaN = find(isnan(y(:,1)),1,'first');
 if ~isempty(iNaN), t(iNaN:end)=[]; y(iNaN:end,:)=[]; end
@@ -189,7 +229,7 @@ phiS_ip = interp1(t,phiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
 if strcmp(surfaceMethod,'decayingConformal')
-    f = fConformal(x,eta_ip,H,k_cut);
+    W = fConformal(x,eta_ip,H,k_cut);
         
 %     fH = fConformal(x-1i*H,eta_ip,H,k_cut);
 %     -imag(fH(1,:))
@@ -205,21 +245,20 @@ if strcmp(surfaceMethod,'decayingConformal')
         haCont(1) = subplot(2,1,1);
         contour(real(f2),imag(f2),xi2,30,'r'); hold on
         contour(real(f2),imag(f2),sig2,'b');
-        plot([f(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
+        plot([W(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
 
         haCont(2) = subplot(2,1,2);
-        kx = getKx(x);
         omega = ifft(  fft(phiS_ip(:,it)).*exp(-sig2.*kx).*2./(exp(2*kx.*H)+1).*(abs(kx)<k_cut));
         contourf(real(f2),imag(f2),real(omega),20); hold on
         contour(real(f2),imag(f2),imag(omega),20,'k')
-        plot([f(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
+        plot([W(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
         axis(haCont,'equal','off')
         
         if isfinite(H), title(haCont(1), sprintf('H[\\zeta] = %.4g, H[z] = %.4g',H,-imag(f2(1,1)))); end
         
     end
 
-    x_ip = real(f);
+    x_ip = real(W);
 %     eta_ip = imag(f); %per definition
 else
     x_ip = x+0*eta_ip;
@@ -242,7 +281,7 @@ xlabel(ha(nPannel),'x [m]','fontsize',11)
 xlim(ha,x([1,end]));%set(ha,'XLim',x([1,end]));
 
     
-fileName = sprintf('%s%ska%.2g_M%d_h%.2f_Nw%d_dt%.3gT_nx%d',exportPrefix,surfaceMethod,ka,M,h,NWaves,NT_dt,nx); fileName(fileName=='.')='p';
+fileName = sprintf('%s%ska%.2g_M%d_h%.2f_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%d',exportPrefix,surfaceMethod,ka,M,h,NWaves,NT_dt,nx,DO_PADDING,round(k_cut/k0)); fileName(fileName=='.')='p';
 if DO_EXPORT
     copyfile('./proto_SSGWInit.m',[exportPath,'/script_',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);

@@ -18,8 +18,8 @@ exportPath = './figures/';
 NWaves = 6;
 lambda = 10;
 ka = .1;%.25;
-% surfaceMethod = 'decayingConformal'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
-surfaceMethod = 'Taylor'; % 'phiS_x', 'phi_x', 'Taylor', 'decayingConformal'
+% surfaceMethod = 'Chalikov'; % 'phiS_x', 'phi_x', 'Taylor', 'Chalikov'
+surfaceMethod = 'Taylor'; % 'phiS_x', 'phi_x', 'Taylor', 'Chalikov'
 H = 10*lambda;
 
 L = NWaves*lambda;
@@ -81,7 +81,7 @@ phaseAng = 30*pi/180;
 
 phiS0 = ka.*sqrt(g*k0)/k0^2*(sin(xk0-phaseAng));
 eta0 = ka/k0*(cos(xk0-phaseAng));
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     eta_adj = initializeInitCond(x,eta0,5);
     xi = x; kx = getKx(xi);
     k_cut = max(kx)/2;
@@ -121,7 +121,7 @@ nPannel = length(t_ip);
 phiS_ip = interp1(t,phiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     xi = x;
     kx = getKx(x);
     f =  xi + 2i*fft(conj(fft(eta_ip,[],1)/nx).*(abs(kx)<k_cut&kx>0),[],1); 

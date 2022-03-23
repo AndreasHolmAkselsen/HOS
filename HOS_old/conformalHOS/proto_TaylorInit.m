@@ -3,7 +3,7 @@ global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H
 timeReached = 0;
 
 %% input
-surfaceMethod = 'decayingConformal'; % Chalikov method
+surfaceMethod = 'Chalikov'; % Chalikov method
 % surfaceMethod = 'Taylor';  % normal HOS
 
 % Resolution
@@ -72,13 +72,13 @@ phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
 eta0 = ka/k0*(cos(xk0-phaseAng));
 k_cut = k_cutTaylor;
 
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     if T_init>0
         surfaceMethod = 'Taylor'; H = h;
         tic
         [tInit,yInit] = ode45(@HOSODE45 ,[t0,t0+T_init],[phiS0;eta0],ODEoptions);
         fprintf('CPU time init stage: %gs\n',toc);
-        surfaceMethod = 'decayingConformal';
+        surfaceMethod = 'Chalikov';
         phiS = yInit(end,1:nx).'; eta = yInit(end,nx+1:2*nx).';
         t0 = tInit(end);
     else
@@ -124,7 +124,7 @@ nPannel = length(t_ip);
 phiS_ip = interp1(t,phiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     f = fConformal(x,eta_ip,H,k_cut);
         
 %     fH = fConformal(x-1i*H,eta_ip,H,k_cut);

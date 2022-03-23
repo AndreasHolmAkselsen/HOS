@@ -3,19 +3,19 @@ global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H dW DO_PADDING kx
 timeReached = 0;
 
 %% input
-% surfaceMethod = 'decayingConformal'; % Chalikov method
+% surfaceMethod = 'Chalikov'; % Chalikov method
 surfaceMethod = 'Taylor';  % normal HOS
-DO_PADDING = true;
+DO_PADDING = 1;
 
 % Resolution
-nx__wave = 2^10/10;
+nx__wave = 2^8/10;
 M = 5; % solution order for Taylor method
 relTolODE = 1e-4;% 1e-8;
 N_SSGW = 2000; % number of modes in SSGW solution
 
 % Plot & export options
 DO_EXPORT = 1;
-EXPORT_MAT = 1;
+EXPORT_MAT = 0;
 PLOT_CURRENT = false;
 exportPrefix = '';
 exportPath = './figures/';
@@ -24,7 +24,7 @@ i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
 % Wave specification
 NWaves = 10;
 lambda = 10;
-ka = .4; % linear wave steepness
+ka = .3; % linear wave steepness
 
 h = 100;%2*lambda; % water depth. 
 
@@ -40,21 +40,22 @@ nx = nx__wave*NWaves;
 
 
 % Simulation/plotting time
-NT_dt = 2.5;
+NT_dt = 5;
 dt = NT_dt*T;
 t_end = 9*dt;
 
     
 % stability
 % DO_LIN_WAVE_INIT = false;
-% Tramp = 0*1*T;
+% Tramp = 0;
 
 DO_LIN_WAVE_INIT = true;
-Tramp = 10*T;
+Tramp = 1*T;
 
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
 % k_cutTaylor = (M+5)*k0;
-k_cutTaylor = 50*(2*pi/L);
+% k_cutTaylor = 50*(2*pi/L);
+k_cutTaylor = inf;
 k_cut_conformal =  (nx*pi/L)/2;
 
 
@@ -186,7 +187,7 @@ else
 end
 
 
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     
     [eta_adj,H] = initializeInitCond(x,eta,h,10);
     k_cut = k_cut_conformal;
@@ -228,7 +229,7 @@ nPannel = length(t_ip);
 phiS_ip = interp1(t,phiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     W = fConformal(x,eta_ip,H,k_cut);
         
 %     fH = fConformal(x-1i*H,eta_ip,H,k_cut);

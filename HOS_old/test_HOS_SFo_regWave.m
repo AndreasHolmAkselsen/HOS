@@ -7,9 +7,9 @@ exportPrefix = 'SFo_';
 exportPath = 'C:\gits\wave-current\conformalMapping\conformalHOS_current\figures\';
 
 
-ka = 0.4;
+ka = 0.3;
 M = 5;
-nwt.sim.Nx = 2^10;
+nwt.sim.Nx = 2^8;
 L = 100;
 lambda = 10;
 h = 100;%2*lambda; % 5
@@ -25,16 +25,18 @@ assert(mod(nk0,1)==0);
 T = 2*pi/sqrt(9.81*k*tanh(k*h));
 fprintf('tanh(k*h) = %g.\n',tanh(k*h))
 
-nwt.sim.dt = 2.5*T;
-nwt.sim.tMax = 9*nwt.sim.dt;
+dt = 5*T;
+KEEP_ALL_TIMES = true;
+nwt.sim.tMax = 9*dt;
 
 nwt.solver.LPfilter.type = 'cut'; %'power'
 % nwt.solver.LPfilter.kCutMode = nk0*(5+M);
-nwt.solver.LPfilter.kCutMode = 50; % from figure caption
+% nwt.solver.LPfilter.kCutMode = 50; % from figure caption
+nwt.solver.LPfilter.kCutMode = 1e12; %i.e., inf
 nwt.solver.rTol = 1e-4;%1e-8;
 nwt.solver.ramp.type = 'exp';
 % ramp: F=1-exp(-(t/Tramp)^nRamp);
-nwt.solver.ramp.Ta = 10*T; % TRamp
+nwt.solver.ramp.Ta = 1*T; % TRamp
 nwt.solver.ramp.n = 2; % nRamp
 
 %% Run
@@ -49,29 +51,40 @@ nwt.init.waveComp{1}.nk0 = nk0;
 nwt.init.waveComp{1}.a = ka/k;
 nwt.init.waveComp{1}.phaseRad = phaseRad;
 
+if KEEP_ALL_TIMES
+    nwt.sim.dt = 0;
+else
+    nwt.sim.dt = dt;
+end
+
 tic
 res=runNWT(nwt);
 CPUTime = toc;
 fprintf('CPU time (SFo): %gs\n',CPUTime);
 
+
 %%  Plot results
-np = length(res.t);
-% figure('color','w','Position',[527  0  1056  1000],'name',sprintf('SFo ka=%.3g,M=%d,CPU=%.3g',ka,M,CPUTime)); hold on;
-% for iP = 1:np
-%     subplot(np,1,np-iP+1), plot(res.x,res.eta(iP,:),'k') ;
-%     ylabel(sprintf('t = %.2fs',res.t(iP)))
-% end
+np = floor(nwt.sim.tMax/dt);
+if KEEP_ALL_TIMES
+    t_ip = linspace(0,res.t(end),np)';
+    eta  = interp1(res.t,res.eta ,t_ip);
+    t = t_ip; 
+    dt = t(end)/(np-1);
+else
+    eta = res.eta; t = res.t; 
+end
+
 
 [hf, ha] = multi_axes(np,1,figure('color','w','position',[527  0  1056  1000],'name',sprintf('SFo ka=%.3g,M=%d',ka,M)),[],[0,0]);
 ha = flipud(ha);
 set([ha(2:np).XAxis],'Visible','off');
 for iP=1:np
-    plot(ha(iP),res.x,res.eta(iP,:),'k');
-    ylabel(ha(iP),sprintf('%.1fs',res.t(iP)));
+    plot(ha(iP),res.x,eta(iP,:),'k');
+    ylabel(ha(iP),sprintf('%.1fs',t(iP)));
     grid(ha(iP),'on');
 end
 linkaxes(ha)
-ylim(max(res.eta(:))*[-1,1])
+ylim(max(eta(:))*[-1,1])
 xlabel(ha(np),'x [m]','fontsize',11)
 
 if DO_EXPORT

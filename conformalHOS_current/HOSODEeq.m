@@ -44,7 +44,7 @@ switch surfaceMethod
         eta_t = real(ifftPad(kFilter.*fft(eta_t),N));
         phiS_t = real(ifftPad(kFilter.*fft(phiS_t),N));
         
-    case 'decayingConformal'
+    case 'Chalikov'
         nx = numel(x);
         kx = getKx(x); % x->xi
         k = abs(kx);

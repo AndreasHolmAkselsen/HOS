@@ -3,7 +3,7 @@ global M x k_cut nonLinRamp  surfaceMethod timeReached t_end H
 timeReached = 0;
 
 %% input
-surfaceMethod = 'decayingConformal'; % Chalikov method
+surfaceMethod = 'Chalikov'; % Chalikov method
 % surfaceMethod = 'Taylor';  % normal HOS
 
 % Resolution
@@ -116,7 +116,7 @@ fftEta = fftshift(fft(eta));
 if sum(abs(fftEta(1:floor(end/4))))>.01*sum(abs(fftEta))
     warning('Initial conition may not have been found. Verify that solution exists.')
 end
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     
     [eta_adj,H] = initializeInitCond(x,eta,h,10);
     k_cut = k_cut_conformal;
@@ -155,7 +155,7 @@ nPannel = length(t_ip);
 phiS_ip = interp1(t,phiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
-if strcmp(surfaceMethod,'decayingConformal')
+if strcmp(surfaceMethod,'Chalikov')
     f = fConformal(x,eta_ip,H,k_cut);
         
 %     fH = fConformal(x-1i*H,eta_ip,H,k_cut);

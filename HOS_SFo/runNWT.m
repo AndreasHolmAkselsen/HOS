@@ -21,9 +21,11 @@ switch nwt.solver.type
                 dx=Lx/Nx;
                 x=(dx*(0:(Nx-1)));
                 
-                %Time integration parameters
-                dt=nwt.sim.dt;
-                tMax=nwt.sim.tMax;
+                if nwt.sim.dt ~= 0
+                    returnTimes = 0:nwt.sim.dt:nwt.sim.tMax;
+                else
+                    returnTimes = [0,nwt.sim.tMax];
+                end
                 
                 %Initialize surface elevation and potential with linear solution
                 eta0=zeros(Nx,1);
@@ -95,7 +97,7 @@ switch nwt.solver.type
                     case 'exp'
                         TRamp=nwt.solver.ramp.Ta;
                         nRamp=nwt.solver.ramp.n;
-                        [t,Y]=ode45(@(t,y)detaPhiS_dt_ExpRamp(t,y,k,M,h,HLP,TRamp,nRamp),0:dt:tMax,y0,options);
+                        [t,Y]=ode45(@(t,y)detaPhiS_dt_ExpRamp(t,y,k,M,h,HLP,TRamp,nRamp),returnTimes,y0,options);
                     otherwise
                         error('a:a','Unknown ramp type %s\n',nwt.hos.ramp.type)
                 end

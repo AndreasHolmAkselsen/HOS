@@ -11,7 +11,7 @@ kx = getKx(xi);
 
 x = x_target;
 nx = numel(x);
-L = (x(2)-x(1))*nx; assert(all(diff(x,2)==0));
+L = (x(2)-x(1))*nx; assert(all(abs(diff(x,2))<1e-12*x(end)));
 % H = min(H,realmax);
 for i = 1:nIt
     FFTeta = fft(eta);

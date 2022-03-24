@@ -7,10 +7,12 @@ k = abs(kx);
 
 FFTeta = fft(eta,[],1);
 if isfinite(H)
-    Lsin = -2./(exp((2*kx.*H))-1-2*(k==0));% argH(1) = 0;
-    z = zeta + 1i*ifft(FFTeta.*Lsin.*exp(-kx.*imag(zeta)).*(k<k_cut),[],1);%+1i*FFTeta(1)/nx;
+%     Lsin = -2./(exp(2*kx.*H)-1-2*(k==0));
+%     z = zeta + 1i*ifft(FFTeta.*Lsin.*exp(-kx.*imag(zeta)).*(k<k_cut),[],1);
+    LsinExp = -2./(exp(kx.*(2*H+imag(zeta)))-(1+2*(k==0)).*exp(kx.*imag(zeta)));
+    z = zeta + 1i*ifft(FFTeta.*LsinExp.*(k<k_cut),[],1);
 else
-    z =  zeta + 2i*fft(conj(FFTeta/nx).*exp(kx.*imag(zeta)).*(k<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
+    z =  zeta + 2i*fft(conj(FFTeta/nx).*exp(kx.*imag(zeta).*(kx>0)).*(k<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
 end
 
 % nx = numel(xi);

@@ -5,13 +5,13 @@ timeReached = 0;
 %% input
 % surfaceMethod = 'Chalikov'; % Chalikov method
 surfaceMethod = 'Taylor';  % normal HOS
-DO_PADDING = 1;
+DO_PADDING = 0;
 
 % Resolution
-nx__wave = 2^8/10;
+nx__wave = 2^9;
 M = 5; % solution order for Taylor method
 relTolODE = 1e-4;% 1e-8;
-N_SSGW = 2000; % number of modes in SSGW solution
+N_SSGW = 2^12; % number of modes in SSGW solution
 
 % Plot & export options
 DO_EXPORT = 1;
@@ -19,14 +19,14 @@ EXPORT_MAT = 0;
 PLOT_CURRENT = false;
 exportPrefix = '';
 exportPath = './figures/';
-i_detailedPlot = 5; %plot contour plots of frame i. Leave empty to skip
+i_detailedPlot = []; %plot contour plots of frame i. Leave empty to skip
 
 % Wave specification
-NWaves = 10;
+NWaves = 1;
 lambda = 10;
-ka = .3; % linear wave steepness
+ka = .4; % linear wave steepness
 
-h = 100;%2*lambda; % water depth. 
+h = 100;%.2*lambda; % water depth. 
 
 % some computations...
 L = NWaves*lambda;
@@ -40,23 +40,23 @@ nx = nx__wave*NWaves;
 
 
 % Simulation/plotting time
-NT_dt = 5;
+NT_dt = 1;
 dt = NT_dt*T;
 t_end = 9*dt;
 
     
 % stability
-% DO_LIN_WAVE_INIT = false;
-% Tramp = 0;
+DO_LIN_WAVE_INIT = false;
+Tramp = 0;
 
-DO_LIN_WAVE_INIT = true;
-Tramp = 1*T;
+% DO_LIN_WAVE_INIT = true;
+% Tramp = 1*T;
 
 nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
-% k_cutTaylor = (M+5)*k0;
+k_cutTaylor = (M+5)*k0;
 % k_cutTaylor = 50*(2*pi/L);
-k_cutTaylor = inf;
-k_cut_conformal =  (nx*pi/L)/2;
+% k_cutTaylor = inf;
+k_cut_conformal = .25; % dim.less, =.25 in Chalikov
 
 
 
@@ -137,22 +137,16 @@ if DO_LIN_WAVE_INIT
 else
     
     [z,dwdz,PP] = SSGW(k0*h,ka,N_SSGW);
-    
-
-    
-    
-    % z = [ z(N_SSGW+1:end)-2*pi/(k0*h) ; z(1:N_SSGW) ];
-    % z = z*h;
-    % dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
-    % z = reshape(repmat(z,1,NWaves) + L*(floor(-NWaves/2+1):floor(NWaves/2)),[],1);
-    
-    if isinf(PP(1)), L_scale = 1/k0; else, L_scale = h; end
-    
-    
+        
+    if isinf(PP(1)), L_scale = 1/k0; else, L_scale = h; end    
     out.c_e = PP(4)*sqrt(g*L_scale); % phase velocity observed from where the meam velocity at the bed is zero
     out.c_s = PP(5)*sqrt(g*L_scale); % mean flow velocity (phase velocity in frame without mean flow)
     out.k = PP(2)/L_scale;
     z = z*L_scale;
+    
+    % to move wave to centre (optional)
+    z = [ z(N_SSGW+1:end)-lambda/2 ; z(1:N_SSGW)+lambda/2 ];
+    dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
     
     z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1);
     dwdz = repmat(dwdz,NWaves,1);
@@ -175,15 +169,15 @@ else
         warning('Initial conition may not have been found. Verify that solution exists.')
     end
     
-    % phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
-    % eta0 = ka/k0*(cos(xk0-phaseAng));
-    % % phi = ka/k0.*g/omega*sin(xk0-phaseAng)*cosh(k*(h+z))/cosh(k*h);
-    % u0 = ka/k0.*g/omega*k0*cos(xk0-phaseAng);
-    % v0 =  ka/k0.*g/omega*k0*sin(xk0-phaseAng)*tanh(k0*h);
-    % figure('color','w')
-    % subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
-    % subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
-    % subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('\phi^S'); grid on
+%     phiS0 = ka/k0.*g/omega*sin(xk0-phaseAng);
+%     eta0 = ka/k0*(cos(xk0-phaseAng));
+%     % phi = ka/k0.*g/omega*sin(xk0-phaseAng)*cosh(k*(h+z))/cosh(k*h);
+%     u0 = ka/k0.*g/omega*k0*cos(xk0-phaseAng);
+%     v0 =  ka/k0.*g/omega*k0*sin(xk0-phaseAng)*tanh(k0*h);
+%     figure('color','w')
+%     subplot(311), plot(x,eta,'-',x,eta0,'--');ylabel('\eta'); grid on
+%     subplot(312), plot(x,phiS,'-',x,phiS0,'--');ylabel('\phi^S'); grid on
+%     subplot(313), plot(x,u0,'-r',x,v0,'-b',real(z),real(dwdz)+out.c_e,'--r',real(z),-imag(dwdz),'--b');ylabel('velocity'); grid on
 end
 
 
@@ -196,10 +190,13 @@ if strcmp(surfaceMethod,'Chalikov')
     
 %     figure('color','w');
 %     f0 = fConformal(x,eta,H,inf);
+%     f = fConformal(x,eta_adj,H,inf);
 %     fH = fConformal(x-1i*H,eta_adj,H,inf);
 %     -imag(fH(1,:))
 %     subplot(2,1,1); plot(x,eta,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
-%     subplot(2,1,2); plot(x,phiS,'-',real(f),phiS_adj,'--','linewidth',1.5);ylabel('\phi^S');
+%     legend('target in z','actual in z','without adjustment')
+%     subplot(2,1,2); plot(x,phiS,'-',real(f),phiS_adj,'--',real(f0),phiS,':','linewidth',1.5);ylabel('\phi^S');
+%     legend('target in z','actual in z','without adjustment')
 else
     [phiS_adj,eta_adj] = deal(phiS,eta);
     [tInit,yInit] = deal([]);

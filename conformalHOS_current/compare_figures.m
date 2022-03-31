@@ -6,10 +6,14 @@
 % hf(1).Visible = 'on';
 % 
 
-hf(1) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw10_dt2p5T_nx1024_pad0_ikCut5.fig']);
-hf(2) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw10_dt2p5T_nx1024_pad1_ikCut5.fig'],'invisible');
-hf(3) = openfig(['./figures/SFo_ka0p4_M5_h100p00_nx1024_ikCut50.fig'],'invisible');
-legendNames = {'unpadded','padded','SFo'};
+% hf(1) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw10_dt2p5T_nx1024_pad0_ikCut5.fig']);
+% hf(2) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw10_dt2p5T_nx1024_pad1_ikCut5.fig'],'invisible');
+% hf(3) = openfig(['./figures/SFo_ka0p4_M5_h100p00_nx1024_ikCut50.fig'],'invisible');
+% legendNames = {'unpadded','padded','SFo'};
+
+hf(1) = openfig(['./figures/Chalikovka0p4_M5_h100p00_Nw1_dt1T_nx512_pad0_ikCut0.fig']);
+hf(2) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw1_dt1T_nx512_pad0_ikCut10.fig'],'invisible');
+legendNames = {'Chalikov','Taylor'};
 
 
 lineStyles = {'-','--',':'};

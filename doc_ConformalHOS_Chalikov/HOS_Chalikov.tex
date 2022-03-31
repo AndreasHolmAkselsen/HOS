@@ -47,7 +47,9 @@
 \newcommand{\cbr}[1]{\left\{#1\right\}}
 %\newcommand{\bU}{(\nabla\phi)_{z=\eta}}
 
+\input{listingsEnvirorment.sty}
 
+\newcommand{\lref}[2]{\href{#2}{#1~\ref*{#2}}}%
 
 %\newcommand{\zz}{z}
 %\newcommand{\xx}{x}
@@ -247,6 +249,52 @@ The system now reads
 \end{subequations}%
 the former equation simply being the definition \eqref{eq:tf} and the latter being \eqref{eq:BC_zz:phi} modified with \eqref{eq:BC_zz2:eta} (which seems to improve numerical stability).
 Variables are of course to be evaluated at $\yy=0$.
+A MATLAB code implementation is for illustration presented in \lref{Listing}{list:basic} for demonstration.
+
+
+
+%\lstinputlisting[caption=Example: Loading a time series.,label=list:load_ts]{\codePath/load_ts.m}
+\begin{lstlisting}[basicstyle=\ttfamily\small,label=list:basic,caption=Core implementation in MATLAB (without anti-aliasing)]
+	S = -2./(exp(2*k*H)-1); S(1) = 1;
+	C = 2./(exp(2*k*H)+1);
+	FFTeta = fft(eta);
+	f_xi = 1 - ifft(k.*FFTeta.*S);
+	JInv = abs(f_xi).^(-2);
+	w_xi = ifft(1i.*kx.*fft(phiS).*C);
+	FFTb = fft(-JInv.*imag(w_xi));
+	tf0 =  1i*sum(imag(FFTb.*conj(FFTeta)).*k./(N*sinh(k*H)+(k==0)).^2);
+	tf  =  1i*tf0 + 1i*ifft(FFTb.*S.*(k~=0));
+	eta_t  = imag(tf.*f_xi);
+	phiS_t = real(tf).*real(w_xi) - .5*JInv.*real(w_xi.^2) - g*eta;
+\end{lstlisting}
+
+\subsection*{Stabilising and anti-aliasing}
+Anti-aliasing is in transform methods \citep{orszag1970transform} normally achieved through use of the so-called $\nu+1$-\textit{half} rule where any physical space variable is zero-padded up to $(\nu+1)/2$ its original size, $\nu$ being the order of nonlinearity in which the variable takes part \citep{bonnefoy2010}.
+The order of nonlinearity in the Chalikov-type scheme is infinite due to the appearance of the inverse Jacobian. \citet{chalikov2005modeling} does however report that the their solutions are insensitive to increases of $\nu>3$ the the $\nu+1$-\textit{half} rule.
+We have in general observed very little sensitivity to zero-padding in our simulations, and we often skip zero-padding for numerical efficiency in preliminary simulations.
+\\
+
+
+More critical for numerical stability is the use of numerical damping.
+Following \citet{chalikov2005modeling}, we extend the time derivative computation with
+\begin{subequations}
+\begin{align}
+\eta_t &\coloneqq \FF^{-1}\{\FF_j(\eta_t) - \mu_j \FF_j(\eta) \}\\
+\varphi\S_t &\coloneqq  \FF^{-1}\{\FF_j(\varphi\S_t) - \mu_j \FF_j(\varphi\S) \}
+\end{align}%
+\label{eq:damping}%
+\end{subequations}
+where 
+\begin{equation}
+\mu_j = \begin{cases}
+0.25\times 2\pi M \sqrt{g/L}\rbr{\frac{2j}{M}-1}^2,& j> M/2\\
+0 & \text{otherwise.}
+\end{cases}
+        %mu = mu = k_cut*sqrt(2*pi*g*kx(2))*N/2 * (2*k/kmax-1).^2.*(k>kmax/2);
+\label{eq:damping_nu}
+\end{equation}
+$-M\leq j \leq M$ are here the spectral modes before zero-padding.
+This provides a gradually increasing damping form the middle to the high-wavenumber end of the spectral domain.
 
 
 \subsection*{Initial conditions}
@@ -262,16 +310,17 @@ The Chalikov-type HOS scheme described herein can stably maintain this wave solu
 
 \begin{figure}[h!ptb]%
 \centering
-\includegraphics[width=\columnwidth]{../conformalMapping/conformalHOS/figures/imagedecayingConformalka0p2_M5_h1p00_Nw1_dt0p25T_nx512.pdf}%
+\includegraphics[width=\columnwidth]{../HOS_old/conformalHOS/figures/imagedecayingConformalka0p2_M5_h1p00_Nw1_dt0p25T_nx512.pdf}%
 \caption{Wave initiated with the SSGW solution. Steepness $k\bar H/2=0.2$, depth $H=0.1\lambda$.}%
 \label{fig:SSGWinit:contour}%
 \end{figure}
 \begin{figure}[h!ptb]%
 \centering
-\includegraphics[width=\columnwidth]{../conformalMapping/conformalHOS/figures/decayingConformalka0p2_M5_h1p00_Nw1_dt0p25T_nx512.pdf}%
+\includegraphics[width=\columnwidth]{../HOS_old/conformalHOS/figures/decayingConformalka0p2_M5_h1p00_Nw1_dt0p25T_nx512.pdf}%
 \caption{Wave initiated with the SSGW solution. Steepness $k\bar H/2=0.2$, depth $H=0.1\lambda$.}%
 \label{fig:SSGWinit:eta}%
 \end{figure}
+
 
 
 
@@ -308,9 +357,9 @@ see \autoref{fig:vortex} and related memo.
 
 \begin{figure}[h!ptb]%
 \centering
-\subfloat[Vortex current]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalHOS_current/figures/curr_vortex.pdf}}%
+\subfloat[Vortex current]{\includegraphics[width=.5\columnwidth]{../conformalHOS_current/figures/curr_vortex.pdf}}%
 \\
-\subfloat[Benchmark; \eqref{eq:BCb} vs.\ \eqref{eq:BCb_normalHos}.]{\includegraphics[width=\columnwidth]{../conformalMapping/conformalHOS_current/figures/vortex.pdf}}%
+\subfloat[Benchmark; \eqref{eq:BCb} vs.\ \eqref{eq:BCb_normalHos}.]{\includegraphics[width=\columnwidth]{../conformalHOS_current/figures/vortex.pdf}}%
 \caption{Simulation of wave train over a stationary vortex with normal HOS and Chalikov variant. $ka=0.2$. SSGW initial conditions.}%
 \label{fig:vortex}%
 \end{figure}

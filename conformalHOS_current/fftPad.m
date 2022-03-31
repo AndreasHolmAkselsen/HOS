@@ -4,15 +4,17 @@ function y1 = fftPad(y,n1)
 % n1: return array size (n1=size(x,1))
 %
 % % example:
-% N = 2^3;
-% Nd = 2^5;
+% N = 2^3+1;
+% Nd = 3*N;
 % % example signal from gaussian spectrum
-% y_temp = ifftshift(exp(-linspace(-2,2,N)'.^2+2i*pi*rand(N,1)));
-% x = real(ifft(y_temp)); 
-% y = fft(x);
+% y = ifftshift(exp(-linspace(-2,2,N)'.^2+2i*pi*rand(N,1)));
+% x = ifft(y);
 % xPad = ifft(fftPad(y,Nd));
 % xUnPad = ifft(fftPad(fft(xPad),N));
-% figure; plot(0:N-1,x,'-',(0:Nd-1)*N/Nd,real(xPad),'--',0:N-1,xUnPad,':')
+% figure;
+% subplot(211);plot(0:N-1,real(x),'.-',(0:Nd-1)*N/Nd,real(xPad),'.--',0:N-1,real(xUnPad),':'); title('real')
+% subplot(212);plot(0:N-1,imag(x),'.-',(0:Nd-1)*N/Nd,imag(xPad),'.--',0:N-1,imag(xUnPad),':'); title('imag')
+
 
 [n0,m] = size(y);
 
@@ -20,12 +22,14 @@ function y1 = fftPad(y,n1)
 if n0<n1
     if mod(n0,2)==0
         y1 = [y(1:n0/2,:);.5*y(n0/2+1,:);zeros(n1-n0-1,m);.5*y(n0/2+1,:);y(n0/2+2:n0,:)]*n1/n0;
+%         y1 = [y(1:n0/2,:); 0             ;zeros(n1-n0-1,m);0            ;y(n0/2+2:n0,:)]*n1/n0;
     else
         y1 = [y(1:(n0+1)/2,:);zeros(n1-n0,m);y((n0+1)/2+1:n0,:)]*n1/n0;
     end
 elseif n0>n1
     if mod(n1,2)==0
-        y1 = [y(1:n1/2,:);2*y(n0-n1/2+1,:);y(n0-n1/2+2:n0,:)]*n1/n0; 
+        y1 = [y(1:n1/2,:);2*real(y(n0-n1/2+1,:));y(n0-n1/2+2:n0,:)]*n1/n0; 
+%         y1 = [y(1:n1/2,:);0               ;y(n0-n1/2+2:n0,:)]*n1/n0; 
     else
         y1 = [y(1:(n1+1)/2,:);y(n0-(n1+1)/2+2:n0,:)]*n1/n0; 
     end    

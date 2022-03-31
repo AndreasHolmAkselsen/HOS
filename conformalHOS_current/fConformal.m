@@ -1,9 +1,9 @@
 function z = fConformal(zeta,eta,H,k_cut)
 xi = real(zeta);
-nx = numel(xi);
+nx = size(xi,1);
 kx = getKx(xi);
 k = abs(kx);
-
+if nargin < 4, k_cut = inf; end
 
 FFTeta = fft(eta,[],1);
 if isfinite(H)
@@ -12,7 +12,8 @@ if isfinite(H)
     LsinExp = -2./(exp(kx.*(2*H+imag(zeta)))-(1+2*(k==0)).*exp(kx.*imag(zeta)));
     z = zeta + 1i*ifft(FFTeta.*LsinExp.*(k<k_cut),[],1);
 else
-    z =  zeta + 2i*fft(conj(FFTeta/nx).*exp(kx.*imag(zeta).*(kx>0)).*(k<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
+%     z =  zeta + 2i*fft(conj(FFTeta).*exp(kx.*imag(zeta).*(kx>0)).*(k<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
+    z =  zeta + 2i*ifft(FFTeta.*exp(-kx.*imag(zeta).*(kx<0)).*(k<k_cut&kx<0),[],1)+1i*FFTeta(1)/nx;
 end
 
 % nx = numel(xi);
@@ -23,5 +24,5 @@ end
 % if isfinite(H)
 %     z = xi - 1i*ifft(FFTeta.*argH.*(abs(kx)<k_cut),[],1)+1i*FFTeta(1)/nx;
 % else
-%     z =  xi + 2i*fft(conj(FFTeta/nx).*(abs(kx)<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
+%     z =  xi + 2i*fft(conj(FFTeta).*(abs(kx)<k_cut&kx>0),[],1)+1i*FFTeta(1)/nx;
 % end

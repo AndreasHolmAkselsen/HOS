@@ -1,6 +1,7 @@
 function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
-    global M H DO_PADDING kx
+    global H DO_PADDING kx taylor
     assert(iscolumn(phiS) && iscolumn(eta));
+    M = taylor.M;
     
     % indices:
     % j: spatial/modal index, n: Stokes expansion index, i: z-derivative order (array locatin i+1).
@@ -9,8 +10,8 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
     N = size(phiS,1);
     if DO_PADDING
         Nd = N*(M+2)/2; % SFo uses nx*(M+2)/2 instead of nx*(M+1)/2
-        phiS = real(ifftPad(fft(phiS),Nd));
-        eta = real(ifftPad(fft(eta),Nd));
+        phiS = real(ifft(fftPad(fft(phiS),Nd)));
+        eta = real(ifft(fftPad(fft(eta),Nd)));
     else
         Nd = N;
     end
@@ -39,7 +40,7 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
         % compute new derivatives
         hphi_jn(:,n) = fft(phi_jni(:,n,1));% NB
         for i = 1:(M-n+1)
-            phi_jni(:,n,i+1) = real(ifftPad( H_ji(:,i+1).*hphi_jn(:,n),Nd)); % ifft(k.^i.*hphi_jn(:,n));
+            phi_jni(:,n,i+1) = real(ifft(fftPad( H_ji(:,i+1).*hphi_jn(:,n),Nd))); % ifft(k.^i.*hphi_jn(:,n));
         end        
         %compute W^(n)
         for i = 0:n-1
@@ -50,8 +51,8 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
     W_lin  = W_jn(:,1);
     W_nl   = sum(W_jn(:,2:M),2);
     if DO_PADDING
-        W_lin = ifftPad(fft(W_lin),N);
-        W_nl = ifftPad(fft(W_nl),N);
+        W_lin = ifft(fftPad(fft(W_lin),N));
+        W_nl = ifft(fftPad(fft(W_nl),N));
     end
 %     hphi = sum(hphi_jn,2);
 %     hphi = [hphi(1:N/2,:);2*hphi(Nd-N/2+1,:);hphi(Nd-N/2+2:Nd,:)];

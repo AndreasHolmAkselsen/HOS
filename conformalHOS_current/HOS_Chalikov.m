@@ -1,15 +1,20 @@
-function Y_t = HOSODEeq_mode(t,Y)
+function Y_t = HOS_Chalikov(t,Y)
 % Normalization: t -> t*(L/g)^1/2, (eta,x,y,H) -> (eta,x,y,H)*L, phi -> phi*(L^3*g)^1/2, (p/rho) -> (p/rho)*L*g, k -> k/L
 % g = 9.81; L is chosen as domain length/(2*pi) (such that k_j = j)
 % Let M be the range of modes; -M<=j<=M. Assume odd number of modes (when including zero)
 
-[FFTphiS,FFTeta] = deal(Y(1:end/2,:),Y(end/2+1:end,:));
 
-global timeReached DO_PADDING chalikov dW
+global timeReached DO_PADDING chalikov dW t_end dim
+
+if strcmp(chalikov.solverSpace,'Fourier')
+    [FFTphiS,FFTeta] = deal(Y(1:end/2,:),Y(end/2+1:end,:));
+else
+    [FFTphiS,FFTeta] = deal(fft(Y(1:end/2,:)),fft(Y(end/2+1:end,:)));
+end
 
 if t-timeReached > 1
     timeReached = floor(t);
-    fprintf('Time %ds reached (%.1f%%)\n',timeReached,100*timeReached/chalikov.t_end);
+    fprintf('Time %ds reached (%.1f%%)\n',timeReached,100*timeReached/(t_end/dim.t));
 end
 
 [M2,m] = size(FFTphiS);
@@ -36,7 +41,7 @@ else
 end
 if chalikov.doCurr
     xi = (0:N-1).'/N*2*pi*chalikov.dim.L;
-    dWS = dW( xi+1i*ifft(fftPad( FFTeta.*Lsin,N)) ); 
+    dWS = dW( xi+1i*ifft(fftPad( FFTeta.*Lsin,N)) )/dim.U; 
 end
 % if any(angle(df) < -pi/2), Y_t = nan(2*M2,m);  return; end% downward mapping -> wave breaking
 dww = ifft(fftPad(1i.*kx.*FFTphiS.*Lcos,N));
@@ -62,8 +67,12 @@ FFTeta_t =  fftPad(fft(eta_t_AA ),M2) - mu.*FFTeta ;
 FFTphiS_t = fftPad(fft(phiS_t_AA),M2) - FFTeta  - mu.*FFTphiS;
 
 
+if strcmp(chalikov.solverSpace,'Fourier')
+    Y_t = [FFTphiS_t;FFTeta_t];
+else
+    Y_t = real([ifft(FFTphiS_t);ifft(FFTeta_t)]);
+end
 
-Y_t = [FFTphiS_t;FFTeta_t];
 
 
 

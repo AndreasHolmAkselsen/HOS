@@ -1,5 +1,5 @@
 function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
-    global H DO_PADDING kx taylor
+    global DO_PADDING taylor
     assert(iscolumn(phiS) && iscolumn(eta));
     M = taylor.M;
     
@@ -20,17 +20,9 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
     phi_jni = zeros(Nd,M,M+1); % [j,n,i+1] where i is the i'th derivative in z.
     phi_jni(:,1) = phiS;
     
-    
-%     kx = getKx(x);
-%     dk = 2*pi/(N*(x(2)-x(1)));
-    if mod(Nd,2)==0
-        kPad = [0:Nd/2-1,Nd/2:-1:1]'*kx(2);
-    else
-        kPad = [0:(Nd-1)/2, (Nd-1)/2:-1:1]'*kx(2);
-    end
-
-    H_ji = kPad.^(0:M); % [j,i+1] where i is the i'th derivative in z.
-    if isfinite(H), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(kPad*H); end
+    k = [0:ceil(Nd/2)-1, floor(Nd/2):-1:1]';
+    H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
+    if isfinite(taylor.h), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*taylor.h); end
 
     for n = 1:M
         % Compute phi^(n)

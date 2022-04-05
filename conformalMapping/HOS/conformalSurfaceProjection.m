@@ -165,7 +165,7 @@ fww = @(zz) sum( hww.*exp(1i*(zz+1i*y0).*kk )./cosh(kk*HScale) ,3);
     % plot the z-plane
     haz = subplot(3,1,1); hold on;
     title('z-plane');xlabel('x');ylabel('i y');box off
-    set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
+    set(gca,'XAxisLocation','origin','YAxisLocation','origin','XTick',[],'YTick',[])
     [~,hcz] = contourf(real(z),imag(z),real(ww),phiLevels,'LineStyle','none');
     
     zPhi = fz(linspace(xxL,xxR,10) + 1i*linspace(yyPlotLower,yyPlotUpper,200)');
@@ -191,7 +191,7 @@ fww = @(zz) sum( hww.*exp(1i*(zz+1i*y0).*kk )./cosh(kk*HScale) ,3);
     % plot the zz-plane
     hazz = subplot(3,1,2); hold on    
     title('\zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off
-    set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
+    set(gca,'XAxisLocation','origin','YAxisLocation','origin','XTick',[],'YTick',[])
     
     [~,hczz] = contourf(real(zz),imag(zz),real(ww),phiLevels,'LineStyle','none');
 %     hFills = hczz.FacePrims;
@@ -276,8 +276,7 @@ end
 function dzdzz = dfzStrip0(zz,h1,h2)
     c2 = (h2/h1)^2; lambda = -exp(zz); 
     t = sqrt((lambda-c2)./(lambda-1));
-%     dzdzz =  -lambda*h2/pi.* (c2-1).^2./( (c2-t.^2).*(t.^2-1).*(lambda-1).^2.*sqrt((lambda-c2)./(lambda-1)) );
-    dzdzz = h2./(pi*t);
+    dzdzz =  -lambda*h2/pi.* (c2-1).^2./( (c2-t.^2).*(t.^2-1).*(lambda-1).^2.*sqrt((lambda-c2)./(lambda-1)) );
 end
 
 

@@ -47,6 +47,8 @@
 \newcommand{\cbr}[1]{\left\{#1\right\}}
 %\newcommand{\bU}{(\nabla\phi)_{z=\eta}}
 
+\newcommand{\refCS}{C\&S}
+
 \input{listingsEnvirorment.sty}
 
 \newcommand{\lref}[2]{\href{#2}{#1~\ref*{#2}}}%
@@ -105,6 +107,7 @@
 
 \section{Aim}
 This document presents a conformal mapping approach to evaluating potential function derivatives in two dimensions at a modulated free surface.
+We have largely followed \citet{chalikov2005modeling}, hereafter referred to as \refCS{}, in our derivation. 
 The problem is encountered within free-surface hydrodynamics whence boundary conditions require a vertical velocity component $v=\phi_y$ evaluated at the free surface $(\x,\surf(\x))$ itself.
 A standard approach for such an evaluation, e.g.\ adopted in numerical higher order spectral methods, is to related the free surface $\y=\surf$ to the horizontal line $\y=0$ through Taylor expansions.
 The downside of such an approach is that the Taylor series convergence is limited \citep{west1981deep} and that it requires evaluation of a number of functional derivatives.
@@ -126,26 +129,28 @@ For this purpose we introduce the following two transformation kernels:
 \newcommand{\fun}{\mu}
 \begin{subequations}
 \begin{align}
-\Lcos[\fun](\zz) &= \sum_{j=-\infty}^\infty \FF_j(\fun) \frac{\ee^{\ii \kk_j(\zz+\ii \Hzz)}}{\cosh(\kk_j\Hzz)},% = \sum_{j=-\infty}^\infty \FF_j(\fun) \frac{2\ee^{\ii \kk_j \zz}}{\ee^{2\kk_j\Hzz}+1}
+\Lcos[\fun](\zz) &= \sum_{j=-M}^M \FF_j(\fun) \frac{\ee^{\ii \kk_j(\zz+\ii \Hzz)}}{\cosh(\kk_j\Hzz)},% = \sum_{j=-M}^M \FF_j(\fun) \frac{2\ee^{\ii \kk_j \zz}}{\ee^{2\kk_j\Hzz}+1}
 \label{eq:Lcos}\\
-\Lsin[\fun](\zz) &= \sum_{j=-\infty}^\infty \FF_j(\fun) \frac{-\ee^{\ii \kk_j(\zz+\ii \Hzz)}}{\sinh(\kk_j\Hzz)-\delta_j}.% = \sum_{j=-\infty}^\infty \FF_j(\fun) \frac{-2\ee^{\ii \kk_j \zz}}{\ee^{2\kk_j\Hzz}-1-2\delta_j}.
+\Lsin[\fun](\zz) &= \sum_{j=-M}^M \FF_j(\fun) \frac{-\ee^{\ii \kk_j(\zz+\ii \Hzz)}}{\sinh(\kk_j\Hzz)-\delta_j}.% = \sum_{j=-M}^M \FF_j(\fun) \frac{-2\ee^{\ii \kk_j \zz}}{\ee^{2\kk_j\Hzz}-1-2\delta_j}.
 \label{eq:Lsin}%
-\end{align}%
+ \end{align}%
 \label{eq:L}%
 \end{subequations}%
-$\FF_j(\fun)$ is here the Fourier transforms $\fun=\sum_{j=-\infty}^\infty \FF_j(\fun)\ee^{\ii \kk_j \xx}$ and $\delta_j=1$ for $j=0$ and zero otherwise. 
+$\FF_j(\fun)$ is here the Fourier transform such that $\fun=\sum_{j=-\infty}^\infty \FF_j(\fun)\ee^{\ii \kk_j \xx}$, and $\delta_j=1$ for $j=0$ and zero otherwise. 
 Wavenumbers are $\kk_j=2\pi j/L$, $L$ being the domain length in the $\zeta$-plane.
 Assuming $\fun(\xx)$ is real, $\Lcos$ and $\Lsin $ have the following properties:
 \begin{subequations}
 \begin{align}
-\Lcos[\fun](\xx) &= \fun(\xx)  -2\,\ii \sum_{j=1}^\infty \Im\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\tanh\kk_j\Hzz,\label{eq:LProps:C0}\\
-\Lsin[\fun](\xx) &= \fun(\xx)  -2\,\ii \sum_{j=1}^\infty \Im\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\coth\kk_j\Hzz;\label{eq:LProps:S0}\\
-\Lcos[\fun](\xx-\ii\Hzz) &= \FF_0(\fun)  +2\,    \sum_{j=1}^\infty \Re\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\sech\kk_j\Hzz,\label{eq:LProps:CH}\\
-\Lsin[\fun](\xx-\ii\Hzz) &= \FF_0(\fun)  -2\,\ii \sum_{j=1}^\infty \Im\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\csch\kk_j\Hzz;\label{eq:LProps:SH}\\
-\lim_{\Hzz\to\infty}\Lcos[\fun](\zz) &=\lim_{\Hzz\to\infty}\Lsin[\fun](\zz)= \FF_0(\fun) + 2 \sum_{j=-\infty}^{-1} \FF_j(\fun) \ee^{\ii \kk_j \zz}.\label{eq:LProps:lim}
+\Lcos[\fun](\xx) &= \fun(\xx)  -2\,\ii \sum_{j=1}^M \Im\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\tanh\kk_j\Hzz,\label{eq:LProps:C0}\\
+\Lsin[\fun](\xx) &= \fun(\xx)  -2\,\ii \sum_{j=1}^M \Im\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\coth\kk_j\Hzz;\label{eq:LProps:S0}\\
+\Lcos[\fun](\xx-\ii\Hzz) &= \FF_0(\fun)  +2\,    \sum_{j=1}^M \Re\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\sech\kk_j\Hzz,\label{eq:LProps:CH}\\
+\Lsin[\fun](\xx-\ii\Hzz) &= \FF_0(\fun)  -2\,\ii \sum_{j=1}^M \Im\Big[\FF_j(\fun) \ee^{\ii \kk_j\zz}\Big]\csch\kk_j\Hzz;\label{eq:LProps:SH}\\
+\lim_{\Hzz\to\infty}\Lcos[\fun](\zz) &=\lim_{\Hzz\to\infty}\Lsin[\fun](\zz)= \FF_0(\fun) + 2 \sum_{j=-M}^{-1} \FF_j(\fun) \ee^{\ii \kk_j \zz}.\label{eq:LProps:lim}
 \end{align}%
 \label{eq:LProps}%
 \end{subequations}%
+That is to say, the real part of both kernels equal the input function itself at the surface line $\yy=0$, and $\Lcos$ is pure real while $\Lsin$ is pure imaginary at the bed line $\yy = -\Hzz$, save for a constant.
+
 We require an undulating surface and a flat bed in the physical plane 
  %the property \eqref{eq:LProps:CH} at the bed for our conformal map 
 and so we choose the map
@@ -161,8 +166,12 @@ Note the stretching of the $\x$ coordinate which means that
 \label{eq:hzz}
 \end{equation}
  with 
-\[\xS(\xx,t)=\x_0(t)+\xx+2\sum_{j=1}^\infty \Im\Big\{\FF_j[\hzz(t)] \ee^{\ii \kk_j\zz}\Big\}\coth\kk_j\Hzz.\] 
-Property \eqref{eq:LProps:SH} reveals that $\Hzz = \Hz+\langle\eta\rangle$.
+\[\xS(\xx,t)=\x_0(t)+\xx+2\sum_{j=1}^M \Im\Big\{\FF_j[\hzz(t)] \ee^{\ii \kk_j\xx}\Big\}\coth\kk_j\Hzz.\] 
+Property \eqref{eq:LProps:SH} further reveals that $\Hzz = \Hz+\langle\eta\rangle$.
+
+An example for a single $\zz$-plane mode is shown in \autoref{fig:conformalH}.
+Note that a monochromatic wave in the $\zz$-plane is not monochromatic in the physical plane.
+\\
 
 Similar to the surface elevation, we also need to map the surface potential onto the free surface.
 We introduce the complex surface potentials  
@@ -185,7 +194,14 @@ $\Re \ww(\xx,t)=\varphi(\xx,0,t)=\varphi\S(\xx,t)=\phi[\xS(\xx,t),\hzz(\xx,t),t]
 \ww(\zz,t) = \Lcos[\varphi\S](\zz).
 \label{eq:ww}
 \end{equation}
+Velocities are most easily found by differentiating the complex potential; $\w_\z = \phi_\x-\ii\phi_\y$, $\ww_\zz = \varphi_\xx-\ii\varphi_\yy$.
 
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.5\columnwidth]{./conformalH.pdf}%
+\caption{The conformal mapping of a single mode---a wave which is monochromatic wave in the $\zz$-plane.}%
+\label{fig:conformalH}%
+\end{figure}
 
 \subsection*{Boundary value problem}
 The map $\zmap(\zz,t)$ cannot be inverted explicitly. 
@@ -198,11 +214,11 @@ h_t &=- \phi_x h_x+\phi_y,\\
 \phi_t &=- \frac12|w_\z|^2-gh.
 \end{align*}
 %in physical space.
-Re-stated in the $\zz$-plane%
+Re-stated in $\zz$-plane variables%
 \footnote{using \eqref{eq:hzz}, \eqref{eq:ww:match} and the Cauchy--Riemann conditions $x_\xx = y_\yy$, $x_\yy=-y_\xx$.}
  it reads%
  \footnote{The dynamic condition can further be re-written
-$\varphi\S_t = |\zmap_\zz|^{-2} (\xS_t\xS_\xx + \hzz_t\hzz_\xx)\varphi_\zz - \frac12 |\zmap_\zz|^{-2} \rbr{\varphi_\xx^2-\varphi_\yy^2}  - g \hzz$ as per \citet{chalikov2005modeling}.} 
+$\varphi\S_t = |\zmap_\zz|^{-2} (\xS_t\xS_\xx + \hzz_t\hzz_\xx)\varphi_\zz - \frac12 |\zmap_\zz|^{-2} \rbr{\varphi_\xx^2-\varphi_\yy^2}  - g \hzz$ as per \refCS{}.} 
 \begin{subequations}
 \begin{align}
 \hzz_t\xS_\xx - \xS_t\hzz_\xx &= \phi_\y\xS_\xx-\phi_\x\hzz_\xx = \ldots = \varphi_\yy, \label{eq:BC_zz:eta} \\
@@ -212,7 +228,7 @@ $\varphi\S_t = |\zmap_\zz|^{-2} (\xS_t\xS_\xx + \hzz_t\hzz_\xx)\varphi_\zz - \fr
 \end{subequations}%
 %$|\zmap_\zz|^{2}$ being the transformation Jacobian.%
 A final obstacle remains---the left-hand side of \eqref{eq:BC_zz:eta} should be written in terms of a single time derivative.
-\citet{chalikov2005modeling} does this by introducing a modified map
+\refCS{} does this by introducing a modified map
 \begin{equation}
 \tf(\zz,t)\equiv\zmap_t/\zmap_\zz = |\zmap_\zz|^{-2}[\x_t\x_\xx + \y_t\y_\xx +\ii(\y_t\x_\xx - \x_t\y_\xx ) ]
 \label{eq:tf}
@@ -233,8 +249,8 @@ by solving
 \[\int x_t\,\mr d\xx=\int\Re(\tf \zmap_\zz) \,\mr d \xx = 0\]
 one finds
 \begin{equation}
-%\tilde x_{0}(t) = -\sum_{j=-\infty}^\infty \frac{\kk_j \Im[\FF_j(|\zmap_\zz|^{-2}\varphi_\yy)\FF_j(\eta)^*]}{\sinh^2\kk_j\Hzz + \delta_j}.
-\tilde x_{0}(t) = -2\sum_{j=1}^\infty \frac{\kk_j \Im[\FF_j(b)\FF_j(\eta)^*]}{\sinh^2\kk_j\Hzz}.
+%\tilde x_{0}(t) = -\sum_{j=-M}^M \frac{\kk_j \Im[\FF_j(|\zmap_\zz|^{-2}\varphi_\yy)\FF_j(\eta)^*]}{\sinh^2\kk_j\Hzz + \delta_j}.
+\tilde x_{0}(t) = -2\sum_{j=1}^M \frac{\kk_j \Im[\FF_j(b)\FF_j(\eta)^*]}{\sinh^2\kk_j\Hzz}.
 \label{eq:tx0}
 \end{equation}
 The system now reads
@@ -270,7 +286,8 @@ A MATLAB code implementation is for illustration presented in \lref{Listing}{lis
 
 \subsection*{Stabilising and anti-aliasing}
 Anti-aliasing is in transform methods \citep{orszag1970transform} normally achieved through use of the so-called $\nu+1$-\textit{half} rule where any physical space variable is zero-padded up to $(\nu+1)/2$ its original size, $\nu$ being the order of nonlinearity in which the variable takes part \citep{bonnefoy2010}.
-The order of nonlinearity in the Chalikov-type scheme is infinite due to the appearance of the inverse Jacobian. \citet{chalikov2005modeling} does however report that the their solutions are insensitive to increases of $\nu>3$ the the $\nu+1$-\textit{half} rule.
+The order of nonlinearity in the Chalikov-type scheme is infinite due to the appearance of the inverse Jacobian. \refCS{} do however report that the their solutions are insensitive to increases of $\nu>3$ the the $\nu+1$-\textit{half} rule.
+Zero-padding has in our code been implemented as a simulation option.
 We have in general observed very little sensitivity to zero-padding in our simulations, and we often skip zero-padding for numerical efficiency in preliminary simulations.
 \\
 
@@ -287,14 +304,14 @@ Following \citet{chalikov2005modeling}, we extend the time derivative computatio
 where 
 \begin{equation}
 \mu_j = \begin{cases}
-0.25\times 2\pi M \sqrt{g/L}\rbr{\frac{2j}{M}-1}^2,& j> M/2\\
+0.25\times 2\pi M \sqrt{g/L}\rbr{\frac{|j|-M\_d}{M-M\_d}}^2,& j>M\_d\\
 0 & \text{otherwise.}
 \end{cases}
         %mu = mu = k_cut*sqrt(2*pi*g*kx(2))*N/2 * (2*k/kmax-1).^2.*(k>kmax/2);
 \label{eq:damping_nu}
 \end{equation}
-$-M\leq j \leq M$ are here the spectral modes before zero-padding.
-This provides a gradually increasing damping form the middle to the high-wavenumber end of the spectral domain.
+$-M\leq j \leq M$ are here the spectral modes before zero-padding and $M\_d$ is the first mode with active damping.
+The damping is gradually increasing form $M\_d$ into the high-wavenumber end of the spectral domain.
 
 
 \subsection*{Initial conditions}
@@ -322,6 +339,16 @@ The Chalikov-type HOS scheme described herein can stably maintain this wave solu
 \end{figure}
 
 
+
+\subsection*{Normalization and implementation}
+We have here presented model and method in dimensional units. 
+The practical normalization used by \refCS{}, also adopted in our implementation, is to normalize with gravity and the length scale $L/2\pi$, $L$ being the domain length. 
+This renders wavenumbers as integers; $k_j = j$.
+
+Another difference between \refCS{}'s method and traditional HOS implementations is that there is no need to perform the time integration in physical space; instead of $y^{n+1}=y_t^{n}\Delta t$ we can write $\hat y^{n+1}=\hat y_t^{n}\Delta t$ where $\hat y = \FF(y)$.
+A benefit with this is that we save ourself an FFT/iFFT operation pair on $\eta$ and $\phi\S$ at each iteration. 
+A possible drawback if automated time stepping is used is that the ODE solved can select unnecessarily small time steps.
+Both types of input/output are supported in our implementation, as well as an option to choose between a fixed time step Runge--Kutta method adopt MATLAB's \texttt{ODExx} adaptive time step ODE solvers. 
 
 
 \subsection*{Extension with a background flow field}
@@ -365,6 +392,47 @@ see \autoref{fig:vortex} and related memo.
 \end{figure}
 
 
+
+
+\subsection*{Breaking wave benchmark}
+
+As a more flashy benchmark, we have attempted to reproduce \refCS{}'s solution of a breaking wave. (Run 1 in \refCS{}, figure 2 therein.)
+The authors do not specify very precisely what their initial conditions are, other than to say it is a monochromatic wave, in physical space judging by their figure.
+Our simulation did not remain stable up to the point of breaking with the parametric description given by \refCS{}, where $M\_d$, equation \eqref{eq:damping_nu}, is set to $M/2$.
+Instability was caused by the range of undampened modes $|j|<M\_d$ where $|j|$ is still much greater than one due to the high resolution of this simulation. 
+The rate of instability is sensitive to the initial conditions, to which the difference in results may be attributed. 
+We can however stabilize our solution by dampening a wider range of modes; setting $M\_d=0$ yields the result shown in \autoref{fig:breaker:eta}.
+The numerical damper is now active on all modes, but with little influence on the dominant wavenumbers. 
+The bulky shape attained before the wave front is established is likely due the the initial conditions and not the damping.
+We then reach the stage where the surface elevation becomes multi-valued in physical space, after which wave breaking is sure to ensue. 
+The numerical damping is however strong at these wavenumbers, and the wave never actually breaks.  
+Instead, the plunger pulls back, and the simulation survives to continue. 
+To some extent, the numerical damping may be regarded as a crude wave breaking modes, although we stress that it is not founded in any physical or empirical evidence. 
+
+A demonstration so the full conformal map solution in a stage of plunging is given in \autoref{fig:breaker:contour}.
+\\
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.6\columnwidth]{../conformalHOS_current/figures/rounded2_Chalikov_ka0p5_M3072_hInf_Nw1_dt0p177T_nx6145_pad1_.pdf}%
+\caption{Wave initiated as a steep monochromatic wave $k\bar a=0.5$, cf. \refCS{}'s run 1. Infinite depth, $M=3072$.}%
+\label{fig:breaker:eta}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.75\columnwidth]{../conformalHOS_current/figures/rounded2_contour.pdf}%
+\caption{Contour solution of fourth frame ($t=3.38$\,s) of \autoref{fig:breaker:eta}.}%
+\label{fig:breaker:contour}%
+\end{figure}
+
+The high resolution here used is not necessary for attaining the plunger crest shape, but the wide range of damping is.
+\autoref{fig:breaker:etaCoarse} shows the same simulation as in \autoref{fig:breaker:eta}, but with $M=512$.
+This simulation is also stable and quite similar up to the point of breaking. We notice however that phase velocity of the two simulations differ during the `breaking event'.
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.6\columnwidth]{../conformalHOS_current/figures/Chalikov_ka0p5_M512_hInf_Nw1_dt0p177T_nx1025_pad1.pdf}%
+\caption{\autoref{fig:breaker:eta}, but with $M=512$.}%
+\label{fig:breaker:etaCoarse}%
+\end{figure}
 
 
 

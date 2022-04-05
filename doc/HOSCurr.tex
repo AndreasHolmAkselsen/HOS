@@ -456,6 +456,45 @@ Examples are shown in \autoref{fig:basinPatch:uniform} and \ref{fig:basinPatch:f
 \end{figure}
 
 
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=1\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec/novortex_flipLinear_Lh50x15_nx256nk512_patchPos8xm1p8x0x0_Uj0_posZ0.pdf}
+\caption{`flip-linear' profile without vortex patch.}%
+\label{fig:basinPatch:noVotex}%
+\end{figure}
+
+
+\subsection{Closed domain basin simulation v2.0}
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.5\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/timeCompare_T1CM1.pdf}\\
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/snapCompare_T1CM1.pdf}%
+\caption{$T=1.0$\,s, normal current strength.}%
+\label{fig:res2:T1CM1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.5\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/timeCompare_T1CM2.pdf}\\
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/snapCompare_T1CM2.pdf}%
+\caption{$T=1.0$\,s, double current strength. Time not in sync for vortex simulation data due to simulation crash.}%
+\label{fig:res2:T1CM2}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.5\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/timeCompare_T1p5CM1.pdf}\\
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/snapCompare_T1p5CM1.pdf}%
+\caption{$T=1.5$\,s, normal current strength.}%
+\label{fig:res2:T1p5CM1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.5\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/timeCompare_T1p5CM2.pdf}\\
+\includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/snapCompare_T1p5CM2.pdf}%
+\caption{$T=1.5$\,s, double current strength.}%
+\label{fig:res2:T1p5CM2}%
+\end{figure}
+
 \subsection{Closed domain basin simulation}
 We here present some preliminary closed domain results. 
 The closed domain code seems somewhat less numerically robust than does the periodic domain code, so wave steepness is here limited to $(ka)\oo1=0.2$.\footnote{Steepness according to linear wavemaker theory, which is an overestimate of the observed steepness.}

@@ -1,6 +1,6 @@
 clear 
 clear global
-global x surfaceMethod timeReached dW DO_PADDING kx chalikov taylor t_end
+global surfaceMethod timeReached dW DO_PADDING chalikov taylor t_end dim
 timeReached = 0; 
 addpath c:/gits/timsas2/matlabLibs
 
@@ -13,9 +13,11 @@ g=9.81;
 % surfaceMethod = 'Chalikov'; % Chalikov method
 surfaceMethod = 'Taylor';  % normal HOS
 
-DO_PADDING = 1;
-chalikov.M = 3072;
-% chalikov.dt = 5e-4; % comment out to use ODE45
+DO_PADDING = 0;
+nx__wave = 2^5;
+
+chalikov.M = 2^11;
+RK4dt = 0;%2.5e-3; % set to zero to use ODE45
 chalikov.r = .25; % dim.less, =.25 in Chalikov
 chalikov.kd__kmax = .5; % .5 in Chalikov
 
@@ -36,7 +38,6 @@ PLOT_CURRENT = false;
 exportPrefix = '';
 exportPath = './figures/';
 i_detailedPlot = []; %plot contour plots of frame i. Leave empty to skip
-
 
 
 % current specification
@@ -65,39 +66,39 @@ end
 
 
 % Simulation/plotting time
-dt = 50*Tp;
+dt = 200*Tp;
 t_end = 9*dt;
 
     
 % stability
 INIT_WAVE_TYPE = 'linear';
 % packet = 1;
-stillWindowWidth__L = 1/4;
+stillWindowWidth__L = 0;%-inf;% 1/4;
 stillWindowCentre__L = 2/3;
-taperWidth__L = .1*stillWindowWidth__L;
-Tramp = 2*Tp;
+taperWidth__L = .1*1/4;
 
 
 
-taylor.nx__wave = 2^6;
 taylor.M = 5; 
-taylor.nonLinRamp = @(t) max(0,1-exp(-(t/Tramp)^2));
+TRamp = 10*Tp;
+taylor.nonLinRamp = @(t) max(0,1-exp(-(t/TRamp)^2));
 taylor.k_cut = (taylor.M+5)*k0;
-
-
+taylor.h = h;
 
 %% Simulation
 % L = NWaves*2*pi/k0;
-NWaves_temp = L*k0/(2*pi);
-nx = round(taylor.nx__wave*NWaves_temp);
-NWaves = nx/taylor.nx__wave;
 % c_p = 2*pi/T/k0;
+NWaves_temp = L*k0/(2*pi);
+nx = round(nx__wave*NWaves_temp);
+NWaves = nx/nx__wave;
+nx = nx__wave*NWaves;
+nx = 2*floor(nx/2);
 
-if strcmp(surfaceMethod,'Chalikov')
-    nx = 2*chalikov.M+1;
-else
-    nx = taylor.nx__wave*NWaves;
-end
+
+% if strcmp(surfaceMethod,'Chalikov')
+%     nx = 2*chalikov.M+1;
+% end
+
 dx = L/nx;
 x = (0:nx-1)'*dx;
 if strcmp(surfaceMethod,'Taylor')
@@ -180,7 +181,6 @@ end
 %% init with SSGW:
 switch INIT_WAVE_TYPE
     case 'linear'
-                    
         nk = floor((nx-1)/2) +1;
         k_plus = (2*pi/L)*(0:nk-1)';
         if isfinite(h)
@@ -229,78 +229,90 @@ eta = eta.*stillWindowFilter;
 phiS = phiS.*stillWindowFilter;
 
 
-if strcmp(surfaceMethod,'Chalikov')
-    
-    [eta_adj,chalikov.H] = initializeInitCond(x,eta,h,100);
-    
-    FFTeta_adj = fft(eta_adj); FFTeta0 = FFTeta_adj(1); FFTeta_adj(1)=[];
-    ic = find(abs(FFTeta_adj)/max(abs(FFTeta_adj)) < 1e-6,1,'first');
-    assert(mod(nx,2)==1); % odd
-    FFTeta_adj(ic:nx-ic) = 0; % low-pass filter;
-    FFTeta_adj = [FFTeta0;FFTeta_adj];
-    
-    
-%     kx = getKx(x);
-%     FFTphiS_adj = -FFTeta_adj.*1i.*sign(kx).*sqrt(g./abs(kx)); FFTphiS_adj(1)=0;
+dim.L  = L/(2*pi);
+dim.t = sqrt(dim.L/g);
+dim.phi = sqrt(dim.L^3*g);
+dim.U = dim.L/dim.t;
 
-    
-    f = fConformal(x,eta_adj,chalikov.H);
-    phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f),'linear',nan);
-    
-    FFTphiS_adj = fft(phiS_adj); FFTphiS0 = FFTphiS_adj(1); FFTphiS_adj(1)=[];
-    ic = find(abs(FFTphiS_adj)/max(abs(FFTphiS_adj)) < 1e-6,1,'first');
-    FFTphiS_adj(ic:nx-ic) = 0; % low-pass filter;
-    FFTphiS_adj = [FFTphiS0;FFTphiS_adj];
-    
-%     chalikov.H;
-%     FFTeta_adj = zeros(nx,1);
-%     FFTeta_adj([2,end]) = .5*ka/k0*nx;
-%     FFTphiS_adj = zeros(nx,1);
-%     FFTphiS_adj(2) = -.5i*ka/k0.*g/omega*nx;
-%     FFTphiS_adj(end)=-FFTphiS_adj(2);
-    
-    
-%     
-%     figure('color','w');
-%     f0 = fConformal(x,eta,H,inf);
-%     f = fConformal(x,eta_adj,H,inf);
-%     fH = fConformal(x-1i*H,eta_adj,H,inf);
-%     -imag(fH(1,:))
-%     subplot(2,1,1); plot(x,eta,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
-%     legend('target in z','actual in z','without adjustment')
-%     subplot(2,1,2); plot(x,phiS,'-',real(f),phiS_adj,'--',real(f0),phiS,':','linewidth',1.5);ylabel('\phi^S');
-%     legend('target in z','actual in z','without adjustment')
-    
-
-    dim.L  = L/(2*pi);
-    dim.t = sqrt(dim.L/g);
-    dim.phi = sqrt(dim.L^3*g);
-    chalikov.t_end = t_end/dim.t;
-    chalikov.dim = dim;
-    ODEoptions.Vectorized = true;
-    tic
-    if isfield(chalikov,'dt')
-        [t,y] = RK4(@HOSODEeq_mode,[t0/dim.t,chalikov.dt,chalikov.t_end],[FFTphiS_adj/dim.phi;FFTeta_adj/dim.L]);
-    else
-        [t,y] = ode45(@HOSODEeq_mode ,[t0,t_end]/dim.t,[FFTphiS_adj/dim.phi;FFTeta_adj/dim.L],ODEoptions);
-    end
-    fprintf('CPU time: %gs\n',toc);
-    iNaN = find(isnan(y(:,1)),1,'first');
-    if ~isempty(iNaN), t(iNaN:end)=[]; y(iNaN:end,:)=[]; end
-    phiS = ifft(y(:,1:nx),[],2)*dim.phi; eta = ifft(y(:,nx+1:2*nx),[],2)*dim.L;
-    t = t*dim.t;
-else
-    kx = getKx(x);
-    tic
-    [t,y] = ode45(@HOSODE45 ,[t0,t_end],[phiS;eta],ODEoptions);
-    fprintf('CPU time: %gs\n',toc);   
-    phiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
+%% Run simulation
+switch surfaceMethod
+    case 'Chalikov'
+        [eta_adj,chalikov.H] = initializeInitCond(x,eta,h,100);
+        FFTeta_adj = fft(eta_adj);
+        
+        % filtering the initial conditions proved useful when simulating very highly resolved wave in the process of breaking
+        filterIC = false;
+        if filterIC
+            cutFactor = 1e-8;
+            FFTeta0 = FFTeta_adj(1); FFTeta_adj(1)=[];
+            [~,imax] = max(abs(FFTeta_adj));
+            ic = find(abs(FFTeta_adj(imax+1:end))/max(abs(FFTeta_adj)) < cutFactor,1,'first')+imax;
+            assert(mod(nx,2)==1); % odd
+            FFTeta_adj(ic:nx-ic) = 0; % low-pass filter;
+            FFTeta_adj = [FFTeta0;FFTeta_adj];
+        end
+        
+        %     kx = getKx(x);
+        %     FFTphiS_adj = -FFTeta_adj.*1i.*sign(kx).*sqrt(g./abs(kx)); FFTphiS_adj(1)=0;
+        
+        f = fConformal(x,eta_adj,chalikov.H);
+        phiS_adj = interp1([x-L;x;x+L],[phiS;phiS;phiS],real(f),'linear',nan);
+        FFTphiS_adj = fft(phiS_adj);
+        if filterIC
+            FFTphiS0 = FFTphiS_adj(1); FFTphiS_adj(1)=[];
+            ic = find(abs(FFTphiS_adj)/max(abs(FFTphiS_adj)) < cutFactor,1,'first');
+            FFTphiS_adj(ic:nx-ic) = 0; % low-pass filter;
+            FFTphiS_adj = [FFTphiS0;FFTphiS_adj];
+        end
+        
+        %     figure('color','w');
+        %     f0 = fConformal(x,eta,H,inf);
+        %     f = fConformal(x,eta_adj,H,inf);
+        %     fH = fConformal(x-1i*H,eta_adj,H,inf);
+        %     -imag(fH(1,:))
+        %     subplot(2,1,1); plot(x,eta,'-',real(f),imag(f),'--',real(f0),imag(f0),':','linewidth',1.5);ylabel('\eta');title('IC verification')
+        %     legend('target in z','actual in z','without adjustment')
+        %     subplot(2,1,2); plot(x,phiS,'-',real(f),phiS_adj,'--',real(f0),phiS,':','linewidth',1.5);ylabel('\phi^S');
+        %     legend('target in z','actual in z','without adjustment')
+        
+        %     chalikov.dim = dim;
+        ODEoptions.Vectorized = true;
+        tic
+        switch chalikov.solverSpace
+            case 'Fourier'
+                if RK4dt~=0
+                    [t,y] = RK4(@HOS_Chalikov,[t0,RK4dt,t_end]/dim.t,[FFTphiS_adj/dim.phi;FFTeta_adj/dim.L]);
+                else
+                    [t,y] = ode45(@HOS_Chalikov ,[t0,t_end]/dim.t,[FFTphiS_adj/dim.phi;FFTeta_adj/dim.L],ODEoptions);
+                end
+                phiS = ifft(y(:,1:nx),[],2)*dim.phi; eta = ifft(y(:,nx+1:2*nx),[],2)*dim.L;
+            case 'physical'
+                if RK4dt~=0
+                    [t,y] = RK4(@HOS_Chalikov,[t0,RK4dt,t_end]/dim.t,[ifft(FFTphiS_adj)/dim.phi;ifft(FFTeta_adj)/dim.L]);
+                else
+                    [t,y] = ode45(@HOS_Chalikov ,[t0,t_end]/dim.t,[ifft(FFTphiS_adj)/dim.phi;ifft(FFTeta_adj)/dim.L],ODEoptions);
+                end
+                phiS = y(:,1:nx)*dim.phi; eta = y(:,nx+1:2*nx)*dim.L;
+        end
+        fprintf('CPU time: %gs\n',toc);
+        t = t*dim.t;
+    case 'Taylor'
+        tic
+        if RK4dt~=0
+            [t,y] = RK4(@HOS_Taylor ,[t0,RK4dt,t_end]/dim.t,[phiS/dim.phi;eta/dim.L]);
+        else
+            [t,y] = ode45(@HOS_Taylor ,[t0,t_end]/dim.t,[phiS/dim.phi;eta/dim.L],ODEoptions);
+        end
+        fprintf('CPU time: %gs\n',toc);
+        phiS = y(:,1:nx)*dim.phi; eta = y(:,nx+1:2*nx)*dim.L;
 end
-
+iNaN = find(isnan(phiS(:,1)),1,'first');
+if ~isempty(iNaN), t(iNaN:end)=[]; phiS(iNaN:end,:)=[]; eta(iNaN:end,:)=[]; end
+clear y
 
 % t_ip = (0:dt:t_end)';
 t_ip = linspace(0,t(end),10).';
-% t_ip = linspace(.9*t(end),t(end),10).';
+% t_ip = linspace(.5*t(end),t(end),10).';
 
 nPannel = length(t_ip);
 phiS_ip = interp1(t,phiS,t_ip).';
@@ -316,23 +328,30 @@ if strcmp(surfaceMethod,'Chalikov')
 %     figure, plot(x/lambda,(real(fH)-x)/lambda)
     
     for it = i_detailedPlot
+        H = chalikov.H;
         hfCont = figure('color','w'); hold on
-        y0 = max(-x(end)/NWaves/2,-H);
+        y0 = max(-x(end)/NWaves/3,-H);
         if y0>-H,nan_ = nan; else nan_=1; end
         
-        [xi2,sig2]= ndgrid(x,linspace(y0,0,100));
-        f2 = fConformal(xi2+1i*sig2,eta_ip(:,it),H,k_cut);
+        [xi2,sig2]= ndgrid(x,linspace(y0,0,200));
+        f2 = fConformal(xi2+1i*sig2,eta_ip(:,it),H);
         haCont(1) = subplot(2,1,1);
-        contour(real(f2),imag(f2),xi2,30,'r'); hold on
-        contour(real(f2),imag(f2),sig2,'b');
+        nLinesX = 50;
+        contour(real(f2),imag(f2),xi2,nLinesX,'r'); hold on
+        contour(real(f2),imag(f2),sig2,round(-nLinesX*y0/L),'b');
         plot([W_ip(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
 
         haCont(2) = subplot(2,1,2);
-        omega = ifft(  fft(phiS_ip(:,it)).*exp(-sig2.*kx).*2./(exp(2*kx.*H)+1).*(abs(kx)<k_cut));
+        kx = getKx(x);
+        if isfinite(H)
+            omega = ifft(  fft(phiS_ip(:,it)).*exp(-sig2.*kx).*2./(exp(2*kx.*H)+1));
+        else
+            omega = ifft(  fft(phiS_ip(:,it)).*exp(-sig2.*kx.*(kx<0)).*2.*(kx<0));
+        end
         contourf(real(f2),imag(f2),real(omega),20); hold on
         contour(real(f2),imag(f2),imag(omega),20,'k')
         plot([W_ip(:,it);nan;nan_*f2([1,end],1)],'k','linewidth',2)
-        axis(haCont,'equal','off')
+        axis(haCont,'tight','equal','off')
         if isfinite(H), title(haCont(1), sprintf('H[\\zeta] = %.4g, H[z] = %.4g',H,-imag(f2(1,1)))); end
     end
 else
@@ -340,7 +359,8 @@ else
 end
 
 
-[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('%s Tramp%g Hs=%.3g, Tp=%.2g',surfaceMethod,Tramp,Hs,Tp)),[],[0,0]);
+
+[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('%s TRamp%g Hs=%.3g, Tp=%.2g',surfaceMethod,TRamp,Hs,Tp)),[],[0,0]);
 ha = flipud(ha); set([ha(2:end).XAxis],'Visible','off');% if plotting bottom-to-top
 hp = 0*t_ip;
 % set([ha(1:end-1).XAxis],'Visible','off');% if plotting top-to-bottom
@@ -353,16 +373,18 @@ for i=1:nPannel
     end
     grid(ha(i),'on');
 end
-% axis(ha,'equal')
-% linkaxes(ha)
-% ylim(max(res.eta(:))*[-1,1])
+% axis(ha,'equal','tight')
+set(ha,'XLim',[min(x_ip(:)),max(x_ip(:))],'YLim',[min(eta_ip(:)),max(eta_ip(:))])
+% set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
-% xlim(ha,x([1,end]));%set(ha,'XLim',x([1,end]));
 
 
 
+iw = round([.75;1]*size(eta,1));
+heta = fft(eta(iw(1):iw(2),:).',[],1);
+S_mean = mean(abs(2*heta(1:nk,:)).^2./df,2)/df;
 
-hf2 = figure('color','w','position',[1640 164 600 500],'name',sprintf('%s Tramp%g Hs=%.3g, Tp=%.2g',surfaceMethod,Tramp,Hs,Tp));
+hf2 = figure('color','w','position',[1640 164 600 500],'name',sprintf('%s TRamp%g Hs=%.3g, Tp=%.2g',surfaceMethod,TRamp,Hs,Tp));
 ha2(1) = subplot(121);ha2(2) = subplot(122);
 xlabel(ha2(1),'k');xlabel(ha2(2),'f');
 ylabel(ha2(1),'F');ylabel(ha2(2),'S');

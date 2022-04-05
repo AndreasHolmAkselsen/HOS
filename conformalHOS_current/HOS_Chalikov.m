@@ -1,10 +1,25 @@
 function Y_t = HOS_Chalikov(t,Y)
+% Conformal mapping mathod, following Chalikov and Sheinin (2005).
+% Y = [FFTphiS;FFTeta] if chalikov.solverSpace = 'Fourier';
+% Y = [phiS;eta] if chalikov.solverSpace = 'physical';
+% Method supports vectorized row input.
 % Normalization: t -> t*(L/g)^1/2, (eta,x,y,H) -> (eta,x,y,H)*L, phi -> phi*(L^3*g)^1/2, (p/rho) -> (p/rho)*L*g, k -> k/L
 % g = 9.81; L is chosen as domain length/(2*pi) (such that k_j = j)
 % Let M be the range of modes; -M<=j<=M. Assume odd number of modes (when including zero)
+%
+% global inputs: 
+% DO_PADDING, bool; whether to zero-pad data to avoid aliasing. N = 4.5*M used as prescribed by Chalikov et. al.
+% dW, function handle; dW(z) gives the complex velocity at a point z in physical space. Inactive if ~chalikov.doCurr
+% dim, struct; proerties t,L. Scaling used for time and length, respectively. (Used for status printing and background current only.)
+% chalikov.solverSpace, string; Tekes fourier modes as input and output if ='Fourier', phusical space input and output otherwise.
+%                               (Affectrs the call efficiency (less fft with 'Fourier', but also the time steps chosen by a ODE-method.)
+% chalikov.kd__kmax, double<=1; starting wavenumber for numerical damping, raletive to largest. See C&S, eq 46-48.
+% chalikov.r, double; damping intensity.
+% chalikov.H, double; depth in conformal plane. (Equals normalized actual depth + mean(eta).)
+% timeReached, double; (for status printing) set to zero befor call.
+% t_end, double; simulation end time (for status printing)
 
-
-global timeReached DO_PADDING chalikov dW t_end dim
+global DO_PADDING chalikov dW dim timeReached t_end
 
 if strcmp(chalikov.solverSpace,'Fourier')
     [FFTphiS,FFTeta] = deal(Y(1:end/2,:),Y(end/2+1:end,:));
@@ -41,13 +56,12 @@ else
 end
 if chalikov.doCurr
     xi = (0:N-1).'/N*2*pi*chalikov.dim.L;
-    dWS = dW( xi+1i*ifft(fftPad( FFTeta.*Lsin,N)) )/dim.U; 
+    dWS = dW( xi+1i*ifft(fftPad( FFTeta.*Lsin,N)) )/(dim.L/dim.t); 
 end
 % if any(angle(df) < -pi/2), Y_t = nan(2*M2,m);  return; end% downward mapping -> wave breaking
 dww = ifft(fftPad(1i.*kx.*FFTphiS.*Lcos,N));
 df =  1 - ifft(fftPad( kx.*FFTeta.*Lsin,N));
 JInv = abs(df).^(-2);
-% if any(JInv>1e+6),     Y_t = nan(2*M2,m);  return; end% downward mapping -> wave breaking
 if chalikov.doCurr
     FFTb = fftPad(fft(-JInv.*(imag(dww)+imag(dWS.*df))),M2); % unpad
     tf0 = 1i*sum(imag(FFTb.*conj(FFTeta)).*kx./(M2*sinh(kx*H)+(k==0)).^2); % enforces mean(x_t) = 0

@@ -1,4 +1,4 @@
-function Y_t = HOS_Taylor(t,Y)
+function Y_t = HOS_Taylor_flat(t,Y)
 % Method supports vectorized row input.
 % Normalization: t -> t*(L/g)^1/2, (eta,x,y,H) -> (eta,x,y,H)*L, phi -> phi*(L^3*g)^1/2, (p/rho) -> (p/rho)*L*g, k -> k/L
 % g = 9.81; L is chosen as domain length/(2*pi) (such that k_j = j)
@@ -13,7 +13,7 @@ end
 
 wNl = taylor.nonLinRamp(t);
 wCurr = wNl;
-[w_lin,w_nl] = phiComponentsHOS(phiS,eta);
+[w_lin,w_nl] = phiComponentsHOS_flat(phiS,eta);
 
 N = size(eta,1);
 FFTeta = fft(eta);

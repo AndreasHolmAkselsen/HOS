@@ -16,11 +16,11 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
         Nd = N;
     end
     W_jn = zeros(Nd,M);
-    hphi_jn = zeros(Nd,M);
+    hphi_jn = zeros(N,M);
     phi_jni = zeros(Nd,M,M+1); % [j,n,i+1] where i is the i'th derivative in z.
     phi_jni(:,1) = phiS;
     
-    k = [0:ceil(Nd/2)-1, floor(Nd/2):-1:1]';
+    k = [0:ceil(N/2)-1, floor(N/2):-1:1]';
     H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
     if isfinite(taylor.h), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*taylor.h/dim.L); end
 
@@ -30,9 +30,9 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
             phi_jni(:,n,1) = phi_jni(:,n,1) - eta.^i.*phi_jni(:,n-i,i+1)/factorial(i);
         end
         % compute new derivatives
-        hphi_jn(:,n) = fft(phi_jni(:,n,1));% NB
+        hphi_jn(:,n) = fftPad(fft(phi_jni(:,n,1)),N);% NB
         for i = 1:(M-n+1)
-            phi_jni(:,n,i+1) = real(ifft(fftPad( H_ji(:,i+1).*hphi_jn(:,n),Nd))); % ifft(k.^i.*hphi_jn(:,n));
+            phi_jni(:,n,i+1) = real(ifft(fftPad(H_ji(:,i+1).*hphi_jn(:,n),Nd)));
         end        
         %compute W^(n)
         for i = 0:n-1

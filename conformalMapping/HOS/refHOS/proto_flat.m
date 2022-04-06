@@ -24,7 +24,7 @@ relTolODE = 1e-4;% 1e-8;
 N_SSGW = 2^12; % number of modes in SSGW solution
 
 % Plot & export options
-DO_EXPORT = 1;
+DO_EXPORT = 0;
 EXPORT_MAT = 0;
 PLOT_CURRENT = false;
 exportPrefix = 'testFlat_';

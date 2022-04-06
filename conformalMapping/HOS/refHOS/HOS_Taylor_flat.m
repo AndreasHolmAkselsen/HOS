@@ -6,12 +6,12 @@ global taylor timeReached t_end dW DO_PADDING dim
 
 [phiS,eta] = deal(Y(1:end/2,:),Y(end/2+1:end,:));
 
-if t-timeReached > 1
-    timeReached = floor(t);
-    fprintf('Time %ds reached (%.1f%%)\n',timeReached,100*timeReached/(t_end/dim.t));
+if t*dim.t-timeReached > 1
+    timeReached = floor(t*dim.t);
+    fprintf('Time %ds reached (%.1f%%)\n',timeReached,100*timeReached/t_end);
 end
 
-wNl = taylor.nonLinRamp(t);
+wNl = taylor.nonLinRamp(t*dim.t);
 wCurr = wNl;
 [w_lin,w_nl] = phiComponentsHOS_flat(phiS,eta);
 

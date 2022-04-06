@@ -1,5 +1,5 @@
 function [W_lin,W_nl] = phiComponentsHOS_flat(phiS,eta)
-    global DO_PADDING taylor
+    global DO_PADDING taylor dim
     assert(iscolumn(phiS) && iscolumn(eta));
     M = taylor.M;
     
@@ -22,7 +22,7 @@ function [W_lin,W_nl] = phiComponentsHOS_flat(phiS,eta)
     
     k = [0:ceil(Nd/2)-1, floor(Nd/2):-1:1]';
     H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
-    if isfinite(taylor.h), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*taylor.h); end
+    if isfinite(taylor.h), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*taylor.h/dim.L); end
 
     for n = 1:M
         % Compute phi^(n)

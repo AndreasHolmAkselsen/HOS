@@ -11,9 +11,10 @@
 % hf(3) = openfig(['./figures/SFo_ka0p4_M5_h100p00_nx1024_ikCut50.fig'],'invisible');
 % legendNames = {'unpadded','padded','SFo'};
 
-hf(1) = openfig(['./figures/Chalikovka0p4_M5_h100p00_Nw1_dt1T_nx512_pad0_ikCut0.fig']);
-hf(2) = openfig(['./figures/Taylorka0p4_M5_h100p00_Nw1_dt1T_nx512_pad0_ikCut10.fig'],'invisible');
-legendNames = {'Chalikov','Taylor'};
+hf(1) = openfig(['./figures/Chalikov_ka0p2_M128_h0p79_Nw4_dt1T_nx257_pad0.fig']);
+hf(2) = openfig(['./figures/Taylor_ka0p2_M9_h0p79_Nw4_dt1T_nx256_pad0_kCut14.fig'],'invisible');
+hf(3) = openfig(['./figures/_Taylor_ka0p2_M9_h0p79_Nw4_dt1T_nx256_pad0_kCut14.fig'],'invisible');
+legendNames = {'Chalikov','Taylor','_Taylor'};
 
 
 lineStyles = {'-','--',':'};

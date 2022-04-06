@@ -1,6 +1,6 @@
 clear 
 clear global
-global timeReached DO_PADDING taylor t_end map H1 H2 width_xx xi_cut
+global timeReached DO_PADDING taylor t_end map H1 H2 width_xx xi_cut dim
 timeReached = 0; 
 
 g = 9.81;
@@ -269,7 +269,10 @@ end
 
 
 
-
+dim.L  = (map.xi(2)-map.xi(1))*nx/(2*pi);
+dim.t = sqrt(dim.L/g);
+dim.phi = sqrt(dim.L^3*g);
+dim.U = dim.L/dim.t;
 
 %% Run simulation
 % tic
@@ -283,12 +286,13 @@ end
 % phiS0 = y(:,1:nx)*dim.phi; h0 = y(:,nx+1:2*nx)*dim.L;
 tic
 if RK4dt~=0
-    [t,y] = RK4(@HOS_Taylor ,[t0,RK4dt,t_end],[varphiS0;eta0]);
+    [t,y] = RK4(@HOS_Taylor ,[t0,RK4dt,t_end]/dim.t,[varphiS0/dim.phi;eta0/dim.L]);
 else
-    [t,y] = ode45(@HOS_Taylor ,[t0,t_end],[varphiS0;eta0],ODEoptions);
+    [t,y] = ode45(@HOS_Taylor ,[t0,t_end]/dim.t,[varphiS0/dim.phi;eta0/dim.L],ODEoptions);
 end
 fprintf('CPU time: %gs\n',toc);
-varphiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
+t = t*dim.t;
+varphiS = y(:,1:nx)*dim.phi; eta = y(:,nx+1:2*nx)*dim.L;
 
 iNaN = find(isnan(varphiS(:,1)),1,'first');
 if ~isempty(iNaN), t(iNaN:end)=[]; varphiS(iNaN:end,:)=[]; eta(iNaN:end,:)=[]; end

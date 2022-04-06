@@ -7,28 +7,28 @@ timeReached = 0;
 g = 1.0;
 
 %% input
-surfaceMethod = 'Chalikov'; % Chalikov method
-% surfaceMethod = 'Taylor';  % normal HOS
+% surfaceMethod = 'Chalikov'; % Chalikov method
+surfaceMethod = 'Taylor';  % normal HOS
 
-% DO_PADDING = 0;
-% chalikov.M = 2^7;
-% chalikov.r = .25; % dim.less, =.25 in C&S
-% chalikov.kd__kmax = .5;%0/chalikov.M;%.1; % .5 in C&S
-% chalikov.solverSpace = 'physical'; % 'Fourier','physical'
-% ka = .2; % linear wave steepness
-% RK4dt = 0;%2e-2; % set to zero to use ODE45
-
-
-
-% for wave breaking example
-DO_PADDING = 1;
-chalikov.M = 2^9; %3072
-RK4dt = 0;%2.5e-3; % set to zero to use ODE45
+DO_PADDING = 0;
+chalikov.M = 2^7;
 chalikov.r = .25; % dim.less, =.25 in C&S
-chalikov.kd__kmax = .0;  % .5 in C&S
+chalikov.kd__kmax = .5;%0/chalikov.M;%.1; % .5 in C&S
 chalikov.solverSpace = 'physical'; % 'Fourier','physical'
-ka = .5; % linear wave steepness
-%  and  NT_dt =  5 /9/T; lambda = 2*pi; g=1;
+ka = .2; % linear wave steepness
+RK4dt = 0;%2e-2; % set to zero to use ODE45
+
+
+
+% % for wave breaking example
+% DO_PADDING = 1;
+% chalikov.M = 2^9; %3072
+% RK4dt = 0;%2.5e-3; % set to zero to use ODE45
+% chalikov.r = .25; % dim.less, =.25 in C&S
+% chalikov.kd__kmax = .0;  % .5 in C&S
+% chalikov.solverSpace = 'physical'; % 'Fourier','physical'
+% ka = .5; % linear wave steepness
+% %  and  NT_dt =  5 /9/T; lambda = 2*pi; g=1;
 
 
 
@@ -36,15 +36,15 @@ relTolODE = 1e-4;% 1e-8;
 N_SSGW = 2^12; % number of modes in SSGW solution
 
 % Plot & export options
-DO_EXPORT = 0;
+DO_EXPORT = 1;
 EXPORT_MAT = 0;
 PLOT_CURRENT = false;
-exportPrefix = '';
+exportPrefix = '_';
 exportPath = './figures/';
 i_detailedPlot = []; %plot contour plots of frame i. Leave empty to skip
 
 
-h = inf; % water depth. 
+h = pi/4; % water depth. 
 
 % current specification
 U_curr = 0;
@@ -53,7 +53,7 @@ currentMatFile = [];
 
 
 % Wave init specification
-NWaves = 1;
+NWaves = 4;
 lambda = 2*pi;
 k0 = 2*pi/lambda;
 L = NWaves*lambda;
@@ -65,17 +65,17 @@ omega = k0*U_curr+sqrt(g*k0*tanh(k0*h)); T = 2*pi/omega;
 
 
 % Simulation/plotting time
-NT_dt =  6 /9/T;
+NT_dt =  1;
 dt = NT_dt*T;
 t_end = 9*dt;
     
 % Initial conditions
-INIT_WAVE_TYPE = 'linear';  % 'SSGW' or 'linear'
+INIT_WAVE_TYPE = 'SSGW';  % 'SSGW' or 'linear'
 packageWidth = inf;  % set to inf if not simulating wave packets
 packageCentre__L = .5;
 
 taylor.nx__wave = 2^6;
-taylor.M = 3; 
+taylor.M = 9; 
 TRamp = 0*T;
 taylor.nonLinRamp = @(t) max(0,1-exp(-(t/TRamp)^2));
 taylor.k_cut = (taylor.M+5)*k0;
@@ -279,7 +279,7 @@ switch surfaceMethod
                 else
                     [t,y] = ode45(@HOS_Chalikov ,[t0,t_end]/dim.t,[FFTphiS_adj/dim.phi;FFTeta_adj/dim.L],ODEoptions);
                 end
-                phiS = ifft(y(:,1:nx),[],2)*dim.phi; eta = ifft(y(:,nx+1:2*nx),[],2)*dim.L;
+                y = [ifft(y(:,1:nx),[],2), ifft(y(:,nx+1:2*nx),[],2)];
             case 'physical'
                 if RK4dt~=0
                     [t,y] = RK4(@HOS_Chalikov,[t0,RK4dt,t_end]/dim.t,[ifft(FFTphiS_adj)/dim.phi;ifft(FFTeta_adj)/dim.L]);

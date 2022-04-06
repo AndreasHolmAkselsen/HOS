@@ -1,5 +1,5 @@
 function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
-    global DO_PADDING taylor map
+    global DO_PADDING taylor map dim
     assert(iscolumn(phiS) && iscolumn(eta));
     M = taylor.M;
     
@@ -20,10 +20,9 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta)
     phi_jni = zeros(Nd,M,M+1); % [j,n,i+1] where i is the i'th derivative in z.
     phi_jni(:,1) = phiS;
     
-    k = abs(getKx(map.xi,Nd));
-%     k = [0:ceil(Nd/2)-1, floor(Nd/2):-1:1]';
+    k = [0:ceil(Nd/2)-1, floor(Nd/2):-1:1]';
     H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
-    if isfinite(map.H), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*map.H); end
+    if isfinite(map.H), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*map.H/dim.L); end
 
     for n = 1:M
         % Compute phi^(n)

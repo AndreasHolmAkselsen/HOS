@@ -38,7 +38,7 @@ assert(isscalar(M));
 kx = [0:M,-M:-1]';
 k = abs(kx);
 kd = chalikov.kd__kmax*M;
-H = chalikov.H;
+H = chalikov.H/dim.L;
 if isfinite(H)
     Lsin = -2./(exp(2*kx.*H)-1); Lsin(1) = 1;
     Lcos = 2./(exp(2*kx.*H)+1);

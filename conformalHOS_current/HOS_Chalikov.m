@@ -37,7 +37,7 @@ M = (M2-1)/2;
 assert(isscalar(M));
 kx = [0:M,-M:-1]';
 k = abs(kx);
-kd = chalikov.kd__kmax*M;
+Md = chalikov.kd__kmax*M;
 H = chalikov.H/dim.L;
 if isfinite(H)
     Lsin = -2./(exp(2*kx.*H)-1); Lsin(1) = 1;
@@ -76,7 +76,7 @@ end
 eta_t_AA = imag(tf.*df);
 
 % Unpad and dampen:
-mu = chalikov.r*M*((k-kd)/(M-kd)).^2.*(k>kd);
+mu = chalikov.r*M*((k-Md)/(M-Md)).^2.*(k>Md);
 FFTeta_t =  fftPad(fft(eta_t_AA ),M2) - mu.*FFTeta ;
 FFTphiS_t = fftPad(fft(phiS_t_AA),M2) - FFTeta  - mu.*FFTphiS;
 

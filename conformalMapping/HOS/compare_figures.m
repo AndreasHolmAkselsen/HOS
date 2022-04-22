@@ -1,7 +1,8 @@
 
-hf(1) = openfig(['./figures/testConf__ka0p05_M3_H1p00_0p99_Nw30_dt2p35T_nx1920_pad0_kCut400.fig']);
-hf(2) = openfig(['./figures/testFlat_Taylor_ka0p05_M3_h1p00_Nw30_dt2p35T_nx1920_pad0_kCut400.fig'],'invisible');
-legendNames = {'Conformal','flat'};
+hf(1) = openfig(['./figures/testFlat_Taylor_ka0p05_M3_h1p00_Nw30_dt1T_nx1920_pad1_kCut4.fig']);
+hf(2) = openfig(['./figures/testConfDim__ka0p05_M3_H1p00_0p99_Nw30_dt1T_nx1920_pad1_kCut4.fig'],'invisible');
+hf(3) = openfig(['./figures/testConf__ka0p05_M3_H1p00_0p99_Nw30_dt1T_nx1920_pad1_kCut4.fig'],'invisible');
+legendNames = {'flat','ConformalDim','Conformal'};
 
 
 lineStyles = {'-','--',':'};

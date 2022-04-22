@@ -12,7 +12,7 @@ surfaceMethod = 'Taylor';  % normal HOS
 
 
 % for wave breaking example
-DO_PADDING = 1;
+DO_PADDING = 0;
 RK4dt = 0;%2e-2; % set to zero to use ODE45
 
 
@@ -24,7 +24,7 @@ relTolODE = 1e-4;% 1e-8;
 N_SSGW = 2^12; % number of modes in SSGW solution
 
 % Plot & export options
-DO_EXPORT = 0;
+DO_EXPORT = 1;
 EXPORT_MAT = 0;
 PLOT_CURRENT = false;
 exportPrefix = 'testFlat_';
@@ -57,17 +57,17 @@ omega = k0*U_curr+sqrt(g*k0*tanh(k0*h)); T = 2*pi/omega;
 
 
 % Simulation/plotting time
-NT_dt =  1;
+NT_dt =  2;
 dt = NT_dt*T;
 t_end = 9*dt;
     
 % Initial conditions
-INIT_WAVE_TYPE = 'linear';  % 'SSGW' or 'linear'
+INIT_WAVE_TYPE = 'SSGW';  % 'SSGW' or 'linear'
 packageWidth__L = .1;  % set to inf if not simulating wave packets
 packageCentre__L = -.25;
 
 taylor.nx__wave = 2^6;
-taylor.M = 3; 
+taylor.M = 9; 
 TRamp = 0*T;
 taylor.nonLinRamp = @(t) max(0,1-exp(-(t/TRamp)^2));
 taylor.k_cut = (taylor.M+5)*k0;
@@ -165,11 +165,12 @@ switch INIT_WAVE_TYPE
         out.k = PP(2)/L_scale;
         z = z*L_scale;
         
-        % to move wave to centre (optional)
-        z = [ z(N_SSGW+1:end)-lambda/2 ; z(1:N_SSGW)+lambda/2 ];
-        dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
+%         % to move wave to centre (optional)
+%         z = [ z(N_SSGW+1:end)-lambda/2 ; z(1:N_SSGW)+lambda/2 ];
+%         dwdz = [ dwdz(N_SSGW+1:end); dwdz(1:N_SSGW) ];
         
-        z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1);
+        % duplicate across domain.
+        z = reshape(repmat(z,1,NWaves)+lambda*(0:NWaves-1),[],1) + x(1);
         dwdz = repmat(dwdz,NWaves,1);
         dwdz = dwdz*sqrt(g*L_scale);
         
@@ -268,7 +269,7 @@ else
     fileName = sprintf('%s%s_ka%.2g_M%.4g_h%.2f_Nw%d_dt%.3gT_nx%d_pad%d',exportPrefix,surfaceMethod,ka,chalikov.M,h,NWaves,NT_dt,nx,DO_PADDING); fileName(fileName=='.')='p';
 end
 if DO_EXPORT
-    copyfile('./proto.m',[exportPath,'/',fileName,'.m']) 
+    copyfile('./proto_flat.m',[exportPath,'/',fileName,'.m']) 
     savefig(hf,[exportPath,'/',fileName]);
     export_fig(hf,[exportPath,'/',fileName],'-pdf','-png');
 end

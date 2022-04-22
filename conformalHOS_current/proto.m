@@ -370,11 +370,10 @@ set(ha,'XLim',[min(x_ip(:)),max(x_ip(:))],'YLim',[min(eta_ip(:)),max(eta_ip(:))]
 xlabel(ha(nPannel),'x [m]','fontsize',11)
 
 
-
 if strcmp(surfaceMethod,'Taylor')
     fileName = sprintf('%s%s_ka%.2g_M%d_h%.2f_Nw%d_dt%.3gT_nx%d_pad%d_kCut%.4g',exportPrefix,surfaceMethod,ka,taylor.M,h,NWaves,NT_dt,nx,DO_PADDING,taylor.k_cut); fileName(fileName=='.')='p';
 else
-    fileName = sprintf('%s%s_ka%.2g_M%.4g_h%.2f_Nw%d_dt%.3gT_nx%d_pad%d',exportPrefix,surfaceMethod,ka,chalikov.M,h,NWaves,NT_dt,nx,DO_PADDING); fileName(fileName=='.')='p';
+    fileName = sprintf('%s%s_ka%.2g_M%.4g_h%.2f_Nw%d_dt%.3gT_nx%d_pad%d_Md%.2g_r%.2g',exportPrefix,surfaceMethod,ka,chalikov.M,h,NWaves,NT_dt,nx,DO_PADDING,chalikov.kd__kmax,chalikov.r); fileName(fileName=='.')='p';
 end
 if DO_EXPORT
     copyfile('./proto.m',[exportPath,'/',fileName,'.m']) 

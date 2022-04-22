@@ -1,0 +1,71 @@
+%\documentclass[a4paper,12pt]{article}
+%%\documentclass{amsart}
+%
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+%\usepackage[utf8]{inputenc}
+%\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+%\usepackage{xcolor}
+%\usepackage{graphicx}
+%\usepackage[round]{natbib}
+%\usepackage{mathtools}
+%\usepackage[font=normalsize]{subfig}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\hypersetup{colorlinks=true,
+			%linkcolor=blue,
+			%filecolor=blue,
+			%urlcolor=blue,
+			%citecolor=blue}
+%\usepackage{changepage}
+%\newcommand{\mr}{\mathrm}
+%\newcommand{\mc}{\mathcal}
+%\let\SSS\S
+%\newcommand{\ii}{\mr{i}}
+%\newcommand{\ee}{\mr{e}}
+%%\newcommand{\phit}{\psi}
+%\newcommand{\phit}{\tilde\phi}
+%\newcommand{\br}[3]{\left#1#2\right#3}
+%\let\underscore\_
+%\renewcommand{\_}[1]{_\mr{#1}}
+%\begin{document}
+
+
+Before considering simulations we quickly do some back-of-the-envelope estimates of the effect of such a current based on the horizontal velocities at the surface.
+Waves will be blocked from passing the recirculation zone if the still-water phase speed is less than the backflow velocity. 
+This corresponds for the values quoted above to period of $T=0.128$\,s or a wavelength of $6.7$\,cm in the downstream zone, which is on the edge of what we consider the gravity-dominated regime. 
+\href{fig:lambda_envelope}{Figure~\ref*{fig:lambda_envelope}} shows the wavelength ratio for a range of periods.
+The ratio of wavelengths is about $0.775$ for $T=1.0$\,s and $0.875$ for $T=2.0$\,s.
+This estimate does not take into account of the current variation through the water column nor the effect that the current gradients have on wave stability.
+
+The recirculation patch is expected to limit the viable wave steepness possible in the basin as wave breaking will occur in the recirculation zone rather than the free stream zone. 
+A simple estimate of the limitations on steepness can be made based on the principle of wave action. 
+Wave action is the appropriately conserved property for oscillators in slowly varying media, and we have \citep[\SSS 3.6]{mei_2005}.
+\[\partial_t \left( \frac{E}{\omega-U k}\right) + \partial_x\left[(c_g+U)\frac{E}{\omega-U k}\right]=0,\]
+$c\_g$ being the group velocity.
+Denoting the recirculation zone with `min' and the free stream zone with `$\infty$', conservation of wave action in a steady-state wave train leads to a wave amplitude ratio
+\begin{equation}
+\frac{A\_{min}^2}{A_\infty^2}=\frac{c\_{g,\infty}+U_\infty}{c\_{g,min}+U\_{min}}\frac{\omega-U\_{min}k\_{min}}{\omega-U_\infty k_\infty}
+\label{eq:}
+\end{equation}
+Wave breaking is in deep water expected to take place at steepness $H/\lambda\approx0.14$ under ideal conditions, while Miche's formula is often quoted for intermediate depths.
+If we assume that wave breaking occurs at the same steepness in both the free stream and the recirculation zone, then we can plot the ratio of the two without specifying the precise point of breaking.
+This has been done in 
+\href{fig:waveAction_envelope}{Figure~\ref*{fig:waveAction_envelope}}. Deep water is here assumed but results are in general fairly insensitive to water depth.
+The plots show a notable reduction of maximal steepness also for the longer wave periods. 
+One should however keep in mind that the current cannot be regarded as slowly varying relative to the longer wavelengths.
+
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Wavelength with current velocities $U\_{min}^0$ and $U_\infty^0$.]{\includegraphics[width=.4\columnwidth]{./figures/lambda_envelope.pdf}\label{fig:lambda_envelope}}%
+\qquad
+\subfloat[Maximal steepness ratio based on conservation of wave action.]{\includegraphics[width=.4\columnwidth]{./figures/waveActionSteepness.pdf}\label{fig:waveAction_envelope}}%
+\caption{Back-of-the-envelope estimates in the recirculation zone and the free stream zone based on the estimates $U\_{min}^0 = -0.05$\,m/s, $U_\infty^0=0.17$\,m/s.}%
+\label{fig:envelope}%
+\end{figure}
+%
+%
+%\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
+%\bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.
+%\end{document}

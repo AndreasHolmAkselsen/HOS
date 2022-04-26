@@ -10,13 +10,13 @@ g = 9.81;
 
 % mapping input
 % map.domainType = 'simple';
-map.domainType = 'logstip';
-% map.domainType = 'double'; 
+% map.domainType = 'logstrip';
+map.domainType = 'double'; 
 H1 = 1;
 H2 = .5;
 H_IC = H1;
 
-width_x__L = .2;
+width_x__L = .35;
 
 % xL = -2.5*max(H1,H2);
 % xR = 2.5*max(H1,H2);
@@ -25,7 +25,7 @@ width_x__L = .2;
 % for wave breaking example
 param.DO_PADDING = 0;
 RK4dt = 0;%2.5e-3; % set to zero to use ODE45
-ka = .025; % linear wave steepness
+ka = .05; % linear wave steepness
 %  and  NT_dt =  5 /9/T; lambda = 2*pi; g=1;
 
 
@@ -36,14 +36,14 @@ N_SSGW = 2^12; % number of modes in SSGW solution
 DO_EXPORT = 1;
 EXPORT_MAT = 1;
 PLOT_MAP = 1;
-exportPrefix = 'testConf_';
+exportPrefix = '';
 exportPath = './figures/';
 i_detailedPlot = []; %plot contour plots of frame i. Leave empty to skip
 
 
 % Wave init specification
 
-kH1 = .5;
+kH1 = 1;
 NWaves = 60;
 k0 = kH1/H_IC;
 lambda = 2*pi/k0;
@@ -61,14 +61,15 @@ omega = sqrt(g*k0*tanh(k0*(H_IC))); T = 2*pi/omega;
 
 
 % Simulation/plotting time
-NT_dt =  5;
+NT_dt =  7.5;
 dt = NT_dt*T;
 param.t_end = 9*dt;
     
 % Initial conditions
 INIT_WAVE_TYPE = 'SSGW';  % 'SSGW' or 'linear'
 packageWidth__L = .05;  % set to inf if not simulating wave packets
-packageCentre__L = -.25/2;
+% packageCentre__L = -.12;
+packageCentre__L = -1/3;
 
 nx__wave = 2^6;
 param.M = 5; 
@@ -180,12 +181,12 @@ switch map.domainType
         yyLower = (min(hj)+h2)*pi/2; % from xi->-inf limit
         yyPlotUpper = yyUpper;
         yyPlotLower = 0;     
-    case {'logstip','double'}
-        if strcmp(map.domainType,'logstip')
+    case {'logstrip','double'}
+        if strcmp(map.domainType,'logstrip')
             map.fz = @(zz) fzStrip(zz,H1,H2);
             map.dfz = @(zz) dfzStrip(zz,H1,H2);
         else
-            width_xx = fzero( @(Wxx)-2*real(fzStrip( -Wxx/2,H1,H2 ))-width_x,0);
+            width_xx = fzero( @(Wxx)-2*real(fzStrip( -Wxx/2,H2,H1 ))-width_x,0);
             map.fz = @(zz) fzDouble(zz,H1,H2,width_xx,width_x);
             map.dfz = @(zz) dfzDouble(zz,H1,H2,width_xx);
         end
@@ -231,16 +232,18 @@ varphiS0 = interp1( [x-L;x;x+L],[phiS0;phiS0;phiS0],real(map.fz(map.xi+1i*h0_xiR
 
 if PLOT_MAP
     
-%     xxL = -1.05*width_xx/2;
-%     xxR = -.95*width_xx/2;
-    
+%     % for a 1-to-1 plot
+%     xxL = -420;xxR = -405;
+%     xxL = -5;xxR = 10;
+
+
     hf_map = figure('color','w','position',[436 63 637 600]); 
     zz = linspace(xxL,xxR,100) + 1i*linspace(yyPlotLower,yyPlotUpper,100)';
     z = map.fz(zz); 
 %     etaIp = interp1(real(zzS0),imag(zzS0),real(zz(1,:)),'linear','extrap');
 
     % plot the z-plane
-    haz = subplot(211); hold on;
+    haz = subplot(121); hold on;
     title('z-plane');xlabel('x');ylabel('i y');box off
     set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
 %     [~,hcz] = contourf(real(z),imag(z),real(ww),phiLevels,'LineStyle','none');
@@ -248,19 +251,18 @@ if PLOT_MAP
     zPhi = map.fz(linspace(xxL,xxR,20) + 1i*linspace(yyPlotLower,yyPlotUpper,200)');
     zPsi = map.fz(linspace(xxL,xxR,200) + 1i*linspace(yyPlotLower,yyPlotUpper,10)');
     plot(zPhi,'r','linewidth',1); hold on; plot(zPsi.' ,'b')
-%     axis equal
     switch map.domainType
-        case {'simple','logstip'}
+        case {'simple','logstrip'}
             patch([real(zPsi(1))*[1,1],0,0,real(zPsi(1,end))*[1,1]],[-1.2*max(H1,H2),-H1,-H1,-H2,-H2,-1.2*max(H1,H2)],.5*[1,1,1],'lineStyle','none'); % ,'FaceAlpha',.5
         case 'double'
-            patch([real(zPsi(1))*[1,1],-width_x/2*[1,1],width_x/2*[1,1],real(zPsi(1,end))*[1,1]],[-1.1*max(H1,H2),-H2,-H2,-H1,-H1,-H2,-H2,-1.1*max(H1,H2)],.5*[1,1,1],'lineStyle','none'); %,'FaceAlpha',.5
+            patch([real(zPsi(1))*[1,1],-width_x/2*[1,1],width_x/2*[1,1],real(zPsi(1,end))*[1,1]],[-1.1*max(H1,H2),-H1,-H1,-H2,-H2,-H1,-H1,-1.1*max(H1,H2)],.5*[1,1,1],'lineStyle','none'); %,'FaceAlpha',.5
     end
     xlabel('x');ylabel('i y');
 %     plot(haz,  [ zArr(1,:),nan, zArr(:,end).',nan,zArr(end,:),nan,zArr(:,1).'],'--k','linewidth',2 )
     plot(x,h0,'k','linewidth',1.5);
     
     % plot the zz-plane
-    hazz = subplot(212); hold on    
+    hazz = subplot(122); hold on    
     title('\zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off
     set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
     contour(real(zz),imag(zz),real(z),20,'r','linewidth',1);
@@ -268,11 +270,16 @@ if PLOT_MAP
 %     plot(hazz,[zzArr(1,1),zzArr(1,end),zzArr(end,end),zzArr(end,1),zzArr(1,1)],'--k','linewidth',2 )
     plot(zzS0,'k','linewidth',1.5);
     
-
+%     % for a 1-to-1 plot
+%     subplot(211)
+%     axis equal;xlim(real([z(1,1),z(1,end)]));
+%     subplot(212)
+%     axis equal;xlim([xxL,xxR]);
+    
     if DO_EXPORT
-        fileNameMap = sprintf('map_%s_ka%.2g_H%.2f_%.2f_Nw%d',exportPrefix,ka,H1,H2,NWaves); fileNameMap(fileNameMap=='.')='p';
+        fileNameMap = sprintf('map2_%s%s_%s_ka%.2g_H%.2f_%.2f_Nw%d',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,H1,H2,NWaves); fileNameMap(fileNameMap=='.')='p';
         export_fig(hf_map,['./figures/',fileNameMap],'-png','-pdf')
-        
+        savefig(hf_map,['./figures/',fileNameMap])
 %         axis([haz,hazz],'tight','equal')
 %         xlim(haz,[-1.05,-.95]*width_x/2);
 %         xlim(hazz,[-1.05,-.95]*width_xx/2);
@@ -336,7 +343,7 @@ clear y
 
 % t_ip = (0:dt:param.t_end)';
 t_ip = linspace(0,t(end),10).';
-% t_ip = linspace(.5*t(end),t(end),10).';
+% t_ip = linspace(0,.9*t(end),10).';
 
 nPannel = length(t_ip);
 varphiS_ip = interp1(t,varphiS,t_ip).';
@@ -356,6 +363,8 @@ for i=1:nPannel
     grid(ha(i),'on');
     if strcmp(map.domainType,'double')
        plot(ha(i),[-1,-1,nan,1,1]*.5*width_x,[minh,maxh,nan,minh,maxh],'--k'); 
+    else % 'logstrip/simple'
+        plot(ha(i),[0,0],[minh,maxh],'--k'); 
     end
 end
 % axis(ha,'equal','tight')
@@ -363,7 +372,7 @@ set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
 % set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
 
-fileName = sprintf('%s_ka%.2g_M%d_H%.2f_%.2f_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,ka,param.M,H1,H2,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping); fileName(fileName=='.')='p';
+fileName = sprintf('%s%s_%s_ka%.2g_M%d_H%.2f_%.2f_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,param.M,H1,H2,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping); fileName(fileName=='.')='p';
 
 if DO_EXPORT
     copyfile('./proto.m',[exportPath,'/',fileName,'.m']) 

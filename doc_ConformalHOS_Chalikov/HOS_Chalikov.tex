@@ -304,7 +304,7 @@ Following \citet{chalikov2005modeling}, we extend the time derivative computatio
 where 
 \begin{equation}
 \mu_j = \begin{cases}
-0.25\times 2\pi M \sqrt{g/L}\rbr{\frac{|j|-M\_d}{M-M\_d}}^2,& j>M\_d\\
+r\times 2\pi M \sqrt{g/L}\rbr{\frac{|j|-M\_d}{M-M\_d}}^2,& j>M\_d\\
 0 & \text{otherwise.}
 \end{cases}
         %mu = mu = k_cut*sqrt(2*pi*g*kx(2))*N/2 * (2*k/kmax-1).^2.*(k>kmax/2);
@@ -312,6 +312,7 @@ where
 \end{equation}
 $-M\leq j \leq M$ are here the spectral modes before zero-padding and $M\_d$ is the first mode with active damping.
 The damping is gradually increasing form $M\_d$ into the high-wavenumber end of the spectral domain.
+As in \citet{chalikov2005modeling}, $r=0.25$ is chosen.
 
 
 \subsection*{Initial conditions}

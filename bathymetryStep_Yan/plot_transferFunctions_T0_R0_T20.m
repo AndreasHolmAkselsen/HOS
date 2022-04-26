@@ -1,13 +1,18 @@
 clear
 % k0hd = .25:.5:6;
 % hs_hd = .5:.05:1';
-[k0hd,hshd] = meshgrid( logspace(log10(.25),log10(6.0),40), logspace(log10(.2),log10(.99),45));
+% [k0hd,hshd] = meshgrid( logspace(log10(.25),log10(6.0),40), logspace(log10(.2),log10(.99),45));
+
+[k0hd,hshd] = meshgrid( logspace(log10(.25),log10(6.0),20), logspace(log10(.2),log10(.99),20));
+% k0hd = 2;
+% hshd = .5;
+
 
 h_d = 10;
 g = 9.81;
 
 % NMode = 0;
-NMode = 200;
+NMode = 0;
 
 addpath .\step_functions_YanLi
 
@@ -21,9 +26,11 @@ for i = size(k0,1):-1:1
         
          %% [1] linear waves coefficients and wavenumbers
         [R_n,T_m,k_nv,k_msv] = monochramonic_coefficient_final(h_d,h_s(i,j),w0(i,j),NMode);
+%         testttt_Free_waves_super_Harmonic(h_d,h_s(i,j),k_nv(1),NMode);
         
         %% [2] super-harmonic wave coefficients and wavenumbers
         [~,T_2m,~,~] = Free_waves_super_Harmonic(h_d,h_s(i,j),k_nv(1),k_msv(1),R_n(1),T_m(1),NMode);
+        
         
         R0(i,j) = R_n(1);
         T0(i,j) = T_m(1);

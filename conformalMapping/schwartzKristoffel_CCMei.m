@@ -104,18 +104,25 @@ function y = log2(x)
     y(ii) = y(ii) + 2i*pi;
 end
 
+% function fz=ffz(zeta)
+% global h1 h2
+% c = h2/h1;
+% % lambda = exp(zeta); % surface at imag(zeta) = pi, bed at imag(zeta) = 0
+% lambda = -exp(zeta); % surface at imag(zeta) = 0, bed at imag(zeta) = -pi
+% t = sqrt((lambda-c^2)./(lambda-1));
+% % t = sqrt2(lambda-c^2)./sqrt2(lambda-1);
+% fz = -1i*h1 + h2/pi.*(1/c.*log2((t-c)./(t+c))-log((t-1)./(t+1)));
+% end
+
+
+
 function fz=ffz(zeta)
 global h1 h2
 c = h2/h1;
-% lambda = exp(zeta); % surface at imag(zeta) = pi, bed at imag(zeta) = 0
-lambda = exp(zeta+1i*pi); % surface at imag(zeta) = 0, bed at imag(zeta) = -pi
-t = sqrt((lambda-c^2)./(lambda-1));
-% t = sqrt2(lambda-c^2)./sqrt2(lambda-1);
+lambda = exp(zeta); % surface at imag(zeta) = 0, bed at imag(zeta) = -pi
+t = sqrt((lambda+c^2)./(lambda+1));
 fz = -1i*h1 + h2/pi.*(1/c.*log2((t-c)./(t+c))-log((t-1)./(t+1)));
 end
-
-
-
 
 
 % A = rand(2000);

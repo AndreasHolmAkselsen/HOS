@@ -6,12 +6,17 @@ addpath .\step_functions_YanLi
 % h_d = 10;
 g = 9.81;
 
-h_d = 10;%6;
+h_d = 10;
 
+
+% h_s = logspace(log10(.2*h_d),log10(.95*h_d),45)';
+% f = logspace(log10(.1),log10(.36),45);
 
 h_s = logspace(log10(.2*h_d),log10(.95*h_d),45)';
 f = logspace(log10(.1),log10(.36),45);
 
+% h_s = .5*h_d;
+% f = .2;
 
 % NMode = 0;
 NMode = 100;
@@ -41,11 +46,29 @@ end
 
 [H_S,F] = ndgrid(h_s ,f);
 
+% sig_s = tanh(k0s.*h_s);
+% heta_b = k0s.*(3-sig_s.^2)./(4*sig_s.^3).*T0.^2;
+% heta_f = 2*w0.^2./g.*T20  ;
+% heta_ratio = heta_f./heta_b;
+% heta_ratio(heta_ratio>2) = nan;
+
+
+% A0_p        = eps/k_0;
+% A_slowT        =  A0_p*exp(-(c_g0/c_g20s*(X_p)-X_0-c_g0.*(T_vec-T_0)).^2/2);
+% zeta_2T_f      =  2*omega_0/g*abs(T_2m(1)).*A_slowT.^2.*...
+%                   cos(k_20s.*(x_p-x_0)-2*omega_0*(t_vec-t_0)+phi_2T_f + 2*phi_shift);
+% 
+% zeta_sup_b  = k_0*A_envelop.^2*cosh(k_0*h_d)*(2*(cosh(k_0*h_d))^2+1)/...
+%                4/(sinh(k_0*h_d))^3.*cos_sup;           
+
+
+% heta_b = k0s*cosh(k0s*h_s)*(2*(cosh(k0s*h_s))^2+1)/4/(sinh(k0s*h_s))^3.*T0.^2; % as written by Yan
 sig_s = tanh(k0s.*h_s);
 heta_b = k0s.*(3-sig_s.^2)./(4*sig_s.^3).*T0.^2;
-heta_f = 2*w0.^2./g.*T20  ;
+heta_f = 2*w0./g.*T20  ;
 heta_ratio = heta_f./heta_b;
-heta_ratio(heta_ratio>2) = nan;
+heta_ratio(heta_ratio>1) = nan;
+
 
 gfz = figure('color','w','name',['N modes: ',num2str(NMode)]);
 contourf(H_S./h_d,1./F,heta_ratio)

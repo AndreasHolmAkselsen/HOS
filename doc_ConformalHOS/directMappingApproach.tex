@@ -1,0 +1,98 @@
+
+
+
+
+
+\section{A direct mapping technique for matching the surface potential.}
+\label{sec:directMapping}
+Even though the map \eqref{eq:map_double} cannot be inverted analytically, a numerical inversion function $\zzmap$ based on interpolation can easily be constructed. 
+Crucially, the bathymetry mapping is constant throughout any simulation, meaning that the minor computation associated with this inverse mapping is done in advance, 
+and the surface in the $\zz$-plane obtained at $\zz\S(\x)=\zzmap[\x+\ii h(\x)]$.
+The inverse map $\zzmap$ is composed from scattered interpolation of a structured rectangle in the $\zz$-plane, fitted to contain the surface $\zz\S$.
+The main challenge and goal of such a construct is then to be able to construct a complex potential $\ww(\zz)$ from \eqref{eq:ww_logstrip} or \eqref{eq:ww_double}, depending on map, whose real part coincides with $\phi\S(\x)$ at $\zz=\zz\S(\x)$.
+
+As discussed in \autoref{sec:finiteDepth}, the modes $\h\ww_j$ cannot explicitly be related to $\phi\S$ because the complex potential is also constructed to account for the impermeable lower boundary. 
+We can however express the system for the discrete points $\z_i,\zz_i$ which can easily be solved numerically.
+Incorporating the condition $\h\ww_{-j}=\h\ww_{j}^*$, the system is written
+\begin{equation}
+\h\phi_0 + 2\sum_{j=1}^J (\h\phi_j \cos\kk_j \xx_i - \h\psi_j \sin\kk_j \xx_i )\frac{\cosh \kk_j(\yy_i+\yy_0)}{\cosh\kk_j\tilde H} = \phi\S_i,
+%\Re\ww_0 + 2\sum_{j=1}^J \Re\left\{\h\ww_j \ee^{\ii \kk_j \xx_i}\right\}\frac{\cosh \kk_j(\yy_i+\yy_0)}{\cosh\kk_j\tilde H} = \phi\S_i,
+\label{eq:syst_ww}
+\end{equation}
+to be solved for the real and imaginary parts of 
+%$\h\ww_j$; $\Re\h\ww_j \ee^{\ii \kk_j \xx_i} = \h\phi_j \cos\kk_j \xx_i - \h\psi_j \sin\kk_j \xx_i $
+$\h\ww_j = \h\phi_j + \ii \h\psi_j$. 
+$\yy_0$ and $\tilde H$ both equal $\pi$ in the extended maps \eqref{eq:map_logstrip} and \eqref{eq:map_double}, and equals respectively zero and some representative height (e.g., $\Im \zzmap(0)$) with the simpler map \eqref{eq:mapSC}.
+The imaginary part of $\h\ww_0$ is left arbitrary.
+
+It is found numerically stabilizing to integrate $\phi\S(x)$ such that $\xx_i$ are equidistant.  
+This ensures that the system \eqref{eq:syst_ww} corresponds to a normal Fourier transform in the case of a flat surface $\yy_i=0$, such that $\h\ww_j = \h\phi_j\S \ee^{\ii k_j \x_0}$ ($\h\phi_j\S$ being the Fourier coefficients of $\phi\S(\x)$ after interpolation).
+Robustness of the method then gradually decreases with increasing surface amplitudes as the components in \eqref{eq:syst_ww} become less orthogonal.
+It is possible that robustness can be improved further by other interpolation choices or by over-determining system \eqref{eq:syst_ww}, including fewer wave modes than there are spatial points.
+\\
+
+Examples of thus computed potential fields are presented in this section for an arbitrary wave $h(\x) = a\cos(k_0 \x + \varphi)$ with an arbitrary surface potential $\phi\S(\x) = b\sin(k_0 \x + \varphi_1) + c\sin(2k_0 \x + \varphi_2)$ in the $\z$-plane.
+\autoref{fig:res:simple} shows results for the simpler transformation \eqref{eq:mapSC}.
+Dashed black lines indicate the interpolation domain included in the inverse mapping $\zzmap$.
+We see that a smooth potential field has been found in the right half of the domain. 
+The left half shows strong high-frequency variation. 
+This is because to solution obtained form solving \eqref{eq:syst_ww} relied on high-wavenumber modes in this region; it matches $\phi\S$ exactly at the interpolated discrete points, but fluctuates wildly in their neighbourhood.
+
+Better robustness is seen in \autoref{fig:res:logstip} showing the extended map \eqref{eq:map_logstrip} with the coinciding flat planes $\yy=0$ where $\y=0$. 
+Fairly large amplitudes can be imposed before fluctuations at the surface solution are observed. 
+Furthermore, robustness is fairly insensitive to the degree of depth transition.
+
+Several examples more are presented in \autoref{fig:res:double1}--\ref{fig:res:double3}, here for the double step \eqref{eq:map_double}.
+This map has the additional advantage that the domain becomes periodic in both $\zz$ and $\z$ planes.
+
+
+
+
+
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Long waves]{\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/simple_nWaves2_h1_1_h2_0p5_nx101_aEta0p06_kCutF1_L5.pdf}}%
+{\vrule width 1pt}%
+\subfloat[Short waves]{\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/simple_nWaves4_h1_1_h2_0p5_nx101_aEta0p03_kCutF1.pdf}}%
+\caption{Simple Schwartz-Christoffel geometry \eqref{eq:mapSC}}%
+\label{fig:res:simple}%
+\end{figure}
+
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Long waves]{\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/logstip_nWaves2_h1_1_h2_0p5_nx101_aEta0p075_kCutF1_L5.pdf}}%
+{\vrule width 1pt}%
+\subfloat[Short waves]{\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/logstip_nWaves4_h1_1_h2_0p5_nx101_aEta0p03_kCutF1_L5.pdf}}%
+\caption{Extended Schwartz-Christoffel geometry \eqref{eq:map_logstrip}}%
+\label{fig:res:logstip}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Long waves]{\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/double_nWaves2_h1_0p5_h2_1_nx101_aEta0p05_kCutF1.pdf}}%
+{\vrule width 1pt}%
+\subfloat[Short waves] {\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/double_nWaves4_h1_0p4_h2_1_nx101_aEta0p03_kCutF1.pdf}}
+\caption{Extended Schwartz-Christoffel geometry \eqref{eq:map_double} (1)}%
+\label{fig:res:double1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+{\includegraphics[width=.33\columnwidth]{../conformalMapping/figures/double_nWaves2_h1_0p25_h2_1_nx101_aEta0p05_kCutF1.pdf}}%
+{\includegraphics[width=.33\columnwidth]{../conformalMapping/figures/double_nWaves2_h1_0p25_h2_1_nx201_aEta0p075_kCutF1_L10.pdf}}
+{\includegraphics[width=.33\columnwidth]{../conformalMapping/figures/double_nWaves4_h1_0p25_h2_1_nx101_aEta0p03_kCutF1.pdf}}
+\caption{Extended Schwartz-Christoffel geometry \eqref{eq:map_double} (2)}%
+\label{fig:res:double2}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Long waves] {\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/double_nWaves2_h1_1_h2_0p25_nx101_aEta0p05_kCutF1.pdf}}
+{\vrule width 1pt}%
+\subfloat[Short waves] {\includegraphics[width=.5\columnwidth]{../conformalMapping/figures/double_nWaves4_h1_1_h2_0p5_nx101_aEta0p1_kCutF1.pdf}}%
+\caption{Extended Schwartz-Christoffel geometry \eqref{eq:map_double} (3)}%
+\label{fig:res:double3}%
+\end{figure}
+
+
+

@@ -3,16 +3,13 @@ clear
 g = 9.81;
 addpath c:/gits/wavemaker
 
-L = 4;
-T = 4.1733;
+% T = 4.1733;
+T = 2.2987;
 w = 2*pi/T;
 hL = 1.0;
 hR = .5;
-nEv = 400;
+nEv = 500;
 t = 0;
-xL = linspace(-1*L,0,50);
-xR = linspace(0,L,100); xR(1)= [];
-z = linspace(-max([hL,hR]),0,90).';
 
 hphiI = exp(1i*deg2rad(90));
 
@@ -24,6 +21,11 @@ kiR = abs(real(kiR)) + 1i*(abs(imag(kiR)));
 kiL = findWaveNumbers(w,hL,0,nEv);
 kiL = abs(real(kiL)) + 1i*(abs(imag(kiL)));
 
+
+L = .25*pi/kiL(1);
+xL = linspace(-1*L,0,50);
+xR = linspace(0,L,100); xR(1)= [];
+z = linspace(-max([hL,hR]),0,90).';
 
 kjR = [kiR;kiR].';
 kjL = [kiL;kiL].';
@@ -84,23 +86,29 @@ fprintf('Reflection coefficient: %g\n', abs(hphiL(1))/abs(hphiI) )
 %% plot
 
 
-hf = figure('color','w','position',[1640 558 1129 420]);
+hf = figure('color','w','position',[1640 558 1129 240]);
 subplot(1,3,1);
 contourf([xL,xR],z,[phiL,phiR]);
 hold on
-plot([xL([1,end]),xR([1,end])],-[hL,hL,hR,hR],'k','linewidth',1.5)
+patch([0,0,L,L],-[hL,hR,hR,hL],.5*[1,1,1],'lineStyle','none');%,'FaceAlpha',.5
+plot([-L,0,0,L],-[hL,hL,hR,hR],'k','linewidth',1.)
+title('\phi')
+xlabel('x');ylabel('y')
+axis equal
 % 
 ha=subplot(1,3,2);
 plot(phiLx_0,z,'k',phiRx_0,z,'--r','linewidth',1);
-ylabel('z'); grid on;
-ha.XAxisLocation='origin';
-xlabel('\phi_x');
+xlabel('\phi_x'); ylabel('y'); grid on;
+% ha.XAxisLocation='origin';
 % 
 ha=subplot(1,3,3);
 plot(phiL_0,z,'k',phiR_0,z,'--r','linewidth',1);
-ylabel('z'); grid on;
-ha.XAxisLocation='origin';
-xlabel('\phi');
+xlabel('\phi'); ylabel('y'); grid on;
+% ha.XAxisLocation='origin';
+
+
+return
+export_fig('contourPlot','-pdf','-png','-m2')
 
 function res = Lambda(k,h)
     res = .5*(h.*sech(k.*h).^2+tanh(k.*h)./k);

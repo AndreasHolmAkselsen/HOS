@@ -13,6 +13,10 @@ omega_0 = sqrt(g*k_0*tanh(k_0*h_d));
 k_20     = 2*k_0;
 omega    = 2*omega_0;
 
+
+% %%% Yan
+% % k_nr   = zeros(1,N_mode);
+% % k_mr   = k_nr; 
 % const_1  = omega^2*h_d/g;
 % const_2  = omega^2*h_s/g;
 % cof_01   = 1;
@@ -30,8 +34,28 @@ omega    = 2*omega_0;
 %        cof_02     =  0.56;
 %    end
 % end
+% alpha_2nrvp(1)   = fzero(@(x) const_1./x+tan(x),cof_01*pi)/h_d;
+% for i=2:N_mode-1
+%     alpha_2nrvp(i)   = fzero(@(x) const_1./x+tan(x),i*pi)/h_d;
+% end
+% % alpha_2nrvp   = fsolve(@(x) const_1./x+tan(x),[cof_01*pi (2:1:N_mode-1).*pi])/h_d;
+% k_2nv0        = fzero(@(x) -const_1./x+tanh(x),const_1)/h_d;
+% k_2nv         = [k_2nv0 1i*alpha_2nrvp];
+% k_20          = k_2nv0;
+% alpha_2mrvp(1)   = fzero(@(x) const_2./x+tan(x),cof_02*pi)/h_s; 
+% for i=2:N_mode
+%     alpha_2mrvp(i)   = fzero(@(x) const_2./x+tan(x),i*pi)/h_s; 
+% end
+% % alpha_2mrvp   = fsolve(@(x) const_2./x+tan(x),[cof_02*pi (2:1:N_mode).*pi])/h_s; 
+% k_2mv         = 1i*alpha_2mrvp;
+% k_20s         = fzero(@(x) -const_2./x+tanh(x),const_2)/h_s;
+% k_2msv        = [k_20s k_2mv];  % of size N_mode+1
+% %%%% End Yan
 
-% % AHA
+
+
+
+%%% AHA
 k_d = findWaveNumbers(omega,h_d,0,N_mode-1);
 k_2nv0 = k_d(1);
 alpha_2nrvp = 1i*k_d(2:end).';
@@ -43,6 +67,8 @@ k_2nv        = [k_2nv0 1i*alpha_2nrvp];
 k_20          = k_2nv0;
 k_2mv         = 1i*alpha_2mrvp;
 k_2msv        = [k_20s k_2mv];  % of size N_mode+1
+%% end AHA
+
 
 if min([alpha_2nrvp k_2nv0 alpha_2mrvp k_20s])<0
     fprintf('Attention: find a negative wave number!!')

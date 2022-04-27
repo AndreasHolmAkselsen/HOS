@@ -18,9 +18,11 @@ FFTvphiS = fft(vphiS);
 kx = [0:ceil(N/2)-1, -floor(N/2):-1]';
 k = abs(kx);
 
-zz = param.map.xi+1i*eta*param.dim.L;
-h = imag(param.map.fz(zz))/param.dim.L;
-JInv= abs(param.map.dfz(zz)).^(-2);
+zzS = param.map.xi+1i*eta*param.dim.L;
+% h = imag(param.map.fz(zzS))/param.dim.L;
+% JInv= abs(param.map.dfz(zzS)).^(-2);
+h = param.map.fy(zzS)/param.dim.L;
+JInv= param.map.fJInv(zzS);
 
 if param.DO_PADDING
     Nd = N*(4+1)/2;

@@ -363,6 +363,13 @@ we introduce in \eqref{eq:map_logstrip:z} the operator $\ln^+$, the angles of wh
 \autoref{fig:Mei_step} shows the adjusted map \eqref{eq:map_logstrip} for $-\pi\leq\yy\leq0.5$ with the intermediate planes $\lambda(\zz)$ and $\tau(\lambda)$ shown in \autoref{fig:Mei_step_lambda_t}.
 Note that the free surface $\y=0$ is a straight line  $\yy=0$ in the $\zz$-plane, but that $\xx$ is contracted over the step transition.
 The direction of the step is reversed by flipping the abscissa; $z\mapsto-f(-\zz)$.  
+
+For numerical precision can become an issue for large real positive or real negative values of $\zz$ due to $\lambda=\exp \zz$ reaching the precision limit. This is easily circumvented by instead following the asymptote at large value; noting that $f'(\zz)=H\_d/\pi\tau$ and that $\lim_{\xi\to\infty}\tau=1$, $\lim_{\xi\to-\infty}\tau=H\_d/H\_s$, we have 
+\begin{alignat*}{2}
+\zmap(\zz) &= \zmap(\xi\_s)+\frac{H\_s}\pi(\zz-\xi\_s); \quad &\xi&\to-\infty,\\
+\zmap(\zz) &= \zmap(\xi\_d)+\frac{H\_d}\pi(\zz-\xi\_d); & \xi&\to+\infty,
+\end{alignat*}
+$\xi\_s$ and $\xi\_d$ being locations suitably far away form the step on each side.
 \\
 \begin{figure}[h!ptb]%
 \centering
@@ -415,8 +422,8 @@ We remark that despite the many mapping levels of \eqref{eq:map_logstrip}, compu
 \begin{equation}
 \begin{aligned}
 f'(\zz) &= \frac{H_d}{\pi\, \tau},  \\
-f''(\zz) &=- \frac{H_d \lambda\, \tau}{2\pi} \frac{c^2-\lambda}{\rbr{c^2-\lambda}^2},\\
-f'''(\zz) &= \frac{H_d \lambda\, \tau^3}{4\pi} \rbr{c^2\lambda + 2\lambda^2 - 2c^2-\lambda} \frac{c^2-1}{\rbr{c^2-\lambda}^4},\\
+f''(\zz) &= \frac{H_d \lambda\, \tau}{2\pi} \frac{c^2-1}{\rbr{c^2+\lambda}^2},\\
+f'''(\zz) &= \frac{H_d \lambda\, \tau^3}{4\pi} \rbr{c^2\lambda - 2\lambda^2 + 2c^2-\lambda} \frac{c^2-1}{\rbr{c^2+\lambda}^4},\\
 &\ldots
 \end{aligned}
 \label{eq:}

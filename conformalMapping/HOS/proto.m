@@ -10,11 +10,12 @@ g = 9.81;
 
 % mapping input
 % map.domainType = 'simple';
-% map.domainType = 'logstrip';
-map.domainType = 'double'; 
+map.domainType = 'logstrip';
+% map.domainType = 'double'; 
 H1 = 1;
 H2 = .5;
 H_IC = H1;
+DO_MAP_INTERPOLATION = true;
 
 width_x__L = .35;
 
@@ -61,15 +62,15 @@ omega = sqrt(g*k0*tanh(k0*(H_IC))); T = 2*pi/omega;
 
 
 % Simulation/plotting time
-NT_dt =  7.5;
+NT_dt = 5;
 dt = NT_dt*T;
 param.t_end = 9*dt;
     
 % Initial conditions
 INIT_WAVE_TYPE = 'SSGW';  % 'SSGW' or 'linear'
 packageWidth__L = .05;  % set to inf if not simulating wave packets
-% packageCentre__L = -.12;
-packageCentre__L = -1/3;
+packageCentre__L = -.2;
+% packageCentre__L = -1/3;
 
 nx__wave = 2^6;
 param.M = 5; 
@@ -171,33 +172,32 @@ phiS0 = phiS0.*packet;
 
 
 % Create inverse function through scattered interpolation:
-nArrX = 300;
-nArrY = 100;
 switch map.domainType
     case 'simple'
         map.fz = @(zz) fzSimple(zz,H1,H2);
-        map.dfz = @(zz) dfzSimple(zz,H1,H2);
+        dfz = @(zz) dfzSimple(zz,H1,H2);
         yyUpper = (max(hj)+h1)*pi/2;   % from xi->+inf limit
         yyLower = (min(hj)+h2)*pi/2; % from xi->-inf limit
         yyPlotUpper = yyUpper;
         yyPlotLower = 0;     
     case {'logstrip','double'}
         if strcmp(map.domainType,'logstrip')
-            map.fz = @(zz) fzStrip(zz,H1,H2);
-            map.dfz = @(zz) dfzStrip(zz,H1,H2);
+            fz = @(zz) fzStrip(zz,H1,H2);
+            dfz = @(zz) dfzStrip(zz,H1,H2);
         else
             width_xx = fzero( @(Wxx)-2*real(fzStrip( -Wxx/2,H2,H1 ))-width_x,0);
-            map.fz = @(zz) fzDouble(zz,H1,H2,width_xx,width_x);
-            map.dfz = @(zz) dfzDouble(zz,H1,H2,width_xx);
+            fz = @(zz) fzDouble(zz,H1,H2,width_xx,width_x);
+            dfz = @(zz) dfzDouble(zz,H1,H2,width_xx);
         end
                 
-        xxL0 = fzero(@(xx) real(map.fz(xx))-width_x,-1); % numerical inverse, upper left corner of z-domain
+        xxL0 = fzero(@(xx) real(fz(xx))-width_x,-1); % numerical inverse, upper left corner of z-domain
         assert(isfinite(xxL0))
         dzdzz_min = min(abs(dfzStrip0(linspace(xxL0,-xxL0,21),H1,H2)));
-        yyUpper = 1.4*max(h0)./dzdzz_min;
-        yyLower = 1.4*min(h0)./dzdzz_min;
-%         yyUpper = 1;
-%         yyLower = -1;        
+%         yyUpper = 1.4*max(h0)./dzdzz_min;
+%         yyLower = 1.4*min(h0)./dzdzz_min;
+        yyUpper = 2.5*max(h0)./dzdzz_min;
+        yyLower = 2.5*min(h0)./dzdzz_min;
+
         yyPlotUpper = 1;
         yyPlotLower = -pi;   
         map.H = pi;
@@ -205,30 +205,44 @@ switch map.domainType
         error('Domain type''%s'' not recognised.',map.domainType);
 end
 
+
 % dxxExtra = .1*H1;
 dxxExtra = .1;
-xxL = fzero(@(xx) real(map.fz(xx+1i*yyUpper))-xL,xL )-dxxExtra; % numerical inverse, upper left corner of z-domain
-xxR = fzero(@(xx) real(map.fz(xx+1i*yyLower))-xR,xR )+dxxExtra; % numerical inverse, lower left corner of z-domain
+xxL = fzero(@(xx) real(fz(xx+1i*yyUpper))-xL,xL )-dxxExtra; % numerical inverse, upper left corner of z-domain
+xxR = fzero(@(xx) real(fz(xx+1i*yyLower))-xR,xR )+dxxExtra; % numerical inverse, lower left corner of z-domain
 
 % % test that the asymptotic treatment for large xi works properly
 % figure; zz = (-20:.05:20)'-.5i*pi;
-% subplot(121);plot(real(zz),real(map.fz(zz))); hold on; xi_cut = inf; plot(real(zz),real(map.fz(zz)),'--');xi_cut = 10;
-% subplot(122);plot(real(zz),imag(map.fz(zz))); hold on; xi_cut = inf; plot(real(zz),imag(map.fz(zz)),'--');xi_cut = 10;
+% subplot(121);plot(real(zz),real(fz(zz))); hold on; xi_cut = inf; plot(real(zz),real(fz(zz)),'--');xi_cut = 10;
+% subplot(122);plot(real(zz),imag(fz(zz))); hold on; xi_cut = inf; plot(real(zz),imag(fz(zz)),'--');xi_cut = 10;
 
-% zz = initializeInitCondNewton(map.fz,@(zz)dfzStrip0(zz,H1,H2),x+1i*h,linspace(xxL,xxR,nx)',20);
-% [eta,xi] = initializeInitCond(map.fz,x,h,linspace(xxL,xxR,nx)',x*0,20);
+% zz = initializeInitCondNewton(fz,@(zz)dfzStrip0(zz,H1,H2),x+1i*h,linspace(xxL,xxR,nx)',20);
+% [eta,xi] = initializeInitCond(fz,x,h,linspace(xxL,xxR,nx)',x*0,20);
+
+nArrX = 3000;
+nArrY = 200;
 zzArr = linspace(xxL,xxR,nArrX) + 1i*linspace(yyLower,yyUpper,nArrY)';
-zArr = map.fz(zzArr);
+zArr = fz(zzArr);
 finvIp = scatteredInterpolant(  real(zArr(:)), imag(zArr(:)) , zzArr(:),'linear','none');
 zzS0 = finvIp(x, h0 );
 
 % interpolate onto regulart xi grid.
 map.xi = linspace(real(zzS0(1)),real(zzS0(nx)),nx)';
-h0_xiReg = interp1(real(zzS0),imag(zzS0),map.xi);
-varphiS0 = interp1( [x-L;x;x+L],[phiS0;phiS0;phiS0],real(map.fz(map.xi+1i*h0_xiReg)));
-% figure, plot(map.fz(zzS)); hold on, plot(x,h,'--'); plot(map.fz(xi+1i*eta),'.')
-% figure, plot(x,phiS,real(map.fz(xi+1i*eta)),varphiS,'--');
+eta0_xiReg = interp1(real(zzS0),imag(zzS0),map.xi);
+varphiS0 = interp1( [x-L;x;x+L],[phiS0;phiS0;phiS0],real(fz(map.xi+1i*eta0_xiReg)));
+% figure, plot(fz(zzS)); hold on, plot(x,h,'--'); plot(fz(xi+1i*eta),'.')
+% figure, plot(x,phiS,real(fz(xi+1i*eta)),varphiS,'--');
 
+
+if DO_MAP_INTERPOLATION
+    fy0 = griddedInterpolant(real(zzArr).',imag(zzArr).',imag(zArr).','linear','none');
+    fJInv0 = griddedInterpolant(real(zzArr).',imag(zzArr).', abs(dfz(zzArr)).'.^(-2) ,'linear','none');
+    map.fy = @(zz) fy0( (real(zz)+0*zz).', (imag(zz)+0*zz).').';
+    map.fJInv = @(zz) fJInv0( (real(zz)+0*zz).', (imag(zz)+0*zz).').';
+else
+    map.fy = @(zz) imag(fz(zz));
+    map.fJInv = @(zz) abs(dfz(zz)).^(-2);
+end
 
 if PLOT_MAP
     
@@ -239,7 +253,7 @@ if PLOT_MAP
 
     hf_map = figure('color','w','position',[436 63 637 600]); 
     zz = linspace(xxL,xxR,100) + 1i*linspace(yyPlotLower,yyPlotUpper,100)';
-    z = map.fz(zz); 
+    z = fz(zz); 
 %     etaIp = interp1(real(zzS0),imag(zzS0),real(zz(1,:)),'linear','extrap');
 
     % plot the z-plane
@@ -248,8 +262,8 @@ if PLOT_MAP
     set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
 %     [~,hcz] = contourf(real(z),imag(z),real(ww),phiLevels,'LineStyle','none');
     
-    zPhi = map.fz(linspace(xxL,xxR,20) + 1i*linspace(yyPlotLower,yyPlotUpper,200)');
-    zPsi = map.fz(linspace(xxL,xxR,200) + 1i*linspace(yyPlotLower,yyPlotUpper,10)');
+    zPhi = fz(linspace(xxL,xxR,20) + 1i*linspace(yyPlotLower,yyPlotUpper,200)');
+    zPsi = fz(linspace(xxL,xxR,200) + 1i*linspace(yyPlotLower,yyPlotUpper,10)');
     plot(zPhi,'r','linewidth',1); hold on; plot(zPsi.' ,'b')
     switch map.domainType
         case {'simple','logstrip'}
@@ -292,15 +306,15 @@ if PLOT_MAP
 %     figure('color','w','position',[436 63 637 600]); 
 %     subplot(211); hold on    
 %     title('Re f'' in \zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off
-%     df = map.dfz(zz);
+%     df = dfz(zz);
 %     contourf(real(zz),imag(zz),real(df),30);colorbar
 %     subplot(212); hold on    
 %     title('Im f'' in \zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off;
-%     df = map.dfz(zz);
+%     df = dfz(zz);
 %     contourf(real(zz),imag(zz),imag(df),30);colorbar
 % 
 %     % numerically computed df
-%     f = map.fz(zz);
+%     f = fz(zz);
 %     df = diff(f,1,2)./diff(zz,1,2);
 %     zz_m = .5*(zz(:,1:end-1)+zz(:,2:end));
 %     figure('color','w','position',[436 63 637 600]); 
@@ -309,7 +323,7 @@ if PLOT_MAP
 %     contourf(real(zz_m),imag(zz_m),real(df),30);colorbar
 %     subplot(212); hold on    
 %     title('Im f'' in \zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off;
-%     df = map.dfz(zz);
+%     df = dfz(zz);
 %     contourf(real(zz),imag(zz),imag(df),30);colorbar
 
 
@@ -327,9 +341,9 @@ param.map = map;
 %% Run simulation
 tic
 if RK4dt~=0
-    [t,y] = RK4(@(t,Y) HOS_Taylor(t,Y,param) ,[t0,RK4dt,param.t_end]/dim.t,[varphiS0/dim.phi;h0_xiReg/dim.L]);
+    [t,y] = RK4(@(t,Y) HOS_Taylor(t,Y,param) ,[t0,RK4dt,param.t_end]/dim.t,[varphiS0/dim.phi;eta0_xiReg/dim.L]);
 else
-    [t,y] = ode45(@(t,Y) HOS_Taylor(t,Y,param) ,[t0,param.t_end]/dim.t,[varphiS0/dim.phi;h0_xiReg/dim.L],ODEoptions);
+    [t,y] = ode45(@(t,Y) HOS_Taylor(t,Y,param) ,[t0,param.t_end]/dim.t,[varphiS0/dim.phi;eta0_xiReg/dim.L],ODEoptions);
 end
 fprintf('CPU time: %gs\n',toc);
 t = t*dim.t;
@@ -349,7 +363,7 @@ nPannel = length(t_ip);
 varphiS_ip = interp1(t,varphiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
-zS_ip = map.fz(map.xi+1i*eta_ip);
+zS_ip = fz(map.xi+1i*eta_ip);
 
 
 [hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('Conformal; Tramp%g ka=%.3g',TRamp,ka)),[.075,.04,.05,.05],[.0,0]);
@@ -372,7 +386,7 @@ set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
 % set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
 
-fileName = sprintf('%s%s_%s_ka%.2g_M%d_H%.2f_%.2f_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,param.M,H1,H2,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping); fileName(fileName=='.')='p';
+fileName = sprintf('%s%s_%s_ka%.2g_M%d_H%.2f_%.2f_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g_ip%d',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,param.M,H1,H2,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping,DO_MAP_INTERPOLATION); fileName(fileName=='.')='p';
 
 if DO_EXPORT
     copyfile('./proto.m',[exportPath,'/',fileName,'.m']) 

@@ -14,6 +14,7 @@
 \usepackage[font=normalsize]{subfig}
 \usepackage{float}
 \usepackage{hyperref}
+\usepackage{xfrac}
 %\usepackage{cprotect}%for \verb in captions
 %\usepackage{enumerate}
 \usepackage{enumitem}
@@ -79,7 +80,7 @@
 %\maketitle
 \frontmatter
 
-%\tableofcontents
+\tableofcontents
 
 \section{Introduction}
 This memo describes the combination of the so-called higher order spectral method (HOS) with a conformal mapping strategy for simulating wave propagation over irregular bathymetry.
@@ -285,9 +286,15 @@ We have herein used $M\_d = \frac12 M$ and $r=0.25$, as did \citet{chalikov2005m
 \section{Preliminary results}
 \label{sec:results}
 
+
+
+\subsection{Wave packets propagating over a step transition in depth}
+\label{sec:results:step}
 \input{results.tex}
 
-
+\subsection{Wave packets propagating over a slope transition in depth}
+\label{sec:results:slope}
+\input{resultsSlope.tex}
 
 
 
@@ -303,9 +310,10 @@ We have herein used $M\_d = \frac12 M$ and $r=0.25$, as did \citet{chalikov2005m
 \label{sec:SC}
 Assume we have mapped a flat-bedded domain in the $\zz$-plane into a curvilinear $\z$ plane. 
 A common example of such a mapping is the Schwarz--Christoffel  transformation $\z\mapsto \zmap(\zz)$ with
-\[
+\begin{equation}
 \zmap'(\zz) = C \prod_{j=1}^J (\zz-\xx_j)^{-\alpha_j/\pi},
-\]
+\label{eq:SC}
+\end{equation}
 in which the horizontal coordinate is bent stiff angles $\alpha_j$ at locations $\zz=\xi_j$.
 Some particular mappings are analytically integrable, such as the orthogonal step which yields
 \begin{equation}
@@ -315,7 +323,7 @@ Some particular mappings are analytically integrable, such as the orthogonal ste
 $H\_d$ and $H\_s$ being the deep and shallow sides of the step, respectively.%
 \footnote{This is mapping the plane into $\zz_1=-1$, $\zz_2=1$. A less streched map is obtained if mapping into, say, $\zz_1=-d$, $\zz_2=0$; $d=H\_d-H\_s$, yielding
 \[
-\zmap(\zz) =   \frac {2d}\pi \left[  \sqrt{\zz/d}\sqrt{\zz/d+1} - \log\left(\sqrt{\zz/d} \sqrt{\zz/d+1}\right) \right] - \ii H\_s,
+\zmap(\zz) =   \frac {2d}\pi \left[  \sqrt{\zz/d}\sqrt{\zz/d+1} - \ln\left(\sqrt{\zz/d} \sqrt{\zz/d+1}\right) \right] - \ii H\_s,
 \]
  }
 An example of such a map is presented in \autoref{fig:SC_step}
@@ -339,7 +347,7 @@ Map \eqref{eq:mapSC} cannot be analytically inverted.
 
 
 The step map displayed in \autoref{fig:SC_step} can be given a flat surface $y=0$ with some added complexity in the transformation function.
-We base such a map on the common presented task of finding a flow field over a step in a channel \citep[e.g.,][\SSS 4.3.2]{mei_2005}.
+We base such a map on the common presented task of finding a flow field over a step in a channel \citep[e.g.,][\SSS 4.3.2]{mei_2005}\footnote{with opposite sign of $\lambda$ to shift the domain in $\zz$ by $-\ii\pi$.}.
 The complex potential there created can itself be regarded as a conformal map.
 Accordingly, we have
 \begin{subequations}
@@ -429,8 +437,71 @@ f'''(\zz) &= \frac{H_d \lambda\, \tau^3}{4\pi} \rbr{c^2\lambda - 2\lambda^2 + 2c
 \label{eq:}
 \end{equation}
 
+\section{Numerically integrated conformal maps}
+\label{sec:SCnum}
+The Schwartz--Christoffel transform \eqref{eq:SC} is a powerful approach for imposing straight angles in a mapping.
+A limitation of this approach is that the transform defines only the map differential, which is integrable only is special cases. 
+One can however always perform integration numerically.
+For example, a map similar to \eqref{eq:map_logstrip}, \autoref{fig:Mei_step}, but with a sloping depth transition, is computed by integrating
+\begin{equation}
+\zmap'(\zz) = \frac{H\_s}{\pi \tau_\theta}, \qquad \tau_\theta = \rbr{\frac{\lambda + (H\_d/H\_s)^{\pi/\theta}}{\lambda+1}}^{\theta/\pi}. 
+\label{eq:SCnumStep}
+\end{equation}
+The path of such an integration is irrelevant since the map is conformal; we integrate from the top of the domain down to avoid spreading numerical imprecision form the singularities located at $\zeta=-\ii\pi$ and $\zeta=2\ln c-\ii\pi$ into the domain.
+An example is shown on \autoref{fig:SCnumStep45deg} for a 45\textdegree down-step.
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStep45deg_zz.pdf}}%
+\hfill
+\subfloat[$\z$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStep45deg_z.pdf}}%
+\caption{Numerical integration of \eqref{eq:SCnumStep} with $\theta=\pi/4$, $H\_s = 0.5$ and $H\_d = 1.0$.}%
+\label{fig:SCnumStep45deg}%
+\end{figure}
 
 
+We can extend this technique to combine several alterations in bathymetry level by adopting
+\begin{equation}
+\zmap'(\zz) = K \prod_{j=1}^{N_\angle} \rbr{\frac{\exp(\zz-\xi^\angle_j)+1}{\exp(\zz-\xx^\angle_j) + (H_{j+1}/H_j)^{\pi/\theta_j}}}^{\theta_j/\pi}
+\label{eq:SCnumMultiStep}
+\end{equation}
+and fixing the constant $K$ after integration (re-scaling). $N_\angle$ is here the number of depth transitions, $\{H_j\}$ the set of depths, $\{\theta_j\}$ ($>0$) the slopes of the individual transitions and $\{\xi^\angle_j\}$ the horizontal position around which it occurs in the $\zz$-plane. 
+The singularities of \eqref{eq:SCnumMultiStep} are found at $\zz=\xx^\angle_j-\ii \pi$ and $\zz=\xx^\angle_j+\pi/\theta_j\ln(H_{j+1}/H_j)-\ii \pi$.
+\autoref{fig:SCnumStep2x45deg} shows an example similar to the plateau seen earlier. 
+A rougher bathymetry is displayed in \autoref{fig:SCnumMultiStep}. 
+The deformation of some of the sharp corners in this image is due to inaccuracy in the numeral integration near the singularity and is of no consequence for simulation usage.
+Corners can of course be smoothened by defining a higher bathymetry level $\yy=\tilde H < \pi$ in the $\zz$-plane, as shown in \autoref{fig:SCnumMultiStepSmooth}.
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStep2x45deg_zz.pdf}}%
+\hfill
+\subfloat[$\z$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStep2x45deg_z.pdf}}%
+\caption{Numerical integration of \eqref{eq:SCnumMultiStep} with 
+%$\theta_1=\theta_2=\pi/4$; $H_1 = 1.0$, $H_2 = 0.5$, $H_3 = 1.0$ and $\xi^\angle_1=0$, $\xi^\angle_1=5$.
+$\theta_j\in\{\pi/4,\pi/4\}$, $H_j \in\{1.0,0.5,1.0\}$ and $\xx^\angle_j\in\{0,5\}$.
+}%
+\label{fig:SCnumStep2x45deg}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStepMulti_zz.pdf}}%
+\hfill
+\subfloat[$\z$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStepMulti_z.pdf}}%
+\caption{Numerical integration of \eqref{eq:SCnumMultiStep} with 
+$\theta_j\in\{\pi/4,5\pi/2,5\pi/2\}$, $H_j \in\{0.5,1.5,0.75,1.5\}$ and $\xx^\angle_j\in\{0,8,14\}$.
+}%
+\label{fig:SCnumMultiStep}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.47\columnwidth]{../conformalMapping/SCnumStepMultiSmooth_z.pdf}%
+\caption{As \autoref{fig:SCnumMultiStep}, instead choosing bethymetry at $\yy = 0.1-\pi$.
+}%
+\label{fig:SCnumMultiStepSmooth}%
+\end{figure}
 
 \bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
 \bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.

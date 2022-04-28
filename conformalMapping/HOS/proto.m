@@ -15,7 +15,7 @@ map.domainType = 'logstrip';
 H1 = 1;
 H2 = .5;
 H_IC = H1;
-DO_MAP_INTERPOLATION = true;
+DO_MAP_INTERPOLATION = false;
 
 width_x__L = .35;
 
@@ -246,18 +246,13 @@ end
 
 if PLOT_MAP
     
-%     % for a 1-to-1 plot
-%     xxL = -420;xxR = -405;
-%     xxL = -5;xxR = 10;
-
-
     hf_map = figure('color','w','position',[436 63 637 600]); 
-    zz = linspace(xxL,xxR,100) + 1i*linspace(yyPlotLower,yyPlotUpper,100)';
-    z = fz(zz); 
+    zzPlot = linspace(xxL,xxR,100) + 1i*linspace(yyPlotLower,yyPlotUpper,100)';
+    zPlot = fz(zzPlot); 
 %     etaIp = interp1(real(zzS0),imag(zzS0),real(zz(1,:)),'linear','extrap');
 
     % plot the z-plane
-    haz = subplot(121); hold on;
+    haz = subplot(211); hold on;
     title('z-plane');xlabel('x');ylabel('i y');box off
     set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
 %     [~,hcz] = contourf(real(z),imag(z),real(ww),phiLevels,'LineStyle','none');
@@ -267,33 +262,60 @@ if PLOT_MAP
     plot(zPhi,'r','linewidth',1); hold on; plot(zPsi.' ,'b')
     switch map.domainType
         case {'simple','logstrip'}
-            patch([real(zPsi(1))*[1,1],0,0,real(zPsi(1,end))*[1,1]],[-1.2*max(H1,H2),-H1,-H1,-H2,-H2,-1.2*max(H1,H2)],.5*[1,1,1],'lineStyle','none'); % ,'FaceAlpha',.5
+            patch([real(zPsi(1))*[1,1],0,0,real(zPsi(1,end))*[1,1]],[-1.2*max(H1,H2),-H1,-H1,-H2,-H2,-1.2*max(H1,H2)],.5*[1,1,1] ,'FaceAlpha',.5,'lineStyle','none'); % ,'FaceAlpha',.5
         case 'double'
-            patch([real(zPsi(1))*[1,1],-width_x/2*[1,1],width_x/2*[1,1],real(zPsi(1,end))*[1,1]],[-1.1*max(H1,H2),-H1,-H1,-H2,-H2,-H1,-H1,-1.1*max(H1,H2)],.5*[1,1,1],'lineStyle','none'); %,'FaceAlpha',.5
+            patch([real(zPsi(1))*[1,1],-width_x/2*[1,1],width_x/2*[1,1],real(zPsi(1,end))*[1,1]],[-1.1*max(H1,H2),-H1,-H1,-H2,-H2,-H1,-H1,-1.1*max(H1,H2)],.5*[1,1,1] ,'FaceAlpha',.5,'lineStyle','none'); %,'FaceAlpha',.5
     end
     xlabel('x');ylabel('i y');
 %     plot(haz,  [ zArr(1,:),nan, zArr(:,end).',nan,zArr(end,:),nan,zArr(:,1).'],'--k','linewidth',2 )
     plot(x,h0,'k','linewidth',1.5);
     
     % plot the zz-plane
-    hazz = subplot(122); hold on    
+    hazz = subplot(212); hold on    
     title('\zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off
     set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
-    contour(real(zz),imag(zz),real(z),20,'r','linewidth',1);
-    contour(real(zz),imag(zz),imag(z),10,'b','linewidth',1);
+    contour(real(zzPlot),imag(zzPlot),real(zPlot),20,'r','linewidth',1);
+    contour(real(zzPlot),imag(zzPlot),imag(zPlot),10,'b','linewidth',1);
 %     plot(hazz,[zzArr(1,1),zzArr(1,end),zzArr(end,end),zzArr(end,1),zzArr(1,1)],'--k','linewidth',2 )
     plot(zzS0,'k','linewidth',1.5);
     
-%     % for a 1-to-1 plot
-%     subplot(211)
-%     axis equal;xlim(real([z(1,1),z(1,end)]));
-%     subplot(212)
-%     axis equal;xlim([xxL,xxR]);
     
+
+    % repeat for a 1-to-1 plot
+    xxL = -5;xxR = 10;
+    hf_mapZoom = figure('color','w','position',[436 63 637 600]); 
+    zzPlot = linspace(xxL,xxR,100) + 1i*linspace(yyPlotLower,yyPlotUpper,100)';
+    zPlot = fz(zzPlot); 
+    haz = subplot(211); hold on;
+    title('z-plane');xlabel('x');ylabel('i y');box off
+    set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
+    zPhi = fz(linspace(xxL,xxR,20) + 1i*linspace(yyPlotLower,yyPlotUpper,200)');
+    zPsi = fz(linspace(xxL,xxR,200) + 1i*linspace(yyPlotLower,yyPlotUpper,10)');
+    plot(zPhi,'r','linewidth',1); hold on; plot(zPsi.' ,'b')
+    switch map.domainType
+        case {'simple','logstrip'}
+            patch([real(zPsi(1))*[1,1],0,0,real(zPsi(1,end))*[1,1]],[-1.2*max(H1,H2),-H1,-H1,-H2,-H2,-1.2*max(H1,H2)],.5*[1,1,1] ,'FaceAlpha',.5,'lineStyle','none'); % ,'FaceAlpha',.5
+        case 'double'
+            patch([real(zPsi(1))*[1,1],-width_x/2*[1,1],width_x/2*[1,1],real(zPsi(1,end))*[1,1]],[-1.1*max(H1,H2),-H1,-H1,-H2,-H2,-H1,-H1,-1.1*max(H1,H2)],.5*[1,1,1] ,'FaceAlpha',.5,'lineStyle','none'); %,'FaceAlpha',.5
+    end
+    xlabel('x');ylabel('i y');
+    plot(x,h0,'k','linewidth',1.5);
+    hazz = subplot(212); hold on    
+    title('\zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off
+    set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
+    contour(real(zzPlot),imag(zzPlot),real(zPlot),20,'r','linewidth',1);
+    contour(real(zzPlot),imag(zzPlot),imag(zPlot),10,'b','linewidth',1);
+    plot(zzS0,'k','linewidth',1.5);
+    
+    axis(haz,'equal');xlim(haz,real([zPlot(1,1),zPlot(1,end)]));
+    axis(hazz,'equal');xlim(hazz,xxLR);
+
     if DO_EXPORT
-        fileNameMap = sprintf('map2_%s%s_%s_ka%.2g_H%.2f_%.2f_Nw%d',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,H1,H2,NWaves); fileNameMap(fileNameMap=='.')='p';
-        export_fig(hf_map,['./figures/',fileNameMap],'-png','-pdf')
-        savefig(hf_map,['./figures/',fileNameMap])
+        fileNameMap = sprintf('%s%s_%s_ka%.2g_H%.2f_%.2f_Nw%d',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,H1,H2,NWaves); fileNameMap(fileNameMap=='.')='p';
+        export_fig(hf_map,['./figures/map/map_',fileNameMap],'-png','-pdf')
+        savefig(hf_map,['./figures/fig/map_',fileNameMap])
+        export_fig(hf_mapZoom,['./figures/map/mapZoom_',fileNameMap],'-png','-pdf')
+        savefig(hf_mapZoom,['./figures/fig/mapZoom_',fileNameMap])
 %         axis([haz,hazz],'tight','equal')
 %         xlim(haz,[-1.05,-.95]*width_x/2);
 %         xlim(hazz,[-1.05,-.95]*width_xx/2);
@@ -389,16 +411,16 @@ xlabel(ha(nPannel),'x [m]','fontsize',11)
 fileName = sprintf('%s%s_%s_ka%.2g_M%d_H%.2f_%.2f_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g_ip%d',exportPrefix,map.domainType,INIT_WAVE_TYPE,ka,param.M,H1,H2,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping,DO_MAP_INTERPOLATION); fileName(fileName=='.')='p';
 
 if DO_EXPORT
-    copyfile('./proto.m',[exportPath,'/',fileName,'.m']) 
-    savefig(hf,[exportPath,'/',fileName]);
+    copyfile('./proto.m',[exportPath,'/m/',fileName,'.m']) 
+    savefig(hf,[exportPath,'/fig/',fileName]);
     export_fig(hf,[exportPath,'/',fileName],'-pdf','-png');
 end
 if EXPORT_MAT == 1
     wh = whos;
     vars = setdiff({wh.name},{'t','y','varphiS','eta'});
-    save([exportPath,'/',fileName],vars{:}); 
+    save([exportPath,'/mat/',fileName],vars{:}); 
 elseif EXPORT_MAT == 2
-    save([exportPath,'/',fileName]); 
+    save([exportPath,'/mat/',fileName]); 
 end
 
 

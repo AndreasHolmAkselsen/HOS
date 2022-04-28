@@ -1,5 +1,5 @@
 clear 
-global timeReached H theta xx_b
+global timeReached 
 timeReached = 0; 
 
 g = 9.81;
@@ -16,7 +16,13 @@ g = 9.81;
 
 xx_b = 0;    % xi-coordinate of "begining of" edge
 H = [1,.5]; % plateau levels
+% theta = [.1]*pi/2; % slope angles (positive values)
 theta = [1]*pi/2; % slope angles (positive values)
+
+% interpolation grid for conformal map
+nArrX_far = 1000;   % # horizontal points (far field)
+nArrX_near = 2000;  % # horizontal points (near field)
+nArrYDown = 100;    % # vertical points
 
 H_IC = H(1);
 
@@ -59,7 +65,7 @@ omega = sqrt(g*k0*tanh(k0*(H_IC))); T = 2*pi/omega;
 
 
 % Simulation/plotting time
-NT_dt = 7.5;
+NT_dt = 5;
 dt = NT_dt*T;
 param.t_end = 9*dt;
     
@@ -123,14 +129,14 @@ switch INIT_WAVE_TYPE
         n = 2*N_SSGW*NWaves;
         z_m = .5*(zIC(1:n-1)+zIC(2:n));
         dwdz0_m = .5*(dwdz(1:n-1)+dwdz(2:n))+out.c_e;
-        w = [0;cumsum( dwdz0_m.*diff(zIC))];
-        w = w-mean(w);
+        wIC = [0;cumsum( dwdz0_m.*diff(zIC))];
+        wIC = wIC-mean(wIC);
         
         % if z(1)<2*eps&&z(1)>-2*eps, z(1)=1i*imag(z(1));end
-        z_ = [zIC(end)-L;zIC;zIC(1)+L]; % extend with ghost nodes
-        w_ = [w(end);w;w(end)];
-        h0 = interp1(real(z_),imag(z_),x,'linear',nan);
-        phiS0 = interp1(real(z_),real(w_),x,'linear',nan);
+        zIC = [zIC(end)-L;zIC;zIC(1)+L]; % extend with ghost nodes
+        wIC = [wIC(end);wIC;wIC(end)];
+        h0 = interp1(real(zIC),imag(zIC),x,'linear',nan);
+        phiS0 = interp1(real(zIC),real(wIC),x,'linear',nan);
         fft_h = fftshift(fft(h0));
         if sum(abs(fft_h(1:floor(end/4))))>.01*sum(abs(fft_h))
             warning('Initial conition may not have been found. Verify that solution exists.')
@@ -167,21 +173,24 @@ phiS0 = phiS0.*packet;
 %%  map preparation
 
 % Create inverse function through scattered interpolation:
-nArrX_far = 1000;
-nArrX_near = 2000;
-nArrYDown = 100;
 
 
 crudeScale = 1.5*pi/min(H);
 yyUpper = 2*max(h0)*crudeScale;
 % xxIP = linspace(xLR(1),xLR(2),nArrX)*crudeScale; 
 
-delta_xx = 10;
 xxIP_far = linspace(xLR(1),xLR(2),nArrX_far)*crudeScale; 
-nArrX_near = linspace(xx_b(1)-delta_xx,xx_b(end)+delta_xx,nArrX_near);
-xxIP = [xxIP_far(xxIP_far<nArrX_near(1)), nArrX_near, xxIP_far(xxIP_far>nArrX_near(end))];
+% xxIP_near = linspace(xx_b(1)-delta_xx_nearField,xx_b(end)+delta_xx_nearField,nArrX_near);
+% cSq = max(H(2:end)./H(1:end-1),H(1:end-1)./H(2:end)).^(pi/theta);
+% xxIP_near = linspace(xx_b(1)-1.5*log(cSq(1)-1),xx_b(end)+1.5*log(cSq(end)-1),nArrX_near);
 
+% singularities are in the zz-plane located at
+% xi_j - 1i*pi and xi_j + log(c^2) - 1i*pi
 
+log_cSq = pi./theta.*log(H(2:end)./H(1:end-1));
+xxIP_near = linspace( xx_b(1)+min(0,log_cSq(1))-.5*abs(log_cSq(1)), xx_b(end)+max(0,log_cSq(end))+.5*abs(log_cSq(end)), nArrX_near);
+
+xxIP = [xxIP_far(xxIP_far<xxIP_near(1)), xxIP_near, xxIP_far(xxIP_far>xxIP_near(end))];
 H = shiftdim(H,-1); theta = shiftdim(theta,-1);xx_b = shiftdim(xx_b,-1);
 
 % yyIP = linspace(-pi,1.4*max(h0)*crudeScale,nArrYDown)';
@@ -190,7 +199,7 @@ dy = yyIP(2)-yyIP(1);
 yyIP = [yyIP; (dy:dy:yyUpper)' ];
 assert(yyIP(nArrYDown)==0)
 
-[zzIP,dfIP,zIP] = fz(xxIP,yyIP);
+[zzIP,dfIP,zIP] = fz(xxIP,yyIP,H,theta,xx_b);
 assert(real(zIP(nArrYDown,1))<x(1)&&real(zIP(nArrYDown,end))>x(end),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(nArrYDown,1)),real(zIP(nArrYDown,end)))
 
 % hfz = figure('color','w');hold on
@@ -199,8 +208,10 @@ assert(real(zIP(nArrYDown,1))<x(1)&&real(zIP(nArrYDown,end))>x(end),'Physical do
 % minIz = min(imag(zIP(1,:)));
 % hp = patch(real(zIP(1,[1,1:end,end])),[1.1*minIz,imag(zIP(1,:)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');
 
-
-assert(all(abs(imag(zIP(nArrYDown,:)))<1e-3*max(H)),'Map appears not to have a flat surface at yy=0')
+if ~all(abs(imag(zIP(nArrYDown,:)))<1e-3*max(H))
+    warning('Map appears not to have a flat surface at yy=0')
+end
+% assert(all(abs(imag(zIP(nArrYDown,:)))<1e-3*max(H)),'Map appears not to have a flat surface at yy=0')
 xxLR = interp1(real(zIP(nArrYDown,:)),xxIP,xLR);
 
 fzIP0 = griddedInterpolant(real(zzIP).',imag(zzIP)',zIP.','linear','none');
@@ -233,10 +244,6 @@ varphiS0 = interp1( [x-L;x;x+L],[phiS0;phiS0;phiS0],xS_xiReg );
 
 
 if PLOT_MAP
-    
-%     % for a 1-to-1 plot
-%     xxLR = [-5,10];
-
     hf_map = figure('color','w','position',[436 63 637 600]); 
 
     % plot the z-plane
@@ -250,7 +257,7 @@ if PLOT_MAP
     zPsi = fzIP(linspace(xxLR(1),xxLR(2),200)+1i*linspace(-pi,yyUpper,10).');
     plot(zPhi,'r','linewidth',1); hold on; plot(zPsi.' ,'b')
     minIz = min(imag(zPsi(1,:)));
-    patch(real(zPsi(1,[1,1:end,end])),[1.1*minIz,imag(zPsi(1,:)),1.1*minIz],.5*[1,1,1],'lineStyle','none');%,'FaceAlpha',.5
+    patch(real(zPsi(1,[1,1:end,end])),[1.1*minIz,imag(zPsi(1,:)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');%,'FaceAlpha',.5
 
     xlabel('x');ylabel('i y');
     plot(x,h0,'k','linewidth',1.5);
@@ -265,20 +272,45 @@ if PLOT_MAP
     contour(real(zzPlot),imag(zzPlot),imag(zPlot),10,'b','linewidth',1);
     plot(zzS0,'k','linewidth',1.5);
     
-%     % for a 1-to-1 plot
-%     subplot(211)
-%     axis equal;xlim(real([zPlot(1,1),zPlot(1,end)]));
-%     subplot(212)
-%     axis equal;xlim(xxLR);
     
+    % repeat for a 1-to-1 plot
+%     xxLR = [-5,10];
+    xxLR = xxIP_near([1,end]);
+    hf_mapZoom = figure('color','w','position',[436 63 637 600]); 
+    % plot the z-plane
+    haz = subplot(211); hold on;
+    title('z-plane');xlabel('x');ylabel('i y');box off
+    set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
+    zPhi = fzIP(linspace(xxLR(1),xxLR(2),20)+1i*linspace(-pi,yyUpper,200).');
+    zPsi = fzIP(linspace(xxLR(1),xxLR(2),200)+1i*linspace(-pi,yyUpper,10).');
+    plot(zPhi,'r','linewidth',1); hold on; plot(zPsi.' ,'b')
+    minIz = min(imag(zPsi(1,:)));
+    patch(real(zPsi(1,[1,1:end,end])),[1.1*minIz,imag(zPsi(1,:)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');%,'FaceAlpha',.5
+    xlabel('x');ylabel('i y');
+    plot(x,h0,'k','linewidth',1.5);
+    zzSingular = [xx_b-1i*pi,xx_b+log_cSq-1i*pi];
+    plot(fzIP(zzSingular+.025i),'ro'); % mark singularities
+    % plot the zz-plane
+    hazz = subplot(212); hold on    
+    title('\zeta-plane'); xlabel('\xi');ylabel('i \sigma'); box off
+    set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
+    zzPlot = linspace(xxLR(1),xxLR(2),100) + 1i*linspace(-pi,yyUpper,100)';
+    zPlot = fzIP(zzPlot); 
+    contour(real(zzPlot),imag(zzPlot),real(zPlot),20,'r','linewidth',1);
+    contour(real(zzPlot),imag(zzPlot),imag(zPlot),10,'b','linewidth',1);
+    plot(zzS0,'k','linewidth',1.5);
+    plot(zzSingular,'ro'); % mark singularities
+    
+    axis(haz,'equal','tight');xlim(haz,real([zPlot(1,1),zPlot(1,end)]));
+    axis(hazz,'equal');xlim(hazz,xxLR);
+    
+
     if DO_EXPORT
-        fileNameMap = sprintf('map2_%s_%s_ka%.2g_H%.2f_%.2f_nH%d_ang1_%.2g_Nw%d',exportPrefix,INIT_WAVE_TYPE,ka,H(1),H(2),length(H),2*theta/pi,NWaves); fileNameMap(fileNameMap=='.')='p';
-        export_fig(hf_map,['./figures/',fileNameMap],'-png','-pdf')
-        savefig(hf_map,['./figures/',fileNameMap])
-%         axis([haz,hazz],'tight','equal')
-%         xlim(haz,[-1.05,-.95]*width_x/2);
-%         xlim(hazz,[-1.05,-.95]*width_xx/2);
-%         export_fig(hf_map,['./figures/equal',fileNameMap],'-png','-pdf')
+        fileNameMap = sprintf('%s%s_ka%.2g_H%.2f_%.2f_nH%d_ang1_%.2g_Nw%d',exportPrefix,INIT_WAVE_TYPE,ka,H(1),H(2),length(H),2*theta/pi,NWaves); fileNameMap(fileNameMap=='.')='p';
+        export_fig(hf_map,['./figures/map/map_',fileNameMap],'-png','-pdf','-m2')
+        savefig(hf_map,['./figures/fig/map_',fileNameMap])
+        export_fig(hf_mapZoom,['./figures/map/mapZoom_',fileNameMap],'-png','-pdf','-m2')
+        savefig(hf_mapZoom,['./figures/fig/mapZoom_',fileNameMap])
     end
     
 end
@@ -316,42 +348,43 @@ varphiS_ip = interp1(t,varphiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
 zS_ip = fzIP(map.xi+1i*eta_ip);
-x_b = real(fzIP (xx_b));
+
 
 [hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('Conformal; Tramp%g ka=%.3g',TRamp,ka)),[.075,.04,.05,.05],[.0,0]);
 ha = flipud(ha); set([ha(2:end).XAxis],'Visible','off');% if plotting bottom-to-top
 hp = 0*t_ip;
 maxh = max(real(zS_ip(:)));minh = min(real(zS_ip(:)));
+zSingular = fzIP([xx_b-1i*pi,xx_b+log_cSq-1i*pi]+.025i);
+% x_b = real(fzIP(xx_b-1i*pi));
 % set([ha(1:end-1).XAxis],'Visible','off');% if plotting top-to-bottom
 for i=1:nPannel
     hp(i) = plot(ha(i),zS_ip(:,i),'k');
     ylabel(ha(i),sprintf('t = %.2fs\nw_{nl} = %.2f',t_ip(i),param.nonLinRamp(t_ip(i))))
     grid(ha(i),'on');
-    plot(ha(i),[1;1].*x_b,[minh;maxh],'--k'); 
+    plot(ha(i),[1;1].*real(zSingular),[minh;maxh],'--k'); 
 end
 % axis(ha,'equal','tight')
 set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
 % set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
 
-fileName = sprintf('%s_%s_ka%.2g_M%d_H%.2f_%.2f_nH%d_ang1_%.2g_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,INIT_WAVE_TYPE,ka,param.M,H(1),H(2),length(H),2*theta/pi,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping); fileName(fileName=='.')='p';
+fileName = sprintf('%s%s_ka%.2g_M%d_H%.2f_%.2f_nH%d_ang1_%.2g_Nw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,INIT_WAVE_TYPE,ka,param.M,H(1),H(2),length(H),2*theta/pi,NWaves,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping); fileName(fileName=='.')='p';
 
 if DO_EXPORT
-    copyfile('./proto.m',[exportPath,'/',fileName,'.m']) 
-    savefig(hf,[exportPath,'/',fileName]);
+    copyfile('./proto.m',[exportPath,'/m/',fileName,'.m']) 
+    savefig(hf,[exportPath,'/fig/',fileName]);
     export_fig(hf,[exportPath,'/',fileName],'-pdf','-png');
 end
 if EXPORT_MAT == 1
     wh = whos;
     vars = setdiff({wh.name},{'t','y','varphiS','eta'});
-    save([exportPath,'/',fileName],vars{:}); 
+    save([exportPath,'/mat/',fileName],vars{:}); 
 elseif EXPORT_MAT == 2
-    save([exportPath,'/',fileName]); 
+    save([exportPath,'/mat/',fileName]); 
 end
 
 
-function [zz,df,f] = fz(xx,yy)
-    global H theta xx_b
+function [zz,df,z] = fz(xx,yy,H,theta,xx_b)
     assert(isvector(xx)&&isvector(yy));
     xx = xx(:)'; yy = yy(:);
     assert(yy(2)>yy(1))
@@ -370,21 +403,24 @@ function [zz,df,f] = fz(xx,yy)
     temp = H(1:end-1)./H(2:end)+0*zz;
     df_i(iMinus) = temp(iMinus);
    
-
     df = prod(df_i,3);
     [ny,nx] = size(zz);
     df_xh = .5*(df(1,1:nx-1)+df(1,2:nx));
     df_yh = .5*(df(1:ny-1,:)+df(2:ny,:));
-    f = cumsum([0,df_xh.*diff(xx)],2) + cumsum([zeros(1,nx);df_yh.*diff(1i*yy)],1);
-
-    z0 = interp2(xx,yy,real(f),0,0)+1i*interp2(xx,yy,imag(f),0,0);
-    f = f-z0; % orientation constant
-    K = 1/(-min(imag(f(ny,:))))*max(H);% scaling constant
-    f = K*f;
+    z = cumsum([0,df_xh.*diff(xx)],2) + cumsum([zeros(1,nx);df_yh.*diff(1i*yy)],1);
+%     z0 = interp2(xx,yy,real(z),0,0)+1i*interp2(xx,yy,imag(z),0,0);
+    z0 = interp2(xx,yy,real(z),0,-pi)+1i*interp2(xx,yy,imag(z),0,0);
+    z = z-z0; % orientation constant
+    
+    if isscalar(xx_b)
+        K = H(2)./pi;
+    else
+        K = 1/(-min(imag(z(ny,:))))*max(H);% scaling constant
+    end
+    z = K*z;
     df = K*df;
-    
-    [zz,df,f] = deal(flipud(zz),flipud(df),flipud(f));
-    
+        
+    [zz,df,z] = deal(flipud(zz),flipud(df),flipud(z));
 end
 
 % Obs! df = prod(df_i) -> ddf = D[df] ~= prod(ddf_i)!!!

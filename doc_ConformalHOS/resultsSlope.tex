@@ -1,0 +1,118 @@
+ %\documentclass[a4paper,12pt]{article}
+%%\documentclass{amsart}
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+%\usepackage[utf8]{inputenc}
+%\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+%\usepackage{xcolor}
+%\usepackage{graphicx}
+%
+%\usepackage{graphbox}
+%
+%\usepackage[round]{natbib}
+%\usepackage{mathtools}
+%\usepackage[font=normalsize]{subfig}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage{enumitem}
+%\hypersetup{colorlinks=true, 	
+			%linkcolor=blue,
+			%filecolor=blue,
+			%urlcolor=blue,
+			%citecolor=blue}
+%\newcommand{\mr}{\mathrm}
+%\newcommand{\mc}{\mathcal}
+%\let\SSS\S
+%\renewcommand{\S}{^\mr{S}}
+%\newcommand{\ii}{\mr{i}\,}
+%\newcommand{\ee}{\mr{e}}
+%%\newcommand{\phit}{\psi}
+%\newcommand{\phit}{\tilde\phi}
+%\newcommand{\br}[3]{\left#1#2\right#3}
+%\let\underscore\_
+%\renewcommand{\_}[1]{_\mr{#1}}
+%\newcommand{\oo}[1]{^{(#1)}}
+%\newcommand{\rr}{\bm r}%{x,y}
+%\newcommand{\cp}{c\_p}
+%\let\Re\relax
+%\let\Im\relax
+%\DeclareMathOperator\Re{Re}
+%\DeclareMathOperator\Im{Im}
+%\newcommand{\w}{w}
+%\newcommand{\bU}{\bm U}
+%\newcommand{\h}{\hat}
+%\newcommand{\rbr}[1]{\left(#1\right)}
+%\newcommand{\sbr}[1]{\left[#1\right]}
+%\newcommand{\cbr}[1]{\left\{#1\right\}}
+%\newcommand{\z}{z}
+%\newcommand{\x}{x}
+%\newcommand{\y}{y}
+%\newcommand{\zz}{\zeta}
+%\newcommand{\xx}{\xi}
+%\newcommand{\yy}{\sigma}
+%%\newcommand{\k}{k}
+%\newcommand{\kk}{\kappa}
+%
+%\newcommand{\zmap}{f}
+%%\newcommand{\zzmap}{\zmap^{-1}}
+%\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
+%
+%\newcommand{\ww}{\omega}
+%\renewcommand{\w}{w}
+%\newcommand{\surf}{\eta}
+%\newcommand{\dd}[2]{\frac{\mr d #1}{\mr d #2}}
+%
+%\begin{document}
+%
+
+Results for bethymetries of a linear transition in water depth are presented here.
+Conformal maps are integrated numerically, as described in \autoref{sec:SCnum}.
+Results from the numerical map integration method have of course been benchmarked up against the algebraic map results of the previous section.
+\\
+
+Maps of slopes $\theta=\pi/4$, $\pi/20$ and $\pi/40$ are shown in \autoref{fig:res:map_slope} with corresponding simulations displayed in \autoref{fig:res:slope1} to \ref{fig:res:slope3}, all with $H\_s/H\_d = 0.5$.
+Compared with a step transition (\autoref{fig:res:logstrip2}), very little difference is noted in terms of spurious waves  with 45\textdegree slope (\autoref{fig:res:slope1}). 
+Reducing the slope to $\theta=\pi/20$ (or 9\textdegree) reduces the amplitude of the linear reflected wave packet, as shown in \autoref{fig:res:slope2}. 
+No notable effect is seen on the second-order transmitted free wave packet.
+Further reducing the slope to $\theta=\pi/40$ (or 4.5\textdegree) yields some reduction also in the amplitude of this spurious transmitted packet.
+Notice however that the spurious packets are wider than the carrier packet.
+
+
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$\theta=\pi/4$.]{\includegraphics[width=.33\columnwidth]{../conformalMapping/HOS/figures/map/mapZoom_SSGW_ka0p05_H1p00_0p50_nH2_ang1_0p5_Nw60.pdf}}%
+\subfloat[$\theta=\pi/20$.]{\includegraphics[width=.33\columnwidth]{../conformalMapping/HOS/figures/map/mapZoom_SSGW_ka0p05_H1p00_0p50_nH2_ang1_0p1_Nw60.pdf}}%
+\subfloat[$\theta=\pi/40$.]{\includegraphics[width=.33\columnwidth]{../conformalMapping/HOS/figures/map/mapZoom_SSGW_ka0p05_H1p00_0p50_nH2_ang1_0p05_Nw60.pdf}}%
+\caption{Conformal map, single slope; $H\_d = 1.0$, $H\_s = 0.5$}%
+\label{fig:res:map_slope}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=1\columnwidth]{../conformalMapping/HOS/figures/SSGW_ka0p05_M5_H1p00_0p50_nH2_ang1_0p5_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}%
+\caption{Surface elevation, $(ka)_0 = 0.05$, $(kH)_0 = 1.00$ ($H\_d=1.0$\,m corresponds to $T\approx2.30$\,s); single slope with $\theta=\pi/4$; $H\_s/H\_d = 0.5$. Dashed lines indicate $\x$-location of slope transition beginning and end.}%
+\label{fig:res:slope1}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering 
+\includegraphics[width=1\columnwidth]{../conformalMapping/HOS/figures/SSGW_ka0p05_M5_H1p00_0p50_nH2_ang1_0p1_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}%
+\caption{Similar to \autoref{fig:res:slope1}, but with $\theta=\pi/20$.}%
+\label{fig:res:slope2}%
+\end{figure}
+\begin{figure}[h!ptb]%
+\centering 															  
+\includegraphics[width=1\columnwidth]{../conformalMapping/HOS/figures/SSGW_ka0p05_M5_H1p00_0p50_nH2_ang1_0p05_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}%
+\caption{Similar to \autoref{fig:res:slope1}, but with $\theta=\pi/40$.}%
+\label{fig:res:slope3}%
+\end{figure}
+
+
+
+
+
+
+%\big|\zeta_{0T,f}^{(22,0)}\big| &= \frac{2\omega_0}{g}|T_{20}| A_0^2.
+
+
+%\end{document}

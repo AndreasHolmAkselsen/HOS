@@ -1,0 +1,56 @@
+\documentclass[a4paper,12pt]{article}
+
+
+\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage[round]{natbib}
+\usepackage{mathtools}
+\usepackage[font=normalsize]{subfig}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage[noabbrev,nameinlink]{cleveref}
+%\usepackage{cprotect}%for \verb in captions
+\hypersetup{colorlinks=true,
+			linkcolor=blue,
+			filecolor=blue,
+			urlcolor=blue,
+			citecolor=blue}
+\newcommand{\mr}{\mathrm}
+\newcommand{\mc}{\mathcal}
+
+
+%\newcommand{\aref}[2][]{\hyperref[#1]{\ref*{#2}}}
+
+%\newcommand{\aref}[2][]{%
+  %\hyperref[{#2}]{%
+	%\ifx \\#1\\%
+		%figure~\ref*{#2}
+    %\else
+		%#1~\ref*{#2}%
+    %\fi
+  %}%
+%}
+
+\newcommand{\aref}[2][figure]{%
+  \hyperref[{#2}]{#1~\ref*{#2}}%
+}
+
+
+\begin{document}
+text
+
+
+\begin{figure}%
+\centering
+\framebox[5cm]{more}
+\caption{}%
+\label{fig:test}%
+\end{figure}
+
+\newpage
+Here is \hyperref[fig:test]{linkToFig}.\\
+link again \aref[Tullefigur]{fig:test}\\
+link again \aref{fig:test}
+\end{document}

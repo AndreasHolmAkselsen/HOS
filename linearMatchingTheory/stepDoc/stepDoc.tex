@@ -1,0 +1,204 @@
+%\documentclass[a4paper,12pt]{article}
+\documentclass[internal]{sintefmemo}
+%\documentclass{amsart}
+
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+%\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage[round]{natbib}
+\usepackage{mathtools}
+\usepackage[font=normalsize]{subfig}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage[noabbrev,nameinlink]{cleveref}
+%\usepackage{cprotect}%for \verb in captions
+\hypersetup{colorlinks=true,
+			linkcolor=blue,
+			filecolor=blue,
+			urlcolor=blue,
+			citecolor=blue}
+\newcommand{\mr}{\mathrm}
+\newcommand{\mc}{\mathcal}
+%\let\SSS\S
+%\renewcommand{\S}{^\mr{S}}
+\newcommand{\ii}{\mr{i}\,}
+\newcommand{\ee}{\mr{e}}
+%\newcommand{\phit}{\psi}
+\newcommand{\phit}{\tilde\phi}
+\newcommand{\br}[3]{\left#1#2\right#3}
+\let\underscore\_
+\renewcommand{\_}[1]{_\mr{#1}}
+\newcommand{\oo}[1]{^{(#1)}}
+\newcommand{\rr}{\bm r}%{x,y}
+\newcommand{\cp}{c\_p}
+\let\Re\relax
+\let\Im\relax
+\DeclareMathOperator\Re{Re}
+\DeclareMathOperator\Im{Im}
+\newcommand{\h}{\hat}
+\newcommand{\dd}[2]{\frac{\mr d #1}{\mr d #2}}
+
+\newcommand{\aref}[2][figure]{%
+  \hyperref[{#2}]{#1~\ref*{#2}}%
+}
+
+\title{Comparison of reflection estimates for deep waves encountering a shallow beach}
+\author{Andreas H. Akselsen}
+\project{OSC pre-project}
+
+\recipient[information]{SINTEF employees}
+%\recipient[information,agreed]{SVV}
+%\recipient[comments]{\LaTeX\ hackers}
+%\recipient[attention,agreed]{\LaTeX\ users}
+%\recipient[attention]{Word users}
+%\address{Postboks 4762 Torgarden NO-7465 Trondheim, NORWAY}
+%\institute{SINTEF Ocean AS}
+%\vat{}
+
+\begin{document}
+\frontmatter
+%\title{}
+%\author{Andreas H. Akselsen}
+%\date{\today}
+%\maketitle
+%\tableofcontents
+
+
+\section{Main}
+The performance of a shallow, foldable beach is presented in a report published by \citet{tiedeman2012}.
+The report demonstrates energy reflection coefficients below 5\% for a wide range of wave frequencies, even frequencies for which the corresponding wavelength is considerably longer than the beach depth. 
+It is well know and intuitive that effectively absorbing long-wave energy requires a large beach, but how do these and other experimental results match up to estimates based on analytical wave theory?
+\\
+
+A cut-out of the main result in \citet{tiedeman2012} is shown show in \cref{fig:report}. 
+For overview, a comparison plot included in the report \citet{SFo2022W74} in further copied into \cref{fig:SFo2022W74}.
+The experiments by \citet{tiedeman2012} were conducted with about $1.5$ meter water depth where the beach protruded $0.7$ meters under water. 
+These results should be compared to \cref{fig:estimates} showing two analytical reflection estimates. 
+The first and simplest estimates is to assume that all the kinetic wave energy contained below the beach depth in the water column will be reflected back. 
+With linear waves, this leads to the energy reflection estimate
+\begin{equation}
+C\_r \text{ (energy)} = \alpha^2/2 = \frac12\frac{\sinh 2k(h-D)}{\sinh2kh}.
+\label{eq:kinEnergy}
+\end{equation}
+Another reflection estimate can be gained from linear theory by modelling the beach as a vertical step. 
+Assuming that all the wave energy that is transmitted over the step will be absorbed, the energy reflection coefficient equals the modulus of the linear amplitude reflection coefficient $R_0$ squared.
+$R0$ is found by solving the matching problem 
+\begin{equation}
+\begin{aligned}
+[\phi]_-^+ = 0,\quad [\phi_x]_-^+ = 0 \qquad &\text{for }-h\_s\leq z\leq0
+\\
+(\phi_x)_- = 0 \qquad &\text{for }-h\_d\leq z< -h\_s
+\end{aligned}
+\label{eq:matching}
+\end{equation}
+for the linear potential at the step discontinuity.\footnote{$h\_d$ and $h\_s$ are the deep and shallow side depths and $[]_-^+$ indicates the difference between the two sides of the discontinuity.} Details can be found in the appendix of \citet{li_2021_step1}.
+
+Comparing the bathymetry step estimate of \cref{fig:estimates:R0} to the measured reflection (\cref{fig:report}), we observe for most frequencies that the measured reflection is higher than the idealized estimate. 
+This is indeed expected since the estimate does not take account of reflection taking place at the beach itself. 
+There is an exception near $0.25$\,Hz and perhaps one near $0.5$\,Hz where almost no reflection is reported, suggesting some inaccuracy in the measurements. 
+The corresponding deep water case $h\_d\to\infty$ is also shown in \cref{fig:estimates:R0} and indicates that the low-frequency reflection (0.25--0.5\,Hz) would be notably greater in a deeper flume.
+
+Reflection estimates based on the fraction of sub-beach kinetic energy indicates reflection order of magnitude larger. 
+Why?
+The difference has to do with the elastic nature of our medium.
+Water has the capability of vertical movement, even if the shallow water wave motion is mainly horizontal.
+As an indication and an illustration, we show in \crefrange{fig:T1}{fig:T4} the complete flow field near the step as computed form linear theory. 
+Three periods are provided, each with four snapshort times.
+Also shown as smaller upper-left panels are what the same wave fields look like without matching, that is, incoming wave on the left side and transmitted wave on the right side, 
+without including the evanescent and reflected components that enforce matching.
+Wave period $T=1.0$\,s ($1.0$\,Hz) is a relatively shallow wave, while $T=4.0$\,s ($0.25$\;Hz) is a deep wave.
+Large vertical velocities near the step is seen in the latter at all stages of transmission as stagnation builds a pressure field that helps redirect the flow around the step. 
+This effect will however diminish with increasing deep-side depth, as indicated with the dashed line in \cref{fig:estimates:R0} and the accompanying deep-water snapshots \crefrange{fig:deepT1}{fig:deepT4}. 
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.75\columnwidth]{./Wallingford/report_fig11.png}%
+\caption{Cut-out from \citet{tiedeman2012}, showing measured reflected energy with their best-performance configuration.}%
+\label{fig:report}%
+\end{figure}
+
+\begin{figure}%
+\centering
+\includegraphics[width=\columnwidth]{./C_comparison_SFo.png}%
+\caption{A comparison of reflection coefficients reported by numerous sources. 
+Periods are re-scaled to correspond to a beach length $L=4.0$\,m.
+Image taken form report \citet{SFo2022W74}. See reference for further details.
+}%
+\label{fig:SFo2022W74}%
+\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Fraction of kinetic energy below beach]{\includegraphics[width=.47\columnwidth]{./Wallingford/alpha.pdf}\label{fig:estimates:alpha}}%
+\hfill
+\subfloat[Energy in reflected wave at a step discontinuity]{\includegraphics[width=.49\columnwidth]{./Wallingford/R0withDeep.pdf}\label{fig:estimates:R0}}%
+\caption{Relative kinetic energy contained below beach vs.\ relative energy of reflected wave from a step according to linear theory.}%
+\label{fig:estimates}%
+\end{figure}
+
+\section{Discussion}
+Wave reflection from wavelengths considerably deeper than the beach depth have been considered.
+Reported reflection for these wavelengths is surprisingly small when considering the fraction of energy beneath the beach depth---an estimate which seems to significantly over-estimate reflection.
+Agreement is however observed with the analytical linear solution for flow over a step discontinuity, and the difference in the two estimates can be attributed to redirection of velocities through the intervention of the stagnation pressure field in front of the beach. 
+%Surprisingly good absorption results for which the beach depth is shallow compared to the wave penetration depth has been examined analytically.
+%It is observed that linking reflection to the fraction of energy beneath the beach depth yields an overestimate as some of this energy intercepted by the beach through the intervention of the stagnation pressure field in front of the beach. 
+A vertical, impermeable wall at the foot of the beach is here assumed which may provide a physical explanation for the finding in \citet{tiedeman2012} that \textit{`best performance (is) identified when there are no perforations in the front plate.'}
+Similar observations were made in the recently conducted Lader tank experiments \citep{AHA2022Lader}, a graph from which is reproduced in \cref{fig:beachExtensions}.
+Here, it is observed that having a vertical plate from beach foot to floor is for some mid-range periods advantageous to having an open body of water underneath the beach.
+
+However, this uplifting feature that reflection is not proportional to deep-water wave energy does fade with increasing water depth. 
+We should for these reasons be cautious about water depth when considering reported long-period reflection coefficients; 
+reflection coefficient will inevitably tend toward one as water depth and wave period are jointly increased.
+In contrast, reflection coefficients approach $0.5$ with the kinetic energy estimate \eqref{eq:kinEnergy} since this estimate assumes that all potential energy is absorbed by the beach.
+
+
+\begin{figure}%
+\centering
+\includegraphics[width=.75\columnwidth]{../../regressionResults/beach_extsnsions/refl_waveTrainEnd_All_Nwin1_filt0_filt_exclude_1_10_s1o60p0.pdf}%
+\caption{Reflection coefficients measured in the Lader tank experiments \citep{AHA2022Lader}.
+Results for various beach extensions shown. 90\textdegree\ indicates a vertical impermeable plate at the foot of the beach, and 45\textdegree--15\textdegree\ indicate the angle of wedge ramps. `open' refers to experiments with no obstructions beneath the beach.
+Water depth is one meter and beach depth is 0.65--0.70 meters. See reference for details.}%
+\label{fig:beachExtensions}%
+\end{figure}
+
+
+%\appendix
+%\section{Flow field figures}
+
+\newcommand{\fil}[2]{\subfloat[$t = 0.#2\,T$]{\includegraphics[width=.35\columnwidth]{./Wallingford/T#1_nEv400_hd1p5_hs0p7_toT0p#2.pdf}}}
+\newcommand{\figg}[1]{
+\begin{figure}[h!tbp]%
+\centering
+\fil{#1}{0}\quad\fil{#1}{083}%
+\\\vspace{-3mm}
+\fil{#1}{17}\quad\fil{#1}{25}%
+\caption{$T = #1$\,s, $h\_d=1.465$\,m, $h\_s=0.700$\,m.}%
+\label{fig:T#1}%
+\end{figure}}%
+\figg1
+\figg2
+\figg4
+
+\renewcommand{\fil}[2]{\subfloat[$t = 0.#2\,T$]{\includegraphics[width=.35\columnwidth]{./other/T#1_nEv400_deep_hs0p7_toT0p#2.pdf}}}
+\renewcommand{\figg}[1]{
+\begin{figure}[h!tbp]%
+\centering
+\fil{#1}{00}\quad\fil{#1}{08}%
+\\\vspace{-3mm}
+\fil{#1}{17}\quad\fil{#1}{25}%
+\caption{$T = #1$\,s, deep water left side, $h\_s=0.7$\,m.}%
+\label{fig:deepT#1}%
+\end{figure}}%
+\figg1
+\figg2
+\figg4
+
+\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
+\bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.
+
+
+\end{document}

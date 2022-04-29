@@ -29,6 +29,7 @@ zeta = linspace(limZeta(1),limZeta(2),nPoints) + 1i*linspace(limZeta(3),limZeta(
 hf = figure('color','w');
 hold on;
 t = 0;
+k = 1;
 while t<tMax
     theta = thetaMax*cos( 2*pi/T*t );
     thp = theta/pi;
@@ -37,8 +38,11 @@ while t<tMax
 %     fz = -tan(theta).*(d+gamma(-thp)./gamma(.5-thp).*sqrt(pi)/(pi-2*theta).*zeta.^(1-2*thp).*(zeta-1i*d).^thp.*(zeta+1i*d).^thp.*(1+(zeta/d).^2).*H);
 
     c = -(wbl+wbOveWater)*tan(theta) + 1i*wbOveWater;
-    k = pi^1.5/(pi-2*theta).*(wbl-1i*c).*exp(-1i*theta)./(gamma(1+thp)*gamma(.5-thp));
-    d = L*real(k)*(L/wbl)^(-2*thp)*hypergeometric2f1(-thp,.5-thp,1.5-thp,-(L/wbl).^2,nTerms)/(L+wbl*tan(theta));   
+%     k = pi^1.5/(pi-2*theta).*(wbl-1i*c).*exp(-1i*theta)./(gamma(1+thp)*gamma(.5-thp));
+%     d = L*real(k)*(L/wbl)^(-2*thp)*hypergeometric2f1(-thp,.5-thp,1.5-thp,-(L/wbl).^2,nTerms)/(L+wbl*tan(theta));   
+%     d = k*(1-2*thp);
+
+    d = sqrt(pi).*(wbl-1i*c).*exp(-1i*theta)./(gamma(1+thp)*gamma(.5-thp));
     fz = c + k*(zeta/d).^(1-2*thp).*hypergeometric2f1(-thp,.5-thp,1.5-thp,-(zeta/d).^2,nTerms);
     
     cla

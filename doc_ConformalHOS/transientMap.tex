@@ -1,0 +1,195 @@
+%\documentclass[a4paper,12pt]{article}
+%%\documentclass{amsart}
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+%\usepackage[utf8]{inputenc}
+%\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+%\usepackage{xcolor}
+%\usepackage{graphicx}
+%
+%\usepackage{stmaryrd}
+%\usepackage[round]{natbib}
+%\usepackage{mathtools}
+%\usepackage[font=normalsize]{subfig}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage{enumitem}
+%\hypersetup{colorlinks=true, 	
+			%linkcolor=blue,
+			%filecolor=blue,
+			%urlcolor=blue,
+			%citecolor=blue}
+%\newcommand{\mr}{\mathrm}
+%\newcommand{\mc}{\mathcal}
+%\let\SSS\S
+%\renewcommand{\S}{^\mr{S}}
+%\newcommand{\ii}{\mr{i}\,}
+%\newcommand{\ee}{\mr{e}}
+%%\newcommand{\phit}{\psi}
+%\newcommand{\phit}{\tilde\phi}
+%\newcommand{\br}[3]{\left#1#2\right#3}
+%\let\underscore\_
+%\renewcommand{\_}[1]{_\mr{#1}}
+%\newcommand{\oo}[1]{^{(#1)}}
+%\newcommand{\rr}{\bm r}%{x,y}
+%\newcommand{\cp}{c\_p}
+%\let\Re\relax
+%\let\Im\relax
+%\DeclareMathOperator\Re{Re}
+%\DeclareMathOperator\Im{Im}
+%\newcommand{\w}{w}
+%\newcommand{\bU}{\bm U}
+%\newcommand{\h}{\hat}
+%\newcommand{\rbr}[1]{\left(#1\right)}
+%\newcommand{\sbr}[1]{\left[#1\right]}
+%\newcommand{\cbr}[1]{\left\{#1\right\}}
+%\newcommand{\z}{z}
+%\newcommand{\x}{x}
+%\newcommand{\y}{y}
+%\newcommand{\zz}{\zeta}
+%\newcommand{\xx}{\xi}
+%\newcommand{\yy}{\sigma}
+%%\newcommand{\k}{k}
+%\newcommand{\kk}{\kappa}
+%
+%
+%\newcommand{\zmap}{f}
+%%\newcommand{\zzmap}{\zmap^{-1}}
+%\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
+%
+%\newcommand{\ww}{\omega}
+%\renewcommand{\w}{w}
+%\newcommand{\surf}{\eta}
+%\newcommand{\dd}{\mr d}
+%\newcommand{\ddfrac}[2]{\frac{\dd #1}{\dd #2}}
+%
+%\begin{document}
+
+
+
+
+
+
+
+
+
+
+Let us assume that our mapping is time dependent, i.e.,
+\begin{equation}
+z \mapsfrom f(\zz,t).
+\label{eq:}
+\end{equation}
+Such a map can for example account for the action of a wavemaker on the body of water.
+We now derive the associated system equations in terms of $\zz$-variables.
+The kinematic boundary condition states that a fluid particle follows the surface, also in the $\zz$-plane. 
+Fluid particle velocity as seen from the $\zz$-plane is
+\[
+\mc U\_p = \ddfrac{\zz\_p}{t} = (\zzmap)_z \ddfrac{\z\_p}{t} + (\zzmap)_t = \frac{\w_z^*}{\zmap_\zz} + (\zzmap)_t =  \frac{\ww_\zz^*}{|\zmap_\zz|^2} + (\zzmap)_t,
+\]
+subscript `p' indicating fluid particle position.
+The kinematic boundary condition thus becomes
+\begin{equation}
+\eta_t + \Re \mc U\_p \eta_\xx = \Im \mc U\_p.
+\label{eq:BC_kin_transient}
+\end{equation}
+
+The kinematic condition requires an the inverse map time derivative $(\zzmap)_t$. 
+Utilizing the property $(\zzmap)_\z = 1/\zmap_\zz$, we find
+\begin{equation}
+(\zzmap)_t = \int \!\big(1/\zmap_\zz\big)_t \,\dd z = -\int\! \frac{\zmap_{\zz t}}{\zmap_\zz} \,\dd\zz.
+\label{eq:zzmap_t}
+\end{equation}
+Integrating \eqref{eq:zzmap_t} is the same challenge as we face with the Schwartz--Cristoffel transform where
+analytic expressions exist for some maps but not all. Numerical integration can be performed where analytic expressions are not forthcoming. 
+\\
+
+Deriving the dynamic boundary condition is straight-forwart when adopting the complex potentials $\ww(\zz,t)=\w[\zmap(\zz,t),t]$; $\phi=\Re\w$, $\varphi = \Re\ww$.
+This yields
+\begin{equation}
+\varphi_t - \Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}} + \frac12|\zmap_\zz|^{-2}|\ww_\zz|^2 + gh = 0.
+\label{eq:}
+\end{equation}
+Further introducing $\varphi\S(\xx,t)=\varphi[\xx,\eta(\xx,t),t]$ to eliminate $\varphi_t$ and $\varphi_\xx$, we get 
+\begin{equation*}
+\varphi\S_t - \Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}}-\varphi_\yy \eta_t
+ + \frac12|\zmap_\zz|^{-2}\sbr{\rbr{\varphi\S_\xx-\varphi_\yy\eta_\xx}^2+\varphi_\yy^2} + gh = 0.
+\end{equation*}
+%
+Eliminating $\eta_t$ with \eqref{eq:zzmap_t} finally produces
+\begin{equation}
+\varphi\S_t - \Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}}
++ \varphi_\yy\sbr{\Re(\zzmap)_t-\eta_\xx\Im(\zzmap)_t}
+ + \frac12|\zmap_\zz|^{-2}\sbr{\rbr{\varphi\S_\xx}^2-\rbr{1+\eta_\xx^2}\varphi_\yy^2} + gh = 0.
+\label{eq:BC_dyn_transient}
+\end{equation}
+\\
+
+An example of a Schwartz-Christoffel type transform of a flap wavemaker is
+\begin{equation}
+\zmap_\zz(\zz,t) = \prod_{j=-\infty}^\infty \rbr{1+\frac{d^2}{\rbr{\zz+2\ii j h}^2}}^{\theta(t)/\pi}
+= \sbr{1+\frac{\sin^2\!\frac{\pi d}{2h}}{\sinh^2\!\frac{\pi \zz}{2h}}}^{\theta(t)/\pi}
+\label{eq:df_flap}
+\end{equation}
+This map is a $\theta$-bend in the vertical axis mirrored about the horizontal axis.
+This is then mirrored again infinitely many times for every $2\ii h$-period---a product series which expressible in terms of trigonometric functions.
+\eqref{eq:df_flap} is unfortunately to our knowledge not integrable, so integration must be carried out numerically. 
+We note that $\zmap_\zz\to1$ as $\xx\to\infty$ and so the $\z$ plane will scale with the $\zz$ plane far away from the wavemaker, and the two planes will match everywhere for $\theta=0$. $\zz=-\ii d$, which is the hinge position in the $\zz$-plane, will be in proximity to the hinge position in the $\z$-plane, but will shifted vertically with extending flap angles. We perform a numerical iteration in order to determine the value of $d$ to achieve the descried hinge depth $D$ in the physical plane. This is done by measuring the distance from the bottom to the hinge;
+let
+\begin{equation}
+\mc L(d/h,\theta) = \int_{-1}^{-d/h} \dd \yy \sbr{1-\frac{\sin^2\!\frac{\pi}{2}\frac{d}{h}}{\sin^2\!\frac{\pi}{2}\yy}}^{\theta/\pi} = \frac{f(-\ii d)-f(-\ii h)}h
+\label{eq:L}
+\end{equation}
+We iterate by assigning
+\[
+d\leftarrow d + h(1-\mc L) - D.
+\]
+
+The map here given has a horizontal line of symmetry along $\y=0$. The wavemaker forms a wedge at this level. 
+For this not to interfare with the water level, we propose shifting the waterline down a small distance $\y=-\hbar$.
+This is easily done by substituting 
+%\begin{align*}
+%h &\leftarrow h + \hbar, & D &\leftarrow D + \hbar, & \z &\leftarrow \z + \ii \hbar.
+%\end{align*}
+$h \leftarrow h + \hbar$, $D \leftarrow D + \hbar$ and $\z \leftarrow \z + \ii \hbar$, right-hand side lengths being lengths with respect to the waterline.
+\\
+
+\autoref{fig:f_flap} shows an example of \eqref{eq:df_flap} integrated numerically.
+%We note that the floor near the wavemaker is with this map somewhat distorted which will cause some error in non-deep water.
+\\
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$\theta = +30$\textdegree]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalWavemaker/mapFlap3_positive.pdf}}%
+\subfloat[$\theta = -30$\textdegree]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalWavemaker/mapFlap3_negative.pdf}}%
+\caption{The conformal map \eqref{eq:df_flap}, integrated numerically.
+$D=1.0$, $h=2.0$ and $\hbar = 0.25$.
+}%
+\label{fig:f_flap}%
+\end{figure}
+
+
+
+We may for deep water ignore the periodic mirroring in \eqref{eq:df_flap}.
+This expression is integrable in terms of the  ordinary hypergeometric function ${_2F}_1$:
+\begin{equation}
+\tilde\zmap(\zz,t) = \int\!\dd\zz\rbr{1+\frac{b^2}{\zz^2}}^{\theta(t)/\pi}=\frac{d}{1-2\frac\theta\pi}\,{_2F}_1\rbr{-\frac{\theta}{\pi},\frac12-\frac{\theta}{\pi},\frac32-\frac{\theta}{\pi},-\frac{\zz^2}{d^2}}\rbr{\frac{\zz}{d}}^{1-2\frac\theta\pi} + c.
+\label{eq:f_flap}
+\end{equation}
+Equation \ref{eq:df_flap} can be integrated numerically if the hypergeometric functions are not available.\footnote{${_2F}_1$ is in MATLAB only part of the symbolic toolbox.}
+
+The condition that the flap hinge depth be a vertical distance $D$ from the quiescent waterline at $\x=0$, and that the map return be unaffected by the wavemaker motion far away ($\lim_{\xx\to\infty}\zmap(\xi,t) = \xi$) yields the coefficients
+\begin{align*}
+%c &= -(D+\hbar)\tan\theta + \ii \hbar,&
+%d &=  \frac{\sqrt\pi(D+\hbar)\sec\theta}{\Gamma\rbr{1+\frac\theta\pi}\Gamma\rbr{\frac12-\frac\theta\pi}}.
+c = -D\tan\theta,\qquad
+d =  \frac{\sqrt\pi D\sec\theta}{\Gamma\rbr{1+\frac\theta\pi}\Gamma\rbr{\frac12-\frac\theta\pi}}.
+\end{align*} 
+$\hbar$ is here the distance from the quiescent waterline to the line of symmetry around which the map is horizontally mirrored.
+
+Expression \eqref{eq:zzmap_t} is integrable with for the non-mirrored domain, producing
+\begin{equation*}
+(\tilde\zzmap)_t = -\sbr{2d\arctan\frac\zz d + \zz \ln\rbr{1+\frac{d^2}{\zz^2}}}\frac{\theta_t}{\pi}.
+\end{equation*}
+It is also integrable with \eqref{eq:df_flap} itself, although the expression we get is a mess not quoted here. 
+
+
+%\end{document}

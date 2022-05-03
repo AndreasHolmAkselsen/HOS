@@ -5,7 +5,7 @@ clear
 
 wbl = 1.;
 h = 2;
-wbOveWater = 0;
+wbOveWater = .0;
 
 
 dt = 0.1;
@@ -87,14 +87,14 @@ while t<=tMax
     drawnow
 end
     
-
-
-% plot oposite angle
-theta = -thetaMax;
-z = fz(xx,yy,theta,h,wbl,wbOveWater);
-contour(real(z),imag(z),real(zz),20,'r--','linewidth',1);
-contour(real(z),imag(z),imag(zz),20,'b--','linewidth',1);  
-plot([0,-(wbl+wbOveWater)*tan(theta),0],[-wbl,wbOveWater,wbl+2*wbOveWater],'ok--','LineWidth',2.5);
+% 
+% 
+% % plot oposite angle
+% theta = -thetaMax;
+% z = fz(xx,yy,theta,h,wbl,wbOveWater);
+% contour(real(z),imag(z),real(zz),20,'r--','linewidth',1);
+% contour(real(z),imag(z),imag(zz),20,'b--','linewidth',1);  
+% plot([0,-(wbl+wbOveWater)*tan(theta),0],[-wbl,wbOveWater,wbl+2*wbOveWater],'ok--','LineWidth',2.5);
 
 
 

@@ -65,7 +65,8 @@
 
 \newcommand{\surf}{\eta}
 %\newcommand{\w}{\varpi}
-\newcommand{\dd}[2]{\frac{\mr d #1}{\mr d #2}}
+\newcommand{\dd}{\mr d}
+\newcommand{\ddfrac}[2]{\frac{\dd #1}{\dd #2}}
 
 \title{Conformal mapping of bathymetry in the The Higher Order Spectral method}
 \author{Andreas H. Akselsen}
@@ -92,7 +93,7 @@ Only unidirectional wave field are here considered. The method can likely be ext
 We seek to use conformal mapping to project an uneven bathymetry onto a straight line.
 Let such a map be described by 
 \begin{equation*}
-	\z \mapsto \zmap(\zz),
+	\z \mapsfrom \zmap(\zz),
 \end{equation*}
 where $\z = \x+\ii\y$ is the physical plane and $\zz=\xx+\ii\yy$ is the conformal plane. 
 The motivation for doing this is that any complex potential 
@@ -227,14 +228,14 @@ h_t + \phi_x h_x&=\phi_y,\\
 \end{align*}
 can be re-stated in terms of the surface coordinate
 \[
-%\z\S(\x,t)=\x+\ii h(\x,t) \mapsto f[\zz\S(\xx,t)];\quad \zz\S(\xx,t) = \xx+\ii \eta(\xx,t).
-\x+\ii h(\x,t) \mapsto f[\xx+\ii \eta(\xx,t)].
+%\z\S(\x,t)=\x+\ii h(\x,t) \mapsfrom f[\zz\S(\xx,t)];\quad \zz\S(\xx,t) = \xx+\ii \eta(\xx,t).
+\x+\ii h(\x,t) \mapsfrom f[\xx+\ii \eta(\xx,t)].
 \]
 Introducing
 \[\varphi(\xx,\yy,t)=\Re\ww(\zz,t) \]
 we get\footnote{
 Equation \eqref{eq:BC_zz:eta} is derived form the fundamental principle that a fluid particle follows the surface also in the $\zz$-plane; $\frac{\mr D}{\mr D t}(\eta-\yy)=0$. The particle velocity is 
-$\dd\zz t = \dd\z t \dd\zz\z =(\w')^*/f'=(\ww')^*\big/|f'|^2$.
+$\ddfrac\zz t = \ddfrac\z t \ddfrac\zz\z =(\w')^*/f'=(\ww')^*\big/|f'|^2$.
 }
 \begin{subequations}
 \begin{align}
@@ -309,7 +310,7 @@ We have herein used $M\_d = \frac12 M$ and $r=0.25$, as did \citet{chalikov2005m
 \section{Algebraic conformal maps that emulate the presence of a discontinuous bathymetry}
 \label{sec:SC}
 Assume we have mapped a flat-bedded domain in the $\zz$-plane into a curvilinear $\z$ plane. 
-A common example of such a mapping is the Schwarz--Christoffel  transformation $\z\mapsto \zmap(\zz)$ with
+A common example of such a mapping is the Schwarz--Christoffel  transformation $\z\mapsfrom \zmap(\zz)$ with
 \begin{equation}
 \zmap'(\zz) = C \prod_{j=1}^J (\zz-\xx_j)^{-\alpha_j/\pi},
 \label{eq:SC}
@@ -317,7 +318,7 @@ A common example of such a mapping is the Schwarz--Christoffel  transformation $
 in which the horizontal coordinate is bent stiff angles $\alpha_j$ at locations $\zz=\xi_j$.
 Some particular mappings are analytically integrable, such as the orthogonal step which yields
 \begin{equation}
-\z\mapsto\zmap(\zz) = \frac {H\_d-H\_s}\pi \left[  \sqrt{\zz-1}\sqrt{\zz+1} - 2\sinh^{-1}\! \sqrt{(\zz-1)/2} \right] - \ii H\_s,
+\z\mapsfrom\zmap(\zz) = \frac {H\_d-H\_s}\pi \left[  \sqrt{\zz-1}\sqrt{\zz+1} - 2\sinh^{-1}\! \sqrt{(\zz-1)/2} \right] - \ii H\_s,
 \label{eq:mapSC}
 \end{equation}
 $H\_d$ and $H\_s$ being the deep and shallow sides of the step, respectively.%
@@ -356,7 +357,7 @@ Accordingly, we have
 %\tau &= \sqrt{\frac{\lambda-c^2}{\lambda-1} },\label{eq:map_logstrip:t}\\
 \lambda &= \exp(\zz),\label{eq:map_logstrip:lambda}\\
 \tau &= \sqrt{\frac{\lambda+c^2}{\lambda+1} },\label{eq:map_logstrip:t}\\
-z &\mapsto \zmap(\zz) = -\ii H\_s +\frac{H\_d}{\pi}\left[ 
+z &\mapsfrom \zmap(\zz) = -\ii H\_s +\frac{H\_d}{\pi}\left[ 
 \frac1c \ln^+\frac{\tau-c}{\tau+c} - \ln\frac{\tau-1}{\tau+1}
 \right]\label{eq:map_logstrip:z},
 \end{align}%
@@ -370,7 +371,7 @@ With waves present it may be necessary to evaluate $\z$ at locations $\y>0$; $\y
 we introduce in \eqref{eq:map_logstrip:z} the operator $\ln^+$, the angles of which runs from $0$ to $2\pi$. 
 \autoref{fig:Mei_step} shows the adjusted map \eqref{eq:map_logstrip} for $-\pi\leq\yy\leq0.5$ with the intermediate planes $\lambda(\zz)$ and $\tau(\lambda)$ shown in \autoref{fig:Mei_step_lambda_t}.
 Note that the free surface $\y=0$ is a straight line  $\yy=0$ in the $\zz$-plane, but that $\xx$ is contracted over the step transition.
-The direction of the step is reversed by flipping the abscissa; $z\mapsto-f(-\zz)$.  
+The direction of the step is reversed by flipping the abscissa; $z\mapsfrom-f(-\zz)$.  
 
 For numerical precision can become an issue for large real positive or real negative values of $\zz$ due to $\lambda=\exp \zz$ reaching the precision limit. This is easily circumvented by instead following the asymptote at large value; noting that $f'(\zz)=H\_d/\pi\tau$ and that $\lim_{\xi\to\infty}\tau=1$, $\lim_{\xi\to-\infty}\tau=H\_d/H\_s$, we have 
 \begin{alignat*}{2}
@@ -402,7 +403,7 @@ This can be done by extending the Schwarz--Christoffel transformation with anoth
 It is possible to perform the integration numerically [section to come].
 An alternative is to mirror the domain around the $\y$-axis at a suitable distance form the step.
 \begin{equation}
-\z\mapsto\tilde \zmap(\zz) = 
+\z\mapsfrom\tilde \zmap(\zz) = 
 \begin{cases}
 -\zmap(-\zz - L_\xx) - L_\x; & \xx < 0,\\
 +\zmap(+\zz - L_\xx) + L_\x; & \xx>0,
@@ -502,6 +503,11 @@ $\theta_j\in\{\pi/4,5\pi/2,5\pi/2\}$, $H_j \in\{0.5,1.5,0.75,1.5\}$ and $\xx^\an
 }%
 \label{fig:SCnumMultiStepSmooth}%
 \end{figure}
+
+
+\section{Generalization to a transient mapping}
+\input{transientMap}
+
 
 \bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
 \bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.

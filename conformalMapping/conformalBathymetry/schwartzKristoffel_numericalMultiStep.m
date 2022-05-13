@@ -1,6 +1,6 @@
 clear
 
-DO_EXPORT = 1;
+DO_EXPORT = 0;
 nx = 500;
 ny = 500;
 
@@ -18,13 +18,26 @@ ny = 500;
 % theta = [1]*pi/2; % slope angles (positive values)
 % rangeZeta = [-5,10,-pi,1]; % plot range
 
-xx_b = [0,8,14];    % xi-coordinate of "begining of" edge
-h = [.5,1.5,0.75,1.5]; % plateau levels
-theta = [.5,1.25,1.25]*pi/2; % slope angles (positive values)
-rangeZeta = [-5,18,-pi+.001,1]; % plot range
-exportPath = './SCnumStepMulti'; 
-% rangeZeta = [-5,18,-pi+.1,1]; % plot range
-% exportPath = './SCnumStepMultiSmooth'; 
+% xx_b = [0,8,14];    % xi-coordinate of "begining of" edge
+% h = [.5,1.5,0.75,1.5]; % plateau levels
+% theta = [.5,1.25,1.25]*pi/2; % slope angles (positive values)
+% rangeZeta = [-5,18,-pi+.001,1]; % plot range
+% exportPath = './SCnumStepMulti'; 
+% % rangeZeta = [-5,18,-pi+.1,1]; % plot range
+% % exportPath = './SCnumStepMultiSmooth'; 
+
+
+
+xx_b = [0,nan];  %2.7726  % xi-coordinate of "begining of" edge
+h = [5,2.4,1]; % plateau levels
+theta = [1,.5]*pi/2; % slope angles (positive values)
+rangeZeta = [-5,50,-pi+.001,1]; % plot range
+exportPath = './SCnumBeachRamp'; 
+xx_b(2) = xx_b(1) - pi/theta(2)*log(h(3)/h(2));
+
+
+zzRoots = [xx_b-1i*pi;xx_b+pi./theta.*log(h(2:end)./h(1:end-1))-1i*pi].';
+
 
 xx = linspace(rangeZeta(1),rangeZeta(2),nx);
 yy = linspace(rangeZeta(4),rangeZeta(3),ny)'; % integrating top-to-bottom
@@ -39,8 +52,7 @@ zz = xx + 1i*yy;
 % end
 
 h = shiftdim(h,-1); theta = shiftdim(theta,-1);xx_b = shiftdim(xx_b,-1);
-c = (h(2:end)./h(1:end-1)).^(pi/theta/2);
-df = prod(((exp(zz-xx_b)+1)./(exp(zz-xx_b)+c.^2)).^(theta/pi),3); %  df ~ 1/tau
+df = prod(((exp(zz-xx_b)+1)./(exp(zz-xx_b)+(h(2:end)./h(1:end-1)).^(pi/theta))).^(theta/pi),3); %  df ~ 1/tau
 
 
 df_xh = .5*(df(1,1:nx-1)+df(1,2:nx));
@@ -79,6 +91,7 @@ axis equal tight
 box off
 set(gca,'XAxisLocation','origin','YAxisLocation','origin');%,'XTick',[],'YTick',[])
 
+plot(zzRoots,'k*')
 
 if DO_EXPORT
     export_fig(hfz,[exportPath,'_z'],'-pdf','-m2');

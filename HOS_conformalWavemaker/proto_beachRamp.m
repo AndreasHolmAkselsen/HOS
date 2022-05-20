@@ -99,7 +99,7 @@ exportFormats = {'-png','-pdf','-m2'};
 % k1 = findWaveNumbers(omega,H(1),0,0);
 
 % % specifying period
-T = 4.0; omega=2*pi/T; k1 = findWaveNumbers(omega,H(1),0,0);
+T = 3.5; omega=2*pi/T; k1 = findWaveNumbers(omega,H(1),0,0);
 
 
 NWaves = 60;

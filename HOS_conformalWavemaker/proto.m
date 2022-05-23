@@ -8,16 +8,15 @@ g = 9.81;
 %% input
 h = 5; % Depth
 wbl = 2; % hinge depth
-wbOveWater = .25; % flap extention obove quiescent waterline
+wbOveWater = .5; % flap extention obove quiescent waterline
 thetaMax = deg2rad(10);
-
-
-limZeta = [0,2.5*h,-h];
+N_wavelenghtsInL = 20;
 
 % interpolation grid for conformal map
-nArrX_far = 1500;   % # horizontal points (far field)
-nArrX_near = 500;  % # horizontal points (near field)
-nArrYDown = 100;    % # vertical points
+nArrX_far = 200;   % # horizontal points (far field)
+nArrX_near = 200;  % # horizontal points (near field)
+nArrYDown = 200;    % # vertical points
+nTheta = 101;       % # flap angles (odd)
 
 
 % for wave breaking example
@@ -33,7 +32,6 @@ N_SSGW = 2^12; % number of modes in SSGW solution
 DO_EXPORT = 0;
 EXPORT_MAT = 1;
 PLOT_MAP = 0;
-PLOT_INTERPOLATION_MAP = 1;
 exportPrefix = 'BM_';
 exportPath = './figures/';
 exportFormatsMap = {'-pdf','-png'};
@@ -46,11 +44,13 @@ nx = 2^10;
 % % specifying period
 T = 2.0; omega=2*pi/T; 
 kTemp = findWaveNumbers(omega,h(1),0,0);
-L = 2*pi/kTemp*10;
+L = 2*pi/kTemp*N_wavelenghtsInL;
 
+
+flapPlotTimes = linspace(0,T,50); % leave empty skips flap plotting
 
 % Simulation/plotting time
-NT_dt = 5;
+NT_dt = 1;
 dt = NT_dt*T;
 param.t_end = 9*dt;
     
@@ -88,84 +88,91 @@ xxIP_near = linspace( 0, 5*wbl, nArrX_near);
 xxIP_far = linspace(xxIP_near(end),1.1*L,nArrX_far+1); xxIP_far(1) = []; 
 xxIP = [xxIP_near,xxIP_far];
 
-nTh = 101;
-yyUpper = wbOveWater;
-assert(mod(nTh,2)==1)
-theta = shiftdim(  thetaMax*linspace(-1,1,nTh),-1);
-tIP = omega.\asin(theta/thetaMax);
-theta_t = omega*thetaMax*cos(omega*tIP);
+yyUpper = 0;%wbOveWater;
+assert(mod(nTheta,2)==1,'Odd number of angles assumed.')
+thetaIP = shiftdim(  thetaMax*linspace(-1,1,nTheta),-1);
 
-
-% yyIP = linspace(0,-h,nArrYDown)'; % ensure that we capture the line yy=0
-% dy = abs(yyIP(2)-yyIP(1));
-% yyIP = [flipud((dy:dy:yyUpper)');yyIP];
-% assert(yyIP(end-nArrYDown+1)==0)
 
 yyIP = linspace(-h,0,nArrYDown)'; % ensure that we capture the line yy=0
 dy = yyIP(2)-yyIP(1);
-yyIP = [yyIP;(dy:dy:yyUpper)'];
+yyIP = [yyIP;(dy:dy:wbOveWater)'];
 assert(yyIP(nArrYDown)==0)
 
+[zIP,f_zIP,zzIP] = fz(xxIP,yyIP,thetaIP,h,wbl,wbOveWater);
 
-[zIP,dfIP,zzIP] = fz(xxIP,yyIP,theta,h,wbl,wbOveWater);
-
-
-
-
-% fInv_t = getFInv_t(xxIP,yyIP,theta_t,h,wbl,wbOveWater);
-
-% zzIP = xxIP+1i*yyIP;
-% for j=length(theta):-1:1
-%     [zIP(:,:,j),dfIP(:,:,j)] = fz(xxIP,yyIP,theta(j),h,wbl,wbOveWater);
+% % plot interpolation basis to inspect resolution:
+% iThetaToPlot = 1;
+% if ~isempty(iThetaToPlot)
+%     iPlotEnd = round(size(zIP,2)/10);
+%     figure('color','w');hold on; grid on
+%     plot(0,-wbl,'ok','markersize',8,'linewidth',2);
+% %     axis([-(wbl+wbOveWater)*sin(thetaMax),real(zIP(1,iPlotEnd,1)),-h,wbOveWater])
+%     for iPlot = iThetaToPlot
+%         if iPlot>1, delete([hlr;hlb]); end
+%         hlr = plot(zIP(:,1:round(iPlotEnd/30):iPlotEnd,iPlot),'r','linewidth',1);  
+%         hlb = plot(zIP(1:round(size(zIP,1)/10):end,1:iPlotEnd,iPlot).','b','linewidth',1);
+%         drawnow
+% %         minIz = min(imag(zIP(1,iPlotStart:end,iPlot))); patch(real(zIP(1,[1,iPlotStart:end,iPlotEnd],iPlot)),[1.1*minIz,imag(zIP(1,1:iPlotEnd,iPlot)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');
+%     end
 % end
-%%%%%%%%%%%%%%%
-
-% plot interpolation basis to inspect resolution:
-if PLOT_INTERPOLATION_MAP
-    iPlotEnd = round(size(zIP,2)/10);
-    figure('color','w');hold on; grid on
-    axis([-(wbl+wbOveWater)*sin(thetaMax),real(zIP(1,iPlotEnd,1)),-h,wbOveWater])
-    for iPlot = 1:length(theta)
-        cla
-        plot(zIP(:,1:round(iPlotEnd/30):iPlotEnd,iPlot),'r','linewidth',1);  plot(zIP(1:round(size(zIP,1)/10):end,1:iPlotEnd,iPlot).' ,'b')
-        drawnow
-%         minIz = min(imag(zIP(1,iPlotStart:end,iPlot))); patch(real(zIP(1,[1,iPlotStart:end,iPlotEnd],iPlot)),[1.1*minIz,imag(zIP(1,1:iPlotEnd,iPlot)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');
-    end
-end
 % assert(all(real(zIP(nArrYDown,1,:))<x(1)&min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(nArrYDown,1)),real(zIP(nArrYDown,end)))
 assert(all(min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain out of interpolation range.')
 
-%% tests:
-map.fz_t(1+.2i,.1*T)
-map.fz_t(1+.2i,.1*T+2*pi)
-map.fz_t(1+.2i,.1*T-2*pi)
+%% make interpolation objects
+[xxGrid,yyGrid,thGrid] = ndgrid(xxIP,yyIP,thetaIP);
+fzIP0 = griddedInterpolant(xxGrid,yyGrid,thGrid,permute(zIP,[2,1,3]),'linear','none');
+fy0 = griddedInterpolant(xxGrid,yyGrid,thGrid,imag(permute(zIP,[2,1,3])),'linear','none');
+fJInv0 = griddedInterpolant(xxGrid,yyGrid,thGrid,abs(permute(f_zIP,[2,1,3])).^(-2) ,'linear','none');
+tIP = omega.\asin(thetaIP/thetaMax);
+f_tIP2 = cat(3,zeros(size(zzIP)),diff(zIP,1,3)./diff(tIP,1,3),zeros(size(zzIP))); % NB! numerical time differentiation. Find a way to validate!
+thetaIP2 = cat(3,thetaIP(1),.5*(thetaIP(2:end)+thetaIP(1:end-1)),thetaIP(end));
+f_zIP2 = cat(3,f_zIP(:,:,1),.5*(f_zIP(:,:,2:end)+f_zIP(:,:,1:end-1)),f_zIP(:,:,end));
 
-map.fz_t(1+.2i,0)
-map.fz_t(1+.2i,-T/2)
-map.fz_t(1+.2i,-T/2)
-
-[xxGrid,yyGrid,tGrid] = ndgrid(xxIP,yyIP,tIP);
-fzIP0 = griddedInterpolant(xxGrid,yyGrid,tGrid,permute(zIP,[2,1,3]),'linear','none');
-fy0 = griddedInterpolant(xxGrid,yyGrid,tGrid,imag(permute(zIP,[2,1,3])),'linear','none');
-fJInv0 = griddedInterpolant(xxGrid,yyGrid,tGrid,abs(permute(dfIP,[2,1,3])).^(-2) ,'linear','none');
-
-tIP_f_t = tIP(:);
-tIP_f_t = shiftdim([tIP_f_t(1);.5*(tIP_f_t(2:end)+tIP_f_t(1:end-1));tIP_f_t(end)],-2);
-f_t = cat(3,zeros(size(zzIP)),diff(zIP,1,3)./diff(tIP,1,3),zeros(size(zzIP)));
-[xxGrid_f_t,yyGrid_f_t,tGrid_f_t] = ndgrid(xxIP,yyIP,tIP_f_t);
-fz_t0 = griddedInterpolant(xxGrid_f_t,yyGrid_f_t,tGrid_f_t,permute(f_t,[2,1,3]),'linear','none');
-
-% complex2grid = @(zz,ff) ff( (real(zz)+0*zz).', (imag(zz)+0*zz).').';
-T = 2*pi/omega;
-complex2grid = @(zz,t,ff) ff(real(zz),imag(zz), mod(t+T/2,2*pi) -T/2 );
+[xxGrid2,yyGrid2,thGrid2] = ndgrid(xxIP,yyIP,thetaIP2);
+ft__fzIP = f_tIP2./f_zIP2;
+ft__fzIP(f_tIP2==0) = 0;
+ft__fz0 = griddedInterpolant(xxGrid2,yyGrid2,thGrid2,permute(f_tIP2./f_zIP2,[2,1,3]),'linear','none');
 
 
+% t_ = 0:.01:2*T;
+% figure, plot(t_,abs(mod(t_*omega,pi/2)).*sign(cos(t_*omega)),T/4*[1,1],[-1,1]*pi/4,'k')
+% figure, plot(t_, interp1(T/4*[-1,1],pi/2*[-1,1],mod(t_+T/4,T/2+1e-12)-T/4).*sign(cos(omega*t_)),  T/4*[1,1].*(1:4)',[-1,1]*pi/4,'k')
+% figure, plot(t_, pi*(mod(t_+T/4,T/2+1e-12)-T/4).*sign(cos(omega*t_)),  T/4*[1,1].*(1:4)',[-1,1]*pi/4,'k')
+% figure, plot(t_, thetaMax*sin(pi*(mod(t_+T/4,T/2+1e-12)-T/4).*sign(cos(omega*t_))),  T/4*[1,1].*(1:4)',[-1,1]*pi/4,'k')
+
+complex2grid = @(zz,t,ff) ff(real(zz)+0*t,imag(zz)+0*t, thetaMax*sin(omega*t)+0*zz);
 fzIP = @(zz,t) complex2grid(zz,t,fzIP0);
 map.fy = @(zz,t) complex2grid(zz,t,fy0);
 map.fJInv = @(zz,t) complex2grid(zz,t,fJInv0);
-map.fz_t = @(zz,t) complex2grid(zz,t,fz_t);
+map.ft__fz = @(zz,t) complex2grid(zz,t,ft__fz0);
 
-return
+
+% figure,plot(t_,map.fy(1+.2i,t_))
+
+%% test interpolation with plot
+if ~isempty(flapPlotTimes)
+    xxEnd = 2*h;
+    zz_r = linspace(0,xxEnd,30 )+1i*linspace(-h,wbOveWater,200).';
+    zz_b = linspace(0,xxEnd,200)+1i*linspace(-h,wbOveWater,10 ).';
+
+    figure('color','w');hold on; grid on
+    plot(0,-wbl,'ok','markersize',8,'linewidth',2);
+    axis([-(wbl+wbOveWater)*sin(thetaMax),xxEnd,-h,wbOveWater])
+    for iPlot = 1:length(flapPlotTimes), tPlot=flapPlotTimes(iPlot);
+        if iPlot>1, delete(hl); end
+        hl = [plot(fzIP(zz_r,tPlot),'r','linewidth',1)  
+              plot(fzIP(zz_b,tPlot).','b','linewidth',1)
+              plot(fzIP(linspace(0,xxEnd,30 ),tPlot).','.-k','linewidth',1)
+              plot([0,0,-(wbl+wbOveWater)*tan(thetaMax*sin(omega*tPlot))],[-h,-wbl,wbOveWater],'-k','linewidth',2)];
+        drawnow
+    end
+end
+
+%% tests:
+assert(abs(map.fy(1+.2i,.1*T)-map.fy(1+.2i,1.1*T))<1e-12 && abs(map.fy(1+.2i,.1*T)-map.fy(1+.2i,-.9*T))<1e-12)
+assert(abs(map.fy(1+.2i,0)-map.fy(1+.2i,T))<1e-12 && abs(map.fy(1+.2i,0)-map.fy(1+.2i,-T))<1e-12)
+assert(abs(map.ft__fz(1+.2i,.1*T)-map.ft__fz(1+.2i,1.1*T))<1e-12 && abs(map.ft__fz(1+.2i,.1*T)-map.ft__fz(1+.2i,-.9*T))<1e-12)
+assert(abs(map.ft__fz(1+.2i,0)-map.ft__fz(1+.2i,T))<1e-12 && abs(map.ft__fz(1+.2i,0)-map.ft__fz(1+.2i,-T))<1e-12)
 
 
 % NB! may need altering
@@ -182,8 +189,7 @@ map.H = h;
 % xS_xiReg = interp2(real(zzIP),imag(zzIP),real(zIP),map.xi,eta0_xiReg);
 % varphiS0 = interp1( [x-L;x;x+L],[phiS0;phiS0;phiS0],xS_xiReg );
     
-
-
+[varphiS0,eta0_xiReg] = deal(zeros(size(x)));
 
 
 % return
@@ -212,30 +218,26 @@ clear y
 
 
 
-% t_ip = (0:dt:param.t_end)';
-t_ip = linspace(0,t(end),10).';
-% t_ip = linspace(0,.9*t(end),10).';
+% t_ip = (0:dt:param.t_end);
+t_ip = linspace(0,t(end),10);
+% t_ip = linspace(0,.9*t(end),10);
 
 nPannel = length(t_ip);
 varphiS_ip = interp1(t,varphiS,t_ip).';
 eta_ip  = interp1(t,eta ,t_ip).';
 
-zS_ip = fzIP(map.xi+1i*eta_ip);
+zS_ip = fzIP(map.xi+1i*eta_ip,t_ip);
 
 
-[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814],'name',sprintf('Conformal; Tramp%g ka=%.3g',TRamp,ka)),[.075,.04,.05,.05],[.0,0]);
+[hf, ha] = multi_axes(nPannel,1,figure('color','w','position',[1640 164 1081 814]),[.075,.04,.05,.05],[.0,0]); %,'name',sprintf('Conformal; Tramp%g ka=%.3g',TRamp,ka)
 ha = flipud(ha); set([ha(2:end).XAxis],'Visible','off');% if plotting bottom-to-top
 hp = 0*t_ip;
 maxh = max(real(zS_ip(:)));minh = min(real(zS_ip(:)));
-% zSingular = fzIP([xx_b-1i*pi,xx_b+log_cSq-1i*pi]+.025i);
-zSingular = fzIP(zzRoots);
-% x_b = real(fzIP(xx_b-1i*pi));
 % set([ha(1:end-1).XAxis],'Visible','off');% if plotting top-to-bottom
 for i=1:nPannel
     hp(i) = plot(ha(i),zS_ip(:,i),'k');
-    ylabel(ha(i),sprintf('t = %.2fs\nw_{nl} = %.2f',t_ip(i),param.nonLinRamp(t_ip(i))))
+    ylabel(ha(i),sprintf('t = %.2fs',t_ip(i)))
     grid(ha(i),'on');
-    plot(ha(i),[1;1].*real(zSingular(:)).',[minh;maxh],'--k'); 
 end
 % axis(ha,'equal','tight')
 set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
@@ -274,22 +276,25 @@ thp = theta/pi;
 zz = xx + 1i*yy;
 % df = (1+d^2./zz.^2).^thp; % k=1
 
-H = h + wbOveWater;
-D = wbl + wbOveWater;
+% stretched variables
+h_   = h   + wbOveWater;
+wbl_ = wbl + wbOveWater;
+zz_  = zz  - 1i*wbOveWater;
+
 
 tic
 % d = fixHingeDepth(D/H,theta)*H;
 d = 0*theta;
 for i = 1:length(theta)
-    d(i) = fzero(@(d__h) fixHingeDepth_fzero(d__h,D/H,theta(i)),D/H)*H;
+    d(i) = fzero(@(d__h) fixHingeDepth_fzero(d__h,wbl_/h_,theta(i)),wbl_/h_)*h_;
 end
 toc
+% figure, plot(theta(:),d(:)-linspace(d(1),d(end),length(d))','.-')
 
-% h = -yy(end);
-df = (1+csch(pi*zz./(2*H)).^2.*sin(pi*d./(2*H)).^2).^thp; 
+df = (1+csch(pi*zz_./(2*h_)).^2.*sin(pi*d./(2*h_)).^2).^thp; 
 df_yh = .5*(df(1:end-1,1,:)+df(2:end,1,:));
 z1 = cumsum([zeros(size(theta));df_yh.*diff(1i*yy)],1);
-z1 = z1-z1(yy==0) + 1i*wbOveWater;
+z1 = z1-z1(yy==0);% + 1i*wbOveWater;
 df_xh = .5*(df(:,1:end-1,:)+df(:,2:end,:));
 z =  cumsum([z1,df_xh.*diff(xx)],2) ;
 z = z-real(z(end,end,:));
@@ -301,55 +306,55 @@ zz = rot90(zz,2);
 end
 
 
-function d__h = fixHingeDepth(wbl__h,theta)
-maxIt = 100;
-nYInt = 500;
-d__h = wbl__h+0*theta;
-
+function err = fixHingeDepth_fzero(d__h,wbl__h,theta)
 % there's a singularity at zz=-1i*d if theta < 0
-% either stop a yy=-d-delta_singularity:
-% delta_singularity = 1e-3*(theta<0); d_xi = 0;
-%  ... L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) ) + delta_singularity ;
-% or shift integration path d_xi to the right (into the domain)
+% either stop a yy=-d-delta_singularity
+% or shift integration path d_xi to the right (into the domain):
+% delta_singularity = 1e-6*(theta<0); d_xi = 0;
 delta_singularity = 0; d_xi = 1e-6*(theta<0);
 
-for i = 1:maxIt
-    
-    dy = (-d__h-delta_singularity+1)/(nYInt-1);
-    yi = -1 + cumsum((0:nYInt-1)'.*dy,2);
+% nYInt = 10000;
+% yi = linspace(-1,-d__h-delta_singularity,nYInt)';
+% dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) );
+% L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) )+delta_singularity;
 
-    dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) ); 
-    L = sum(.5*(dL(1:end-1,:,:)+dL(2:end,:,:)) .* diff(yi,1,1), 1 )+ delta_singularity ;
-    fprintf('i %d: L = %g, 1-wbl/h=%g\n',i,max(L(:)),1-wbl__h)
+L = integral(@(y) real((1-csc(pi/2*(y-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi)),-1,-d__h-delta_singularity)+delta_singularity;
 
-    delta_d__h = wbl__h-(1-L);
-    
-    iChange = abs(delta_d__h)>1e-9;
-    d__h(iChange) = d__h(iChange) + delta_d__h(iChange);
-    if ~any(iChange), return; end
-end
-
-[~,iMax] = max(abs(delta_d__h(:)));
-warning('failed to find solution withing %d iterations. Biggest last error %g at theta = %.2g deg.',maxIt,delta_d__h(iMax),theta(iMax)*180/pi)
-end
-
-
-function err = fixHingeDepth_fzero(d__h,wbl__h,theta)
-
-nYInt = 10000;
-
-% there's a singularity at zz=-1i*d if theta < 0
-% either stop a yy=-d:
-% delta_singularity = 1e-3*(theta<0);
-%  ... L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) ) + delta_singularity ;
-% or shift integration path d_xi to the right (into the domain)
-d_xi = 1e-9*(theta<0);
-
-yi = linspace(-1,-d__h,nYInt)';
-dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) );
-L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) );
 err = wbl__h-(1-L);
 end
+
+
+% function d__h = fixHingeDepth(wbl__h,theta)
+% maxIt = 100;
+% nYInt = 500;
+% d__h = wbl__h+0*theta;
+% 
+% % there's a singularity at zz=-1i*d if theta < 0
+% % either stop a yy=-d-delta_singularity
+% % or shift integration path d_xi to the right (into the domain):
+% % delta_singularity = 1e-6*(theta<0); d_xi = 0;
+% delta_singularity = 0; d_xi = 1e-6*(theta<0);
+% 
+% for i = 1:maxIt
+%     
+%     dy = (-d__h-delta_singularity+1)/(nYInt-1);
+%     yi = -1 + cumsum((0:nYInt-1)'.*dy,2);
+% 
+%     dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) ); 
+%     L = sum(.5*(dL(1:end-1,:,:)+dL(2:end,:,:)) .* diff(yi,1,1), 1 )+ delta_singularity ;
+%     fprintf('i %d: L = %g, 1-wbl/h=%g\n',i,max(L(:)),1-wbl__h)
+% 
+%     delta_d__h = wbl__h-(1-L);
+%     
+%     iChange = abs(delta_d__h)>1e-9;
+%     d__h(iChange) = d__h(iChange) + delta_d__h(iChange);
+%     if ~any(iChange), return; end
+% end
+% 
+% [~,iMax] = max(abs(delta_d__h(:)));
+% warning('failed to find solution withing %d iterations. Biggest last error %g at theta = %.2g deg.',maxIt,delta_d__h(iMax),theta(iMax)*180/pi)
+% end
+
 
 % 
 % function fInv_t = getFInv_t(xx,yy,theta_t,h,wbl,wbOveWater)

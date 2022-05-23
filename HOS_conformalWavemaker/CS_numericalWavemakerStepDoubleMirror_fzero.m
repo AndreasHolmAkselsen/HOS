@@ -59,8 +59,9 @@ t = 0;
 hp_c=[];
 while t<=tMax
     theta = thetaMax*cos( 2*pi/T*t );
+    tic
     z = fz(xx,yy,theta,h,wbl,wbOveWater);
-    
+    toc
     delete(hp_c)
     [~,hp_c(1)] = contour(real(z),imag(z),real(zz),20,'r','linewidth',1);
     [~,hp_c(2)] = contour(real(z),imag(z),imag(zz),20,'b','linewidth',1);
@@ -120,18 +121,24 @@ end
 
 
 function err = fixHingeDepth(d__h,wbl__h,theta)
-
-nYInt = 500;
-
 % there's a singularity at zz=-1i*d if theta < 0
-% either stop a yy=-d:
-% delta_singularity = 1e-3*(theta<0);
-%  ... L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) ) + delta_singularity ;
-% or shift integration path d_xi to the right (into the domain)
-d_xi = 1e-3*(theta<0);
+% either stop a yy=-d-delta_singularity
+% or shift integration path d_xi to the right (into the domain):
+% delta_singularity = 1e-6*(theta<0); d_xi = 0;
+delta_singularity = 0; d_xi = 1e-6*(theta<0);
 
-yi = linspace(-1,-d__h,nYInt)';
-dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) );
-L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) );
+% nYInt = 10000;
+% yi = linspace(-1,-d__h-delta_singularity,nYInt)';
+% dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) );
+% L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) )+delta_singularity;
+
+L = integral(@(y) real((1-csc(pi/2*(y-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi)),-1,-d__h-delta_singularity)+delta_singularity;
+
 err = wbl__h-(1-L);
 end
+
+
+
+
+
+

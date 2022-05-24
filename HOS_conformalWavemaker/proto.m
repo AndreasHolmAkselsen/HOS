@@ -7,9 +7,9 @@ g = 9.81;
 
 %% input
 h = 5; % Depth
-wbl = 2; % hinge depth
+wbl = 3; % hinge depth
 wbOveWater = .5; % flap extention obove quiescent waterline
-thetaMax = deg2rad(10);
+thetaMax = deg2rad(40);
 N_wavelenghtsInL = 20;
 
 % interpolation grid for conformal map

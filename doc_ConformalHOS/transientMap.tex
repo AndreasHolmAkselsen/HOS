@@ -99,7 +99,12 @@ We accordingly get
 \end{equation}
 and the kinematic boundary condition
 \begin{equation}
-\eta_t = - \Re \UU \eta_\xx + \Im \UU.
+\eta_t = - \Re \UU \eta_\xx + \Im \UU,
+\label{eq:BC_kin_transientU}
+\end{equation}
+or, written in terms of the surface potential $\varphi\S(\xx,t)=\varphi[\xx,\eta(\xx,t),t]$,
+\begin{equation}
+\eta_t = \iJac\sbr{\varphi_\yy\rbr{1+\eta_\xx^2}-\varphi\S_\xx} + \eta_\xx \Re\rbr{\frac{\zmap_t}{\zmap_\zz}}-\Im\rbr{\frac{\zmap_t}{\zmap_\zz}}.
 \label{eq:BC_kin_transient}
 \end{equation}
 %
@@ -116,13 +121,13 @@ and the kinematic boundary condition
 Deriving the dynamic boundary condition is straight-forwart when adopting the complex potentials $\ww(\zz,t)=\w[\zmap(\zz,t),t]$; $\phi=\Re\w$, $\varphi = \Re\ww$.
 This yields
 \begin{equation}
-\varphi_t - \Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}} + \frac12\iJac|\ww_\zz|^2 + gh = 0.
+\varphi_t = \Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}} - \frac12\iJac|\ww_\zz|^2 - gh.
 \label{eq:}
 \end{equation}
 Further introducing $\varphi\S(\xx,t)=\varphi[\xx,\eta(\xx,t),t]$ to eliminate $\varphi_t$ and $\varphi_\xx$, we get 
 \begin{equation*}
-\varphi\S_t - \Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}}-\varphi_\yy \eta_t
- + \frac12\iJac\sbr{\rbr{\varphi\S_\xx-\varphi_\yy\eta_\xx}^2+\varphi_\yy^2} + gh = 0.
+\varphi\S_t =\Re\sbr{\ww_\zz \frac{\zmap_t}{\zmap_\zz}} + \varphi_\yy \eta_t
+ - \frac12\iJac\sbr{\rbr{\varphi\S_\xx-\varphi_\yy\eta_\xx}^2+\varphi_\yy^2} - gh.
 \end{equation*}
 %
 Eliminating $\eta_t$ with \eqref{eq:BC_kin_transient} finally produces
@@ -133,8 +138,8 @@ Eliminating $\eta_t$ with \eqref{eq:BC_kin_transient} finally produces
 %\label{eq:BC_dyn_transient}
 %\end{equation}
 \begin{equation}
-\varphi\S_t - \varphi\S_\xx \Re\rbr{ \frac{\zmap_t}{\zmap_\zz}}
- + \frac12\iJac\sbr{\rbr{\varphi\S_\xx}^2-\rbr{1+\eta_\xx^2}\varphi_\yy^2} + gh = 0.
+\varphi\S_t =  \varphi\S_\xx \Re\rbr{ \frac{\zmap_t}{\zmap_\zz}}
+ - \frac12\iJac\sbr{\rbr{\varphi\S_\xx}^2-\rbr{1+\eta_\xx^2}\varphi_\yy^2} - gh.
 \label{eq:BC_dyn_transient}
 \end{equation}
 \\

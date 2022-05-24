@@ -1,0 +1,317 @@
+%\documentclass[a4paper,12pt]{article}
+\documentclass[internal]{sintefmemo}
+%\documentclass{amsart}
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+
+%\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{graphbox} % allows includegraphics[align=c]
+\usepackage[round]{natbib}
+\usepackage{mathtools}
+\usepackage[font=normalsize]{subfig}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xfrac}
+%\usepackage{cprotect}%for \verb in captions
+%\usepackage{enumerate}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true,
+			linkcolor=blue,
+			filecolor=blue,
+			urlcolor=blue,
+			citecolor=blue}
+\newcommand{\mr}{\mathrm}
+\newcommand{\mc}{\mathcal}
+\let\SSS\S
+\renewcommand{\S}{^\mr{S}}
+\newcommand{\ii}{\mr{i}\,}
+\newcommand{\ee}{\mr{e}}
+\let\underscore\_
+\renewcommand{\_}[1]{_\mr{#1}}
+\newcommand{\oo}[1]{^{(#1)}}
+\let\Re\relax
+\let\Im\relax
+\DeclareMathOperator\Re{Re}
+\DeclareMathOperator\Im{Im}
+\newcommand{\w}{w}
+\newcommand{\bU}{\bm U}
+\newcommand{\h}{\hat}
+\newcommand{\br}[3]{\left#1#2\right#3}
+\newcommand{\rbr}[1]{\left(#1\right)}
+\newcommand{\sbr}[1]{\left[#1\right]}
+\newcommand{\cbr}[1]{\left\{#1\right\}}
+%\newcommand{\bU}{(\nabla\Phi)_{z=\eta}}
+
+
+\newcommand{\z}{z}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\zz}{\zeta}
+\newcommand{\xx}{\xi}
+\newcommand{\yy}{\sigma}
+\newcommand{\kk}{\kappa}
+
+\newcommand{\zmap}{f}
+%\newcommand{\zzmap}{\zmap^{-1}}
+\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
+
+%\newcommand{\ww}{w}
+%\renewcommand{\w}{\ww^\mr{P}}
+\newcommand{\ww}{\omega}
+\renewcommand{\w}{w}
+
+\newcommand{\surf}{\eta}
+%\newcommand{\w}{\varpi}
+\newcommand{\dd}{\mr d}
+\newcommand{\ddfrac}[2]{\frac{\dd #1}{\dd #2}}
+
+\title{A benefit assessment of extending OSC beaches}
+\author{Andreas H. Akselsen}
+\project{302006355-3 (OSC pre-project)}
+\date{\today}
+\recipient[information]{SINTEF employees}
+%\recipient[information,agreed]{Statsbygg}
+
+\begin{document}
+
+
+%\maketitle
+\frontmatter
+
+%\tableofcontents
+
+\section{Introduction}
+A brief simulation study is presented in this memo. 
+The study is aimed as assessing the effect of extending the length of OSC beaches (a so-called `nebb').
+A beach extension will increase the beach depth and is so believed to provide better performance for long wave periods. 
+To emulate this effect we present results form simulations of wave packets propagating over a depth transition.
+The depth transition is vertical but for the upper part which is slanting in order to represent the beach extension. 
+Abrupt depth transitions cause reflection of the carrier wave mode, and it is this reflection we here gauge
+under the basic assumption is that the difference in reflection functions as an estimate for the effect of the beach extension.
+The transmitted wave packet that passes across the depth transition is assumed absorbed by the beach itself, which is not part of our simulations.
+
+A higher order spectral method (HOS) combined with a conformal mapping technique (see related memo/documentation) is used for the simulation.
+
+
+\section{Simulation set-up}
+\label{sec:setup}
+\autoref{fig:maps} shows the bathymetries adopted during our simulations. 
+%The depth transition runs form 5.00 meters on the left side to 1.00 meter on the right.
+The depth transition runs form 10.0 meters on the left side to 2.0 meter on the right.
+The `beach extension' starts at $y=-4.0$\,m and continues to  $y=-2.0$\,m at a 45\textdegree{} or 30\textdegree{} slope.
+A 30\textdegree{} slope is representative of the design slope that would preserve the profile of the Lader tank beach (see related memo), as indicated by the dashed line in \autoref{fig:maps}.
+Notice that the depth difference on each side of the domain translates into a left--right difference in resolution during simulation---simulations are performed with a uniform grid in the $\zz$-plane!
+
+An initial steepness of $(ka)\_L = 0.05$ is adopted in all simulations.
+
+%\begin{figure}[H]
+%	\centering
+%	\begin{minipage}[c]{.45\textwidth}
+%		\subfloat[No beach extension]{\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/map/singleLadies/mapZoom_beach_SSGW_ka0p05_H5p00_1p00__theta90_Nw60.pdf}}\\
+%		\subfloat[$\theta=45$\textdegree{} beach extension]{\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/map/singleLadies/mapZoom_beach_SSGW_ka0p05_H5p00_2p40_1p00__theta90_45_Nw60.pdf}}\\
+%		\subfloat[$\theta=30$\textdegree{} beach extension]{\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/map/singleLadies/mapZoom_beach_SSGW_ka0p05_H5p00_2p25_1p00__theta90_30_Nw60.pdf}}%
+%	\end{minipage}%
+%	\hfill
+%	\subfloat[Full simulation domain]{\includegraphics[width=.45\textwidth,align=c]{../conformalMapping/HOS/figures/map/map_beach_SSGW_ka0p05_H5p00_1p00_Nw60.png}}
+%	\caption{Bathymetries and conformal maps.}
+%	\label{fig:maps}
+%\end{figure}
+
+
+\begin{figure}[H]
+	\centering
+		\subfloat[No beach extension]{\includegraphics[width=.55\textwidth]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th90_z.pdf}}\\
+		\subfloat[$\theta=45$\textdegree{} beach extension]{\includegraphics[width=.7\textwidth]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th45_z.pdf}}\\
+		\subfloat[$\theta=30$\textdegree{} beach extension]{\includegraphics[width=.7\textwidth]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th30_z.pdf}\label{fig:map:30}}\\
+		\subfloat[$\zz$-plane of map in \protect\subref{fig:map:30} ]{\includegraphics[width=.7\textwidth]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th30_zz.pdf}}%
+	\caption{Bathymetries and conformal maps. Dashed line indicates the Lader tank beach profile $\y=-D(\x/L)^2$; $D/L=0.353$.}
+	\label{fig:maps}
+\end{figure}
+
+
+
+
+\section{Simulation results}
+\label{sec:results}
+The results of our simulations are presented in \autoref{tab:results}, listing the amplitudes of the reflected wave packet relative to the incoming primary harmonic amplitudes $a_1=0.0777$\,m, $0.1118$, $0.1518$\,m and $0.1964$\,m. These corresponds to $2.5$, $3.0$, $3.5$ and $4.0$ second periods, respectively.
+Simulation outputs have been collected in \autoref{sec:simFig}.
+Reflection amplitudes are estimated based on visual inspection of the surface elevation (inspecting $y$-coordinate data from one of the second upper panel in each of the figures presented in \autoref{sec:simFig}).
+A notable reduction in reflection amplitudes is observed.
+%\begin{table}[H]
+%	\centering
+%	\begin{tabular}{l|ccc}
+%		  & $\theta=90$\textdegree{}&$\theta=45$\textdegree{} & $\theta=30$\textdegree{}\\\hline
+%%		$T=2.50$\,s &0.1266 &   0.0672  &  0.0200\\
+%%		$T=2.50$\,s &0.3295 &   0.2390  &  0.1550\\
+%		$T=2.50$\,s &13\% &   7\%  &  2\%\\
+%		$T=3.25$\,s &33\% &   24\%  &  15.5\%\\
+%	\end{tabular}
+%	\caption{Estimates of reflection fraction based on visual inspection, tabulated against carrier periods and beach extension slopes.}
+%	\label{tab:results}
+%\end{table}
+
+\begin{table}[H]
+	\centering
+	\subfloat[Reflection]{\parbox[c]{.4\textwidth}{\centering
+	\begin{tabular}{r|ccc}
+		$T\big\backslash\theta$& $90$\textdegree{}&$45$\textdegree{} & $30$\textdegree{}\\\hline
+		$2.50$\,s & 4.0\% & 2.0\%  &1.9\%\\
+		$3.00$\,s &7.9\%&3.9\%&1.8\%\\
+		$3.50$\,s&12.1\%&7.3\%&1.9\%\\
+		$4.00$\,s&16.0\%&11.4\%&5.9\%
+	\end{tabular}\label{tab:results:abs}
+}}%
+\subfloat[Reduction in reflection]{\parbox[c]{.4\textwidth}{\centering
+	\begin{tabular}{r|cc}
+		$T\big\backslash\theta$&$45$\textdegree{} & $30$\textdegree{}\\\hline
+		$2.50$\,s & 2.0\%  &2.1\%\\
+		$3.00$\,s &4.0\%&6.1\%\\
+		$3.50$\,s&4.8\%&10.2\%\\
+		$4.00$\,s&4.6\%&10.1\%
+	\end{tabular} \label{tab:results:reduction}
+}}%
+	\caption{Ten meter water depth; estimates of reflection based on inspection of plotted surface elevation, tabulated against carrier periods and beach extension slopes. Table \protect\subref{tab:results:reduction} lists the difference between the first and the last two columns in table \protect\subref{tab:results:abs}.}
+	\label{tab:results}
+\end{table}
+
+
+\begin{table}[H]
+	\centering
+	\subfloat[Reflection]{\parbox[c]{.4\textwidth}{\centering
+			\begin{tabular}{r|ccc}
+				$T\big\backslash\theta$& $90$\textdegree{}&$45$\textdegree{} & $30$\textdegree{}\\\hline
+				$2.50$\,s&4.6\%&2.6\%&1.5\%\\
+				$3.00$\,s&8.3\%&5.7\%&2.8\%\\
+				$3.50$\,s&11.2\%&8.7\%&5.5\%\\
+				$4.00$\,s&12.8\%&11.0\%&8.1\%
+			\end{tabular}\label{tab:results:abs}
+	}}%
+	\subfloat[Reduction in reflection]{\parbox[c]{.4\textwidth}{\centering
+			\begin{tabular}{r|cc}
+				$T\big\backslash\theta$&$45$\textdegree{} & $30$\textdegree{}\\\hline
+				$2.50$\,s&2.0\%&3.0\%\\
+				$3.00$\,s&2.6\%&5.5\%\\
+				$3.50$\,s&2.5\%&5.7\%\\
+				$4.00$\,s&1.8\%&4.7\%
+			\end{tabular} \label{tab:results:reduction}
+	}}%
+	\caption{Five meter water depth; estimates of reflection based on inspection of plotted surface elevation, tabulated against carrier periods and beach extension slopes. Table \protect\subref{tab:results:reduction} lists the difference between the first and the last two columns in table \protect\subref{tab:results:abs}.}
+	\label{tab:results}
+\end{table}
+
+
+\appendix
+\section{Simulation figures}
+\label{sec:simFig}
+
+
+
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T2p50_ka0p05_M5_H10p00_2p00_theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p0777_aRef0p00314.pdf}
+	\caption{No beach extension, 2.50 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T2p50_ka0p05_M5_H10p00_8p30_4p90_2p00_theta90_180_45_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p0777_aRef0p00155.pdf}
+	\caption{$\theta=45$\textdegree{} extension, 2.50 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T2p50_ka0p05_M5_H10p00_9p10_4p60_2p00_theta90_180_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p0777_aRef0p00149.pdf}
+	\caption{$\theta=30$\textdegree{} beach extension, 2.50 second period.}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p00_ka0p05_M5_H10p00_2p00_theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1118_aRef0p00881.pdf}
+	\caption{No beach extension, 3.00 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p00_ka0p05_M5_H10p00_8p30_4p90_2p00_theta90_180_45_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1118_aRef0p00432.pdf}
+	\caption{$\theta=45$\textdegree{} extension, 3.00 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p00_ka0p05_M5_H10p00_9p10_4p60_2p00_theta90_180_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1118_aRef0p00198.pdf}
+	\caption{$\theta=30$\textdegree{} beach extension, 3.00 second period.}
+\end{figure}
+
+
+%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p50_ka0p05_M5_H10p00_2p00_theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1518_aRef0p01834.pdf}
+	\caption{No beach extension, 3.50 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p50_ka0p05_M5_H10p00_8p30_4p90_2p00_theta90_180_45_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1518_aRef0p01102.pdf}
+	\caption{$\theta=45$\textdegree{} extension, 3.50 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p50_ka0p05_M5_H10p00_9p10_4p60_2p00_theta90_180_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1518_aRef0p00289.pdf}
+	\caption{$\theta=30$\textdegree{} beach extension, 3.50 second period.}
+\end{figure}
+
+
+
+%%%%%%%%%%%%%%%%%%%
+
+\begin{figure}[H] 													   
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T4p00_ka0p05_M5_H10p00_2p00_theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1964_aRef0p03142.pdf}
+	\caption{No beach extension, 4.00 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T4p00_ka0p05_M5_H10p00_8p30_4p90_2p00_theta90_180_45_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1964_aRef0p02236.pdf}
+	\caption{$\theta=45$\textdegree{} extension, 4.00 second period.}
+\end{figure}
+\begin{figure}[H]
+	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T4p00_ka0p05_M5_H10p00_9p10_4p60_2p00_theta90_180_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p1964_aRef0p01158.pdf}
+	\caption{$\theta=30$\textdegree{} beach extension, 4.00 second period.}
+\end{figure}
+
+
+
+
+
+
+
+
+%
+%\begin{figure}[H]
+%	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T2p50_ka0p05_M5_H5p00_1p00__theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}
+%	\caption{No beach extension, 2.50 second period.}
+%\end{figure}
+%\section{Simulation results}
+%\begin{figure}[H]
+%	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T2p50_ka0p05_M5_H5p00_2p40_1p00__theta90_45_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}
+%	\caption{$\theta=45$\textdegree{} extension, 2.50 second period.}
+%\end{figure}
+%\section{Simulation results}
+%\begin{figure}[H]
+%	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T2p50_ka0p05_M5_H5p00_2p25_1p00__theta90_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}
+%	\caption{$\theta=30$\textdegree{} beach extension, 2.50 second period.}
+%\end{figure}
+%
+%%%%%%%%%%%%%%%%%%%%
+%
+%\begin{figure}[H]
+%	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p25_ka0p05_M5_H5p00_1p00__theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}
+%	\caption{No beach extension, 3.25 second period.}
+%\end{figure}
+%\section{Simulation results}
+%\begin{figure}[H]
+%	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p25_ka0p05_M5_H5p00_2p40_1p00__theta45_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}
+%	\caption{$\theta=45$\textdegree{} extension, 3.25 second period.}
+%\end{figure}
+%\section{Simulation results}
+%\begin{figure}[H]
+%	\includegraphics[width=\textwidth]{../conformalMapping/HOS/figures/beach_SSGW_T3p25_ka0p05_M5_H5p00_2p25_1p00__theta90_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}
+%	\caption{$\theta=30$\textdegree{} beach extension, 3.25 second period.}
+%\end{figure}
+
+\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
+\bibliography{sintef_bib}
+
+
+\end{document}

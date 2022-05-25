@@ -21,7 +21,7 @@ function [W_lin,W_nl] = phiComponentsHOS(phiS,eta,param)
     
     k = [0:ceil(N/2)-1, floor(N/2):-1:1]';
     H_ji = k.^(0:M); % [j,i+1] where i is the i'th derivative in z.
-    if isfinite(param.map.H), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*param.map.H/param.dim.L); end
+    if isfinite(param.map.zzDepth), H_ji(:,2:2:M+1) = H_ji(:,2:2:M+1).*tanh(k*param.map.zzDepth/param.dim.L); end
 
     for n = 1:M
         % Compute phi^(n)

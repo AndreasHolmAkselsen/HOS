@@ -301,7 +301,7 @@ finvIp = scatteredInterpolant(  real(zIP(:)), imag(zIP(:)) , zzIP(:),'linear','n
 zzS0 = finvIp(x, h0 );
 % interpolate onto regulart xi grid.
 map.xi = linspace(real(zzS0(1)),real(zzS0(nx)),nx)';
-map.H = pi;
+map.zzDepth = pi;
 eta0_xiReg = interp1(real(zzS0),imag(zzS0),map.xi);
 xS_xiReg = interp2(real(zzIP),imag(zzIP),real(zIP),map.xi,eta0_xiReg);
 varphiS0 = interp1( [x-L;x;x+L],[phiS0;phiS0;phiS0],xS_xiReg );

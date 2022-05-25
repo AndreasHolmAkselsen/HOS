@@ -34,13 +34,19 @@ x2 = (0:2*Nx-1)'*dx; % to plot more of the domain
 % A=-imag(A(:,1:Nx));
 % a_ = sum([A(1),2*A(2:end-1),A(end)].*sin(k.*x2),2)./(2*(Nx-1)) ;
 
+%% transfrom fft, pure sum definition|||
+% a2=a.';
+% aPer=[a2,-fliplr(a2(2:end-1))];
+% A=fft(aPer,[],2);
+% A=-imag(A(:,1:Nx))./(2*(Nx-1)); A(2:end-1) = 2*A(2:end-1);
+% a_ = sum(A.*sin(k.*x2),2) ;
 
-% %% inverse transfrom fft
+%% inverse transfrom fft
 % A = sum([a(1);2*a(2:end-1);a(end)].*sin(k.*x),1);
 % aPer=ifft([A,-fliplr(A(2:end-1))],[],2);
 % a_=imag(aPer(:,1:Nx));
 
-% %% fully sum
+%% fully sum
 A = sum([a(1);2*a(2:end-1);a(end)].*sin(k.*x),1);
 a_ = sum([A(1),2*A(2:end-1),A(end)].*sin(k.*x2),2)./(2*(Nx-1)) ;
  

@@ -8,8 +8,8 @@ g = 9.81;
 %% input
 h = 5; % Depth
 wbl = 3; % hinge depth
-wbOveWater = .5; % flap extention obove quiescent waterline
-thetaMax = deg2rad(40);
+wbOverWater = .5; % flap extention obove quiescent waterline
+thetaMax = deg2rad(10);
 N_wavelenghtsInL = 20;
 
 % interpolation grid for conformal map
@@ -18,6 +18,8 @@ nArrX_near = 200;  % # horizontal points (near field)
 nArrYDown = 200;    % # vertical points
 nTheta = 101;       % # flap angles (odd)
 
+% fz = @fz_yySymmetric;
+fz = @fz_volumeConverving;
 
 % for wave breaking example
 param.DO_PADDING = 0;
@@ -88,17 +90,17 @@ xxIP_near = linspace( 0, 5*wbl, nArrX_near);
 xxIP_far = linspace(xxIP_near(end),1.1*L,nArrX_far+1); xxIP_far(1) = []; 
 xxIP = [xxIP_near,xxIP_far];
 
-yyUpper = 0;%wbOveWater;
+yyUpper = 0;%wbOverWater;
 assert(mod(nTheta,2)==1,'Odd number of angles assumed.')
 thetaIP = shiftdim(  thetaMax*linspace(-1,1,nTheta),-1);
 
 
 yyIP = linspace(-h,0,nArrYDown)'; % ensure that we capture the line yy=0
 dy = yyIP(2)-yyIP(1);
-yyIP = [yyIP;(dy:dy:wbOveWater)'];
+yyIP = [yyIP;(dy:dy:wbOverWater)'];
 assert(yyIP(nArrYDown)==0)
 
-[zIP,f_zIP,zzIP] = fz(xxIP,yyIP,thetaIP,h,wbl,wbOveWater);
+[zIP,f_zIP,zzIP] = fz(xxIP,yyIP,thetaIP,h,wbl,wbOverWater);
 
 % % plot interpolation basis to inspect resolution:
 % iThetaToPlot = 1;
@@ -106,7 +108,7 @@ assert(yyIP(nArrYDown)==0)
 %     iPlotEnd = round(size(zIP,2)/10);
 %     figure('color','w');hold on; grid on
 %     plot(0,-wbl,'ok','markersize',8,'linewidth',2);
-% %     axis([-(wbl+wbOveWater)*sin(thetaMax),real(zIP(1,iPlotEnd,1)),-h,wbOveWater])
+% %     axis([-(wbl+wbOverWater)*sin(thetaMax),real(zIP(1,iPlotEnd,1)),-h,wbOverWater])
 %     for iPlot = iThetaToPlot
 %         if iPlot>1, delete([hlr;hlb]); end
 %         hlr = plot(zIP(:,1:round(iPlotEnd/30):iPlotEnd,iPlot),'r','linewidth',1);  
@@ -115,8 +117,8 @@ assert(yyIP(nArrYDown)==0)
 % %         minIz = min(imag(zIP(1,iPlotStart:end,iPlot))); patch(real(zIP(1,[1,iPlotStart:end,iPlotEnd],iPlot)),[1.1*minIz,imag(zIP(1,1:iPlotEnd,iPlot)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');
 %     end
 % end
-% assert(all(real(zIP(nArrYDown,1,:))<x(1)&min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(nArrYDown,1)),real(zIP(nArrYDown,end)))
-assert(all(min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain out of interpolation range.')
+% % assert(all(real(zIP(nArrYDown,1,:))<x(1)&min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(nArrYDown,1)),real(zIP(nArrYDown,end)))
+% assert(all(min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain out of interpolation range.')
 
 %% make interpolation objects
 [xxGrid,yyGrid,thGrid] = ndgrid(xxIP,yyIP,thetaIP);
@@ -152,18 +154,18 @@ map.ft__fz = @(zz,t) complex2grid(zz,t,ft__fz0);
 %% test interpolation with plot
 if ~isempty(flapPlotTimes)
     xxEnd = 2*h;
-    zz_r = linspace(0,xxEnd,30 )+1i*linspace(-h,wbOveWater,200).';
-    zz_b = linspace(0,xxEnd,200)+1i*linspace(-h,wbOveWater,10 ).';
+    zz_r = linspace(0,xxEnd,30 )+1i*linspace(-h,wbOverWater,200).';
+    zz_b = linspace(0,xxEnd,200)+1i*linspace(-h,wbOverWater,10 ).';
 
     figure('color','w');hold on; grid on
     plot(0,-wbl,'ok','markersize',8,'linewidth',2);
-    axis([-(wbl+wbOveWater)*sin(thetaMax),xxEnd,-h,wbOveWater])
+    axis([-(wbl+wbOverWater)*sin(thetaMax),xxEnd,-h,wbOverWater])
     for iPlot = 1:length(flapPlotTimes), tPlot=flapPlotTimes(iPlot);
         if iPlot>1, delete(hl); end
         hl = [plot(fzIP(zz_r,tPlot),'r','linewidth',1)  
               plot(fzIP(zz_b,tPlot).','b','linewidth',1)
               plot(fzIP(linspace(0,xxEnd,30 ),tPlot).','.-k','linewidth',1)
-              plot([0,0,-(wbl+wbOveWater)*tan(thetaMax*sin(omega*tPlot))],[-h,-wbl,wbOveWater],'-k','linewidth',2)];
+              plot([0,0,-(wbl+wbOverWater)*tan(thetaMax*sin(omega*tPlot))],[-h,-wbl,wbOverWater],'-k','linewidth',2)];
         drawnow
     end
 end
@@ -264,111 +266,161 @@ elseif EXPORT_MAT == 2
 end
 
 
-function [z,df,zz] = fz(xx,yy,theta,h,wbl,wbOveWater)
-
-assert(all(diff(xx)>0),'increasing xx-input assumed');
-xx = fliplr(xx); % integrating from right-to-left
-yy = flipud(yy); % integrating from right-to-left
-
-thp = theta/pi;
-% d = sqrt(pi).*(wbl+wbOveWater).*sec(theta)./(gamma(1+thp)*gamma(.5-thp));
-
-zz = xx + 1i*yy;
-% df = (1+d^2./zz.^2).^thp; % k=1
-
-% stretched variables
-h_   = h   + wbOveWater;
-wbl_ = wbl + wbOveWater;
-zz_  = zz  - 1i*wbOveWater;
-
-
-tic
-% d = fixHingeDepth(D/H,theta)*H;
-d = 0*theta;
-for i = 1:length(theta)
-    d(i) = fzero(@(d__h) fixHingeDepth_fzero(d__h,wbl_/h_,theta(i)),wbl_/h_)*h_;
-end
-toc
-% figure, plot(theta(:),d(:)-linspace(d(1),d(end),length(d))','.-')
-
-df = (1+csch(pi*zz_./(2*h_)).^2.*sin(pi*d./(2*h_)).^2).^thp; 
-df_yh = .5*(df(1:end-1,1,:)+df(2:end,1,:));
-z1 = cumsum([zeros(size(theta));df_yh.*diff(1i*yy)],1);
-z1 = z1-z1(yy==0);% + 1i*wbOveWater;
-df_xh = .5*(df(:,1:end-1,:)+df(:,2:end,:));
-z =  cumsum([z1,df_xh.*diff(xx)],2) ;
-z = z-real(z(end,end,:));
-
-z  = rot90(z ,2);
-df = rot90(df,2);
-zz = rot90(zz,2);
-
-end
-
-
-function err = fixHingeDepth_fzero(d__h,wbl__h,theta)
-% there's a singularity at zz=-1i*d if theta < 0
-% either stop a yy=-d-delta_singularity
-% or shift integration path d_xi to the right (into the domain):
-% delta_singularity = 1e-6*(theta<0); d_xi = 0;
-delta_singularity = 0; d_xi = 1e-6*(theta<0);
-
-% nYInt = 10000;
-% yi = linspace(-1,-d__h-delta_singularity,nYInt)';
-% dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) );
-% L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) )+delta_singularity;
-
-L = integral(@(y) real((1-csc(pi/2*(y-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi)),-1,-d__h-delta_singularity)+delta_singularity;
-
-err = wbl__h-(1-L);
-end
-
-
-% function d__h = fixHingeDepth(wbl__h,theta)
-% maxIt = 100;
-% nYInt = 500;
-% d__h = wbl__h+0*theta;
+%% Volume conserving map
+% function [z,df,zz] = fz(xx,yy,theta,h,wbl,wbOverWater)
+%     assert(all(diff(xx)>0&&all(diff(yy)>0),'increasing zz vectors assumed');
+%     xx = fliplr(xx); % integrating from right-to-left
+%     yy = yy+h; 
+%     
+%     d = wbl+wbOverWater;
+%     H = h+wbl+2*wbOverWater;
+%     [z,df,zz] = fz0(xx,yy,theta,H,d);
+%     
+%     z  = fliplr(z ) - 1i*h - real(z(1,end,:));
+%     df = fliplr(df);
+%     zz = fliplr(zz)-h;
+% end
+% function [z,df,zz] = fz0(xx,yy,theta,H,d)
+% zz = xx + 1i*yy;
+% sig0 = H + [-2;-1;1;2]*d;
 % 
+% sig = zeros(4,1,numel(theta));
+% for i = 1:length(theta)
+%     sig(:,:,i) = LMFnlsq(@(sig) fixHingeDepth(sig,theta(i),H,d),sig0); % {LMFnlsq,newtonraphson,fminsearch}
+% end
+% 
+% zz2 = zz.^2;
+% df = ((zz2+sig(1)^2)./(zz2+sig(4)^2).*((zz2+sig(3)^2)./(zz2+sig(2)^2)).^2).^(theta/pi);
+% df_yh = .5*(df(1:end-1,1,:)+df(2:end,1,:));
+% z1 = cumsum([zeros(size(theta));df_yh.*diff(1i*yy)],1);
+% df_xh = .5*(df(:,1:end-1,:)+df(:,2:end,:));
+% z =  cumsum([z1,df_xh.*diff(xx)],2) ;
+% end
+% function err = fixHingeDepth(sig,theta,H,d)
+% d_xi = 1e-6;
+% df_zz2 = @(zz2) ((zz2+sig(1)^2)./(zz2+sig(4)^2).*((zz2+sig(3)^2)./(zz2+sig(2)^2)).^2).^(theta/pi);
+% dy = @(yy) real( df_zz2((1i*yy+d_xi).^2) ); % real beacuse it is integrated by dzz = 1i*dyy;
+% y = zeros(5,1); sig0 = [0;sig];
+% for i = 1:4
+%     y(i+1) = y(i) + integral( dy,sig0(i),sig0(i+1));
+% end
+% err = y(2:5) - (H+[-2;-1;1;2]*d);
+% end
+
+
+
+%% flat yy=0 map
+% function [z,df,zz] = fz(xx,yy,theta,h,wbl,wbOverWater)
+% assert(all(diff(xx)>0&&all(diff(yy)>0),'increasing zz vectors assumed');
+% xx = fliplr(xx); % integrating from right-to-left
+% 
+% thp = theta/pi;
+% % d = sqrt(pi).*(wbl+wbOverWater).*sec(theta)./(gamma(1+thp)*gamma(.5-thp));
+% zz = xx + 1i*yy;
+% % df = (1+d^2./zz.^2).^thp; % k=1
+% 
+% % stretched variables
+% h_   = h   + wbOverWater;
+% wbl_ = wbl + wbOverWater;
+% zz_  = zz  - 1i*wbOverWater;
+% 
+% % d = fixHingeDepth(D/H,theta)*H;
+% d = 0*theta;
+% for i = 1:length(theta)
+%     d(i) = fzero(@(d__h) fixHingeDepth_fzero(d__h,wbl_/h_,theta(i)),wbl_/h_)*h_;
+% end
+% % figure, plot(theta(:),d(:)-linspace(d(1),d(end),length(d))','.-')
+% 
+% df = (1+csch(pi*zz_./(2*h_)).^2.*sin(pi*d./(2*h_)).^2).^thp; 
+% df_yh = .5*(df(1:end-1,1,:)+df(2:end,1,:));
+% z1 = cumsum([zeros(size(theta));df_yh.*diff(1i*yy)],1);
+% z1 = z1-z1(yy==0);% + 1i*wbOverWater;
+% df_xh = .5*(df(:,1:end-1,:)+df(:,2:end,:));
+% z =  cumsum([z1,df_xh.*diff(xx)],2) ;
+% z = z-real(z(1,end,:));
+% 
+% z  = fliplr(z );
+% df = fliplr(df);
+% zz = fliplr(zz);
+% 
+% end
+% 
+% function err = fixHingeDepth_fzero(d__h,wbl__h,theta)
 % % there's a singularity at zz=-1i*d if theta < 0
 % % either stop a yy=-d-delta_singularity
 % % or shift integration path d_xi to the right (into the domain):
 % % delta_singularity = 1e-6*(theta<0); d_xi = 0;
 % delta_singularity = 0; d_xi = 1e-6*(theta<0);
 % 
-% for i = 1:maxIt
-%     
-%     dy = (-d__h-delta_singularity+1)/(nYInt-1);
-%     yi = -1 + cumsum((0:nYInt-1)'.*dy,2);
+% % nYInt = 10000;
+% % yi = linspace(-1,-d__h-delta_singularity,nYInt)';
+% % dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) );
+% % L = sum(.5*(dL(1:end-1)+dL(2:end)) .* diff(yi) )+delta_singularity;
 % 
-%     dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) ); 
-%     L = sum(.5*(dL(1:end-1,:,:)+dL(2:end,:,:)) .* diff(yi,1,1), 1 )+ delta_singularity ;
-%     fprintf('i %d: L = %g, 1-wbl/h=%g\n',i,max(L(:)),1-wbl__h)
-% 
-%     delta_d__h = wbl__h-(1-L);
-%     
-%     iChange = abs(delta_d__h)>1e-9;
-%     d__h(iChange) = d__h(iChange) + delta_d__h(iChange);
-%     if ~any(iChange), return; end
-% end
-% 
-% [~,iMax] = max(abs(delta_d__h(:)));
-% warning('failed to find solution withing %d iterations. Biggest last error %g at theta = %.2g deg.',maxIt,delta_d__h(iMax),theta(iMax)*180/pi)
+% L = integral(@(y) real((1-csc(pi/2*(y-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi)),-1,-d__h-delta_singularity)+delta_singularity;
+% err = wbl__h-(1-L);
 % end
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% % function d__h = fixHingeDepth(wbl__h,theta)
+% % maxIt = 100;
+% % nYInt = 500;
+% % d__h = wbl__h+0*theta;
+% % 
+% % % there's a singularity at zz=-1i*d if theta < 0
+% % % either stop a yy=-d-delta_singularity
+% % % or shift integration path d_xi to the right (into the domain):
+% % % delta_singularity = 1e-6*(theta<0); d_xi = 0;
+% % delta_singularity = 0; d_xi = 1e-6*(theta<0);
+% % 
+% % for i = 1:maxIt
+% %     
+% %     dy = (-d__h-delta_singularity+1)/(nYInt-1);
+% %     yi = -1 + cumsum((0:nYInt-1)'.*dy,2);
+% % 
+% %     dL = real( (1-csc(pi/2*(yi-1i*d_xi)).^2.*sin(pi/2*d__h).^2).^(theta/pi) ); 
+% %     L = sum(.5*(dL(1:end-1,:,:)+dL(2:end,:,:)) .* diff(yi,1,1), 1 )+ delta_singularity ;
+% %     fprintf('i %d: L = %g, 1-wbl/h=%g\n',i,max(L(:)),1-wbl__h)
+% % 
+% %     delta_d__h = wbl__h-(1-L);
+% %     
+% %     iChange = abs(delta_d__h)>1e-9;
+% %     d__h(iChange) = d__h(iChange) + delta_d__h(iChange);
+% %     if ~any(iChange), return; end
+% % end
+% % 
+% % [~,iMax] = max(abs(delta_d__h(:)));
+% % warning('failed to find solution withing %d iterations. Biggest last error %g at theta = %.2g deg.',maxIt,delta_d__h(iMax),theta(iMax)*180/pi)
+% % end
 % 
-% function fInv_t = getFInv_t(xx,yy,theta_t,h,wbl,wbOveWater)
 % 
-% xx = fliplr(xx); % integrating from right-to-left
-% yy = flipud(yy); % integrating from right-to-left
-% zz = xx + 1i*yy;
-% H = h + wbOveWater;
-% dRep = wbl + wbOveWater;
-% dg = -log(1+csch(pi*zz./(2*H)).^2.*sin(pi*dRep./(2*H)).^2);% time derivative term
-% dg_yh = .5*(dg(1:end-1,1)+dg(2:end,1));
-% g1 = cumsum([0;dg_yh.*diff(1i*yy)],1);
-% dg_xh = .5*(dg(:,1:end-1)+dg(:,2:end));
-% g =  cumsum([g1,dg_xh.*diff(xx)],2) ;
-% g = g-g(end,end);
-% fInv_t = rot90(g,2).*theta_t/pi; 
-% end
+% % 
+% % function fInv_t = getFInv_t(xx,yy,theta_t,h,wbl,wbOverWater)
+% % 
+% % xx = fliplr(xx); % integrating from right-to-left
+% % yy = flipud(yy); % integrating from right-to-left
+% % zz = xx + 1i*yy;
+% % H = h + wbOverWater;
+% % dRep = wbl + wbOverWater;
+% % dg = -log(1+csch(pi*zz./(2*H)).^2.*sin(pi*dRep./(2*H)).^2);% time derivative term
+% % dg_yh = .5*(dg(1:end-1,1)+dg(2:end,1));
+% % g1 = cumsum([0;dg_yh.*diff(1i*yy)],1);
+% % dg_xh = .5*(dg(:,1:end-1)+dg(:,2:end));
+% % g =  cumsum([g1,dg_xh.*diff(xx)],2) ;
+% % g = g-g(end,end);
+% % fInv_t = rot90(g,2).*theta_t/pi; 
+% % end

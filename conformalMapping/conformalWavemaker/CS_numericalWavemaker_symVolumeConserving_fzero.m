@@ -2,10 +2,15 @@ clear
 % global h1 h2
 
 
-wbl = 1.6;
-h = 1.5*wbl;
-wbOverWater = .3;
-thetaMax = 30*pi/180;
+% wbl = 1.6;
+% h = 1.5*wbl;
+% wbOverWater = .3;
+
+h = 5; % Depth
+wbl = 3; % hinge depth
+wbOverWater = .5; % flap extention obove quiescent waterline
+
+thetaMax = 40*pi/180;
 
 
 
@@ -116,8 +121,6 @@ for i = 1:4
     y(i+1) = y(i) + integral( dy,sig0(i),sig0(i+1));
 end
 
-
 % err = y(2:5) - (h+[-1;0;2;3]*wbl);
 err = y(2:5) - (H+[-2;-1;1;2]*d);
-
 end

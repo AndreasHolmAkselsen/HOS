@@ -7,12 +7,12 @@ if nargin==0
 end
 
 
-% A = cosfft(a);
-% a_ = icosfft(A);
+A = cosfft_cleansum(a);
+a_ = icosfft_cleansum(A);
 
-a([1,end],:)=0; % odd function!
-A = sinfft(a);
-a_ = isinfft(A);
+% a([1,end],:)=0; % odd function!
+% A = sinfft(a);
+% a_ = isinfft(A);
 
 figure('color','w');
 n = length(a);
@@ -106,7 +106,7 @@ function a = icosfft_cleansum(A)
 
 n    = size(A,1);
 A([1,n],:) = 2*A([1,n],:);
-aPer = ifft([A;flipud(A(2:n-1,:))],[],1)*(n-1);
+aPer = ifft([A;flipud(A(2:n-1,:))],[],1)*(n-1); % = .5*fft([A;flipud(A(2:n-1,:))],[],1);
 a    = aPer(1:n,:);
 
 % % test: 

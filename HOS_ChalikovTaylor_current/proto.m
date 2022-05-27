@@ -15,7 +15,7 @@ chalikov.M = 2^7;
 chalikov.r = .25; % dim.less, =.25 in C&S
 chalikov.kd__kmax = .5;%0/chalikov.M;%.1; % .5 in C&S
 chalikov.solverSpace = 'physical'; % 'Fourier','physical'
-ka = .2; % linear wave steepness
+ka = .1; % linear wave steepness
 RK4dt = 0;%2e-2; % set to zero to use ODE45
 
 
@@ -36,15 +36,15 @@ relTolODE = 1e-4;% 1e-8;
 N_SSGW = 2^12; % number of modes in SSGW solution
 
 % Plot & export options
-DO_EXPORT = 0;
+DO_EXPORT = 1;
 EXPORT_MAT = 0;
 PLOT_CURRENT = false;
-exportPrefix = '';
+exportPrefix = 'benchmarkBathimetry_';
 exportPath = './figures/';
 i_detailedPlot = []; %plot contour plots of frame i. Leave empty to skip
 
 
-h = pi/4; % water depth. 
+h = 1; % water depth. 
 
 % current specification
 U_curr = 0;
@@ -53,8 +53,10 @@ currentMatFile = [];
 
 
 % Wave init specification
-NWaves = 4;
-lambda = 2*pi;
+NWaves = 30;
+% lambda = 2*pi;
+T = 2.5; k1 = findWaveNumbers(2*pi/T,h,0,0); lambda = 2*pi/k1;
+
 k0 = 2*pi/lambda;
 L = NWaves*lambda;
 
@@ -65,17 +67,19 @@ omega = k0*U_curr+sqrt(g*k0*tanh(k0*h)); T = 2*pi/omega;
 
 
 % Simulation/plotting time
-NT_dt =  1;
+NT_dt =  2;
 dt = NT_dt*T;
 t_end = 9*dt;
     
 % Initial conditions
 INIT_WAVE_TYPE = 'SSGW';  % 'SSGW' or 'linear'
-packageWidth = inf;  % set to inf if not simulating wave packets
-packageCentre__L = .5;
+% packageWidth = inf;  % set to inf if not simulating wave packets
+% packageCentre__L = .5;
+packageWidth = .05*L;  % set to inf if not simulating wave packets
+packageCentre__L = .3;
 
 taylor.nx__wave = 2^6;
-taylor.M = 9; 
+taylor.M = 5; 
 TRamp = 0*T;
 taylor.nonLinRamp = @(t) max(0,1-exp(-(t/TRamp)^2));
 taylor.k_cut = (taylor.M+5)*k0;
@@ -364,7 +368,7 @@ for i=1:nPannel
     end
     grid(ha(i),'on');
 end
-axis(ha,'equal','tight')
+% axis(ha,'equal','tight')
 set(ha,'XLim',[min(x_ip(:)),max(x_ip(:))],'YLim',[min(eta_ip(:)),max(eta_ip(:))])
 % set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)

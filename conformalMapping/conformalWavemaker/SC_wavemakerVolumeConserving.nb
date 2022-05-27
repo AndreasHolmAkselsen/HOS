@@ -1,0 +1,260 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 11.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      7453,        252]
+NotebookOptionsPosition[      6627,        219]
+NotebookOutlinePosition[      7007,        235]
+CellTagsIndexPosition[      6964,        232]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{"ClearAll", "[", "\"\<Global`*\>\"", "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$Assumptions", "=", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"(", 
+      RowBox[{"h", "|", "d"}], ")"}], "\[Element]", "Reals"}], "}"}]}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.862584023108842*^9, 3.862584049181265*^9}, {
+  3.8626372489787674`*^9, 3.8626372558581095`*^9}}],
+
+Cell[BoxData[
+ RowBox[{"\[IndentingNewLine]", 
+  RowBox[{
+   RowBox[{"f0Core", "=", 
+    RowBox[{
+     SubscriptBox["\[Product]", 
+      RowBox[{"{", 
+       RowBox[{"s", ",", 
+        RowBox[{"{", 
+         RowBox[{"1", ",", 
+          RowBox[{"-", "1"}]}], "}"}]}], "}"}]], 
+     RowBox[{
+      RowBox[{"(", 
+       FractionBox[
+        RowBox[{"\[Zeta]", "-", 
+         RowBox[{"\[ImaginaryI]", " ", "s", " ", "h1"}]}], 
+        RowBox[{"\[Zeta]", "+", 
+         RowBox[{"\[ImaginaryI]", " ", "s", " ", "h4"}]}]], ")"}], 
+      SuperscriptBox[
+       RowBox[{"(", 
+        FractionBox[
+         RowBox[{"\[Zeta]", "-", 
+          RowBox[{"\[ImaginaryI]", " ", "s", " ", "h3"}]}], 
+         RowBox[{"\[Zeta]", "+", 
+          RowBox[{"\[ImaginaryI]", " ", "s", " ", "h2"}]}]], ")"}], 
+       "2"]}]}]}], ";"}]}]], "Input",
+ CellChangeTimes->{{3.8626369709375706`*^9, 3.8626369832707357`*^9}, 
+   3.8626370141931553`*^9, {3.8626370801646547`*^9, 3.862637101891526*^9}, {
+   3.8626371457304945`*^9, 3.8626371475159173`*^9}, {3.8626372131930637`*^9, 
+   3.8626372275673065`*^9}, 3.862637390434273*^9, {3.862639545327977*^9, 
+   3.862639555498724*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"f0Core", "-", 
+   RowBox[{
+    FractionBox[
+     RowBox[{
+      SuperscriptBox["\[Zeta]", "2"], "+", 
+      SuperscriptBox["h1", "2"]}], 
+     RowBox[{
+      SuperscriptBox["\[Zeta]", "2"], "+", 
+      SuperscriptBox["h4", "2"]}]], 
+    SuperscriptBox[
+     RowBox[{"(", 
+      FractionBox[
+       RowBox[{
+        SuperscriptBox["\[Zeta]", "2"], "+", 
+        SuperscriptBox["h3", "2"]}], 
+       RowBox[{
+        SuperscriptBox["\[Zeta]", "2"], "+", 
+        SuperscriptBox["h2", "2"]}]], ")"}], "2"]}]}], "//", 
+  "Simplify"}]], "Input",
+ CellChangeTimes->{{3.862639559361029*^9, 3.8626396514077454`*^9}}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{{3.8626396458074846`*^9, 3.8626396522106256`*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"fCore", "=", 
+  RowBox[{
+   RowBox[{
+    SubsuperscriptBox["\[Product]", 
+     RowBox[{"j", "=", 
+      RowBox[{"-", "\[Infinity]"}]}], "\[Infinity]"], 
+    RowBox[{"(", 
+     RowBox[{"f0Core", "/.", 
+      RowBox[{"\[Zeta]", "\[Rule]", 
+       RowBox[{"(", 
+        RowBox[{"\[Zeta]", "+", 
+         RowBox[{"\[ImaginaryI]", " ", "j", " ", "H"}]}], " ", ")"}]}]}], 
+     ")"}]}], "//", "FullSimplify"}]}]], "Input"],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fCore", "-", 
+   RowBox[{
+    SuperscriptBox[
+     RowBox[{"(", 
+      FractionBox[
+       RowBox[{
+        RowBox[{"Cosh", "[", 
+         FractionBox[
+          RowBox[{"2", " ", "\[Pi]", " ", "\[Zeta]"}], "H"], "]"}], "-", 
+        RowBox[{"Cos", "[", 
+         FractionBox[
+          RowBox[{"2", " ", "h3", " ", "\[Pi]"}], "H"], "]"}]}], 
+       RowBox[{
+        RowBox[{"Cosh", "[", 
+         FractionBox[
+          RowBox[{"2", " ", "\[Pi]", " ", "\[Zeta]"}], "H"], "]"}], "-", 
+        RowBox[{"Cos", "[", 
+         FractionBox[
+          RowBox[{"2", " ", "h2", " ", "\[Pi]"}], "H"], "]"}]}]], ")"}], "2"],
+     " ", 
+    FractionBox[
+     RowBox[{
+      RowBox[{"Cosh", "[", 
+       FractionBox[
+        RowBox[{"2", " ", "\[Pi]", " ", "\[Zeta]"}], "H"], "]"}], "-", 
+      RowBox[{"Cos", "[", 
+       FractionBox[
+        RowBox[{"2", " ", "h1", " ", "\[Pi]"}], "H"], "]"}]}], 
+     RowBox[{
+      RowBox[{"Cosh", "[", 
+       FractionBox[
+        RowBox[{"2", " ", "\[Pi]", " ", "\[Zeta]"}], "H"], "]"}], "-", 
+      RowBox[{"Cos", "[", 
+       FractionBox[
+        RowBox[{"2", " ", "h4", " ", "\[Pi]"}], "H"], "]"}]}]]}]}], "//", 
+  "Simplify"}]], "Input",
+ CellChangeTimes->{{3.862638826267699*^9, 3.8626388588730555`*^9}}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{{3.862638859818355*^9, 3.8626388668632784`*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"fInfMirror", "=", 
+  RowBox[{
+   RowBox[{
+    SubsuperscriptBox["\[Product]", 
+     RowBox[{"j", "=", 
+      RowBox[{"-", "\[Infinity]"}]}], "\[Infinity]"], 
+    RowBox[{"(", 
+     FractionBox[
+      RowBox[{
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"\[Zeta]", "+", 
+          RowBox[{"\[ImaginaryI]", " ", "j", " ", "H"}]}], " ", ")"}], "2"], 
+       "+", 
+       SuperscriptBox["h1", "2"]}], 
+      RowBox[{
+       SuperscriptBox[
+        RowBox[{"(", 
+         RowBox[{"\[Zeta]", "+", 
+          RowBox[{"\[ImaginaryI]", " ", "j", " ", "H"}]}], " ", ")"}], "2"], 
+       "+", 
+       SuperscriptBox["h2", "2"]}]], ")"}]}], "//", 
+   "FullSimplify"}]}]], "Input",
+ CellChangeTimes->{{3.8626394459903107`*^9, 3.8626394936207037`*^9}, {
+  3.8626396821642284`*^9, 3.862639726728692*^9}, {3.862639808161762*^9, 
+  3.8626398119616337`*^9}}],
+
+Cell[BoxData["$Aborted"], "Output",
+ CellChangeTimes->{
+  3.862639484277606*^9, {3.8626396959287643`*^9, 3.8626397090945587`*^9}, 
+   3.8626397931346083`*^9, 3.8626398284052963`*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"fInfMirror", "-", 
+   FractionBox[
+    RowBox[{
+     RowBox[{"Cosh", "[", 
+      FractionBox[
+       RowBox[{"2", " ", "\[Pi]", " ", "\[Zeta]"}], "H"], "]"}], "-", 
+     RowBox[{"Cos", "[", 
+      FractionBox[
+       RowBox[{"2", " ", "h1", " ", "\[Pi]"}], "H"], "]"}]}], 
+    RowBox[{
+     RowBox[{"Cosh", "[", 
+      FractionBox[
+       RowBox[{"2", " ", "\[Pi]", " ", "\[Zeta]"}], "H"], "]"}], "-", 
+     RowBox[{"Cos", "[", 
+      FractionBox[
+       RowBox[{"2", " ", "h2", " ", "\[Pi]"}], "H"], "]"}]}]]}], "//", 
+  "Simplify"}]], "Input",
+ CellChangeTimes->{{3.862639820576107*^9, 3.8626398653888197`*^9}}],
+
+Cell[BoxData["0"], "Output",
+ CellChangeTimes->{{3.862639851019476*^9, 3.862639866685894*^9}}]
+}, Open  ]]
+},
+WindowSize->{1121, 833},
+WindowMargins->{{Automatic, 120}, {115, Automatic}},
+Magnification:>1.1 Inherited,
+FrontEndVersion->"11.0 for Microsoft Windows (64-bit) (September 21, 2016)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[558, 20, 76, 1, 33, "Input"],
+Cell[637, 23, 315, 9, 35, "Input"],
+Cell[955, 34, 1150, 30, 80, "Input"],
+Cell[CellGroupData[{
+Cell[2130, 68, 643, 21, 61, "Input"],
+Cell[2776, 91, 98, 1, 33, "Output"]
+}, Open  ]],
+Cell[2889, 95, 440, 13, 45, "Input"],
+Cell[CellGroupData[{
+Cell[3354, 112, 1272, 38, 78, "Input"],
+Cell[4629, 152, 96, 1, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4762, 158, 882, 26, 62, "Input"],
+Cell[5647, 186, 182, 3, 33, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5866, 194, 648, 19, 77, "Input"],
+Cell[6517, 215, 94, 1, 66, "Output"]
+}, Open  ]]
+}
+]
+*)
+

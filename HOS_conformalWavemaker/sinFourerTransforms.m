@@ -48,7 +48,7 @@ x2 = (0:2*Nx-1)'*dx; % to plot more of the domain
 
 %% fully sum
 A = sum([a(1);2*a(2:end-1);a(end)].*sin(k.*x),1);
-a_ = sum([A(1),2*A(2:end-1),A(end)].*sin(k.*x2),2)./(2*(Nx-1)) ;
+a_ = sum([.5*A(1),A(2:end-1),.5*A(end)].*sin(k.*x2),2)./(Nx-1) ;
  
 
 

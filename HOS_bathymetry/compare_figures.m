@@ -1,10 +1,10 @@
 clear hf;
-hf(1) = openfig(['./figures/fig/closed2_zeroMap_SSGW_T2p50_ka0p1_M5_H1p00_theta_Nw30_dt2T_nx1920_pad0_ikCut300_Md0_r0.fig']);
-hf(2) = openfig(['./figures/fig/closed_zeroMap_closed_SSGW_T2p50_ka0p1_M5_H1p00_theta_Nw30_dt2T_nx1920_pad0_ikCut300_Md0_r0.fig'],'invisible');
-hf(3) = openfig(['./figures/fig/closed_zeroMap_open_SSGW_T2p50_ka0p1_M5_H1p00_theta_Nw30_dt2T_nx1920_pad0_ikCut300_Md0_r0.fig'],'invisible');
-hf(4) = openfig(['../../figures/fig/open_zeroMap_SSGW_T2p50_ka0p1_M5_H1p00_theta_Nw30_dt2T_nx1920_pad0_ikCut300_Md0_r0.fig'],'invisible');
+hf(1) = openfig(['./figures/fig/benchmark_closed_linear_T2p50_ka0_M5_H2p00_2p00_theta0_Nw15_dt5T_nx960_pad0_ikCut150_Md0_r0.fig']);
+hf(2) = openfig(['./figures/fig/benchmarkNoMp_closed_linear_T2p50_ka0_M5_H2p00_theta_Nw15_dt5T_nx960_pad0_ikCut150_Md0_r0.fig'],'invisible');
+% hf(3) = openfig(['./figures/fig/closed_zeroMap_open_SSGW_T2p50_ka0p1_M5_H1p00_theta_Nw30_dt2T_nx1920_pad0_ikCut300_Md0_r0.fig'],'invisible');
+% hf(4) = openfig(['../../figures/fig/open_zeroMap_SSGW_T2p50_ka0p1_M5_H1p00_theta_Nw30_dt2T_nx1920_pad0_ikCut300_Md0_r0.fig'],'invisible');
 
-legendNames = {'before merger','after merger','open domain after merger','old open domain'};
+legendNames = {'with map','no map'};
 
 lineStyles = {'-','--',':','-.'};
 colors = {'k','r','b','c'};

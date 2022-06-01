@@ -1,11 +1,11 @@
-function [z,df,zz] = fz_yySymmetric(xx,yy,theta,h,wbl,wbOverWater)
+function [z,f_zz,zz] = fz_yySymmetric(xx,yy,theta,h,wbl,wbOverWater)
 assert(all(diff(xx)>0)&&all(diff(yy)>0),'increasing zz vectors assumed');
 xx = fliplr(xx); % integrating from right-to-left
 
 thp = theta/pi;
 % d = sqrt(pi).*(wbl+wbOverWater).*sec(theta)./(gamma(1+thp)*gamma(.5-thp));
 zz = xx + 1i*yy;
-% df = (1+d^2./zz.^2).^thp; % k=1
+% f_zz = (1+d^2./zz.^2).^thp; % k=1
 
 % stretched variables
 h_   = h   + wbOverWater;
@@ -19,16 +19,16 @@ for i = 1:length(theta)
 end
 % figure, plot(theta(:),d(:)-linspace(d(1),d(end),length(d))','.-')
 
-df = (1+csch(pi*zz_./(2*h_)).^2.*sin(pi*d./(2*h_)).^2).^thp; 
-df_yh = .5*(df(1:end-1,1,:)+df(2:end,1,:));
-z1 = cumsum([zeros(size(theta));df_yh.*diff(1i*yy)],1);
+f_zz = (1+csch(pi*zz_./(2*h_)).^2.*sin(pi*d./(2*h_)).^2).^thp; 
+f_zz_yh = .5*(f_zz(1:end-1,1,:)+f_zz(2:end,1,:));
+z1 = cumsum([zeros(size(theta));f_zz_yh.*diff(1i*yy)],1);
 z1 = z1-z1(yy==0);% + 1i*wbOverWater;
-df_xh = .5*(df(:,1:end-1,:)+df(:,2:end,:));
-z =  cumsum([z1,df_xh.*diff(xx)],2) ;
+f_zz_xh = .5*(f_zz(:,1:end-1,:)+f_zz(:,2:end,:));
+z =  cumsum([z1,f_zz_xh.*diff(xx)],2) ;
 z = z-real(z(1,end,:));
 
 z  = fliplr(z );
-df = fliplr(df);
+f_zz = fliplr(f_zz);
 zz = fliplr(zz);
 
 end

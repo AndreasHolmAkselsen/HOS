@@ -6,11 +6,13 @@ g = 9.81;
 % g = 1.0;
 
 %% input
-h = 5; % Depth
-wbl = 3; % hinge depth
-wbOverWater = .5; % flap extention obove quiescent waterline
-thetaMax = deg2rad(10);
-N_wavelenghtsInL = 20;
+h = 2; % Depth
+wbl = .5; % hinge depth
+wbOverWater = .2*wbl; % flap extention obove quiescent waterline
+thetaMax = deg2rad(.1);
+N_periods_BM_ramp = 2;
+waveRampType = 'linear'; % {'linear','tanh'}
+N_wavelenghtsInL = 5;
 
 % interpolation grid for conformal map
 nArrX_far = 200;   % # horizontal points (far field)
@@ -18,8 +20,8 @@ nArrX_near = 200;  % # horizontal points (near field)
 nArrYDown = 200;    % # vertical points
 nTheta = 101;       % # flap angles (odd)
 
-% fz = @fz_yySymmetric;
-fz = @fz_volumeConverving;
+fz = @fz_yySymmetric;
+% fz = @fz_volumeConverving;
 
 % for wave breaking example
 param.DO_PADDING = 0;
@@ -32,7 +34,7 @@ N_SSGW = 2^12; % number of modes in SSGW solution
 
 % Plot & export options
 DO_EXPORT = 0;
-EXPORT_MAT = 1;
+EXPORT_MAT = 0;
 PLOT_MAP = 0;
 exportPrefix = 'BM_';
 exportPath = './figures/';
@@ -41,18 +43,18 @@ exportFormats = {'-png','-pdf','-m2'};
 
 
 %% Simulation
-nx = 2^10;
+nx = 2^7;
 
 % % specifying period
-T = 2.0; omega=2*pi/T; 
+T = 1.0; omega=2*pi/T; 
 kTemp = findWaveNumbers(omega,h(1),0,0);
 L = 2*pi/kTemp*N_wavelenghtsInL;
 
 
-flapPlotTimes = linspace(0,T,50); % leave empty skips flap plotting
+flapPlotTimes = [];%linspace(0,T,50); % leave empty skips flap plotting
 
 % Simulation/plotting time
-NT_dt = 1;
+NT_dt = .25;
 dt = NT_dt*T;
 param.t_end = 9*dt;
     
@@ -63,9 +65,15 @@ param.t_end = 9*dt;
 
 
 param.M = 5; 
+
 param.iModeCut = inf;
 param.kd__kmax = .5;
-param.rDamping = .25;
+rDamping = .0;
+
+% param.iModeCut = inf* (param.M+5)*N_wavelenghtsInL; %nx__wave*NWaves/4;
+% param.kd__kmax = 0;
+% rDamping = 0;
+
 
 
 dx = L/nx;
@@ -77,7 +85,7 @@ t0 = 0;
 initialStepODE = 1e-3*T;
 ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);%,'MaxStep',1e-4);
 
-fileName = sprintf('%sT%.2f_M%d_h%.2f_wbl%.2f_thetaMax%.1f_L%.3g_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,T,param.M,h,wbl,thetaMax*180/pi,L,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,param.rDamping); fileName(fileName=='.')='p';
+fileName = sprintf('%sT%.2f_M%d_h%.2f_wbl%.2f_thetaMax%.1f_L%.3g_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,T,param.M,h,wbl,thetaMax*180/pi,L,NT_dt,nx,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); fileName(fileName=='.')='p';
 if DO_EXPORT
     copyfile('./proto_beachRamp.m',[exportPath,'/m/',fileName,'.m']) 
 end
@@ -90,7 +98,7 @@ xxIP_near = linspace( 0, 5*wbl, nArrX_near);
 xxIP_far = linspace(xxIP_near(end),1.1*L,nArrX_far+1); xxIP_far(1) = []; 
 xxIP = [xxIP_near,xxIP_far];
 
-yyUpper = 0;%wbOverWater;
+yyUpper = .25*wbl;%wbOverWater;
 assert(mod(nTheta,2)==1,'Odd number of angles assumed.')
 thetaIP = shiftdim(  thetaMax*linspace(-1,1,nTheta),-1);
 
@@ -100,7 +108,7 @@ dy = yyIP(2)-yyIP(1);
 yyIP = [yyIP;(dy:dy:wbOverWater)'];
 assert(yyIP(nArrYDown)==0)
 
-[zIP,f_zIP,zzIP] = fz(xxIP,yyIP,thetaIP,h,wbl,wbOverWater);
+[zIP,f_zzIP,zzIP] = fz(xxIP,yyIP,thetaIP,h,wbl,wbOverWater);
 
 % % plot interpolation basis to inspect resolution:
 % iThetaToPlot = 1;
@@ -121,19 +129,24 @@ assert(yyIP(nArrYDown)==0)
 % assert(all(min(real(zIP(:,end,:)),[],1)>x(end)),'Physical domain out of interpolation range.')
 
 %% make interpolation objects
+
 [xxGrid,yyGrid,thGrid] = ndgrid(xxIP,yyIP,thetaIP);
 fzIP0 = griddedInterpolant(xxGrid,yyGrid,thGrid,permute(zIP,[2,1,3]),'linear','none');
 fy0 = griddedInterpolant(xxGrid,yyGrid,thGrid,imag(permute(zIP,[2,1,3])),'linear','none');
-fJInv0 = griddedInterpolant(xxGrid,yyGrid,thGrid,abs(permute(f_zIP,[2,1,3])).^(-2) ,'linear','none');
-tIP = omega.\asin(thetaIP/thetaMax);
-f_tIP2 = cat(3,zeros(size(zzIP)),diff(zIP,1,3)./diff(tIP,1,3),zeros(size(zzIP))); % NB! numerical time differentiation. Find a way to validate!
+fJInv0 = griddedInterpolant(xxGrid,yyGrid,thGrid,abs(permute(f_zzIP,[2,1,3])).^(-2) ,'linear','none');
+
+
+%f(zz,t) = F[zz,theta(t)]
+F_thetaIP2 = cat(3,zeros(size(zzIP)),diff(zIP,1,3)./diff(thetaIP,1,3),zeros(size(zzIP))); % NB! numerical time differentiation. Find a way to validate!
+% tIP = omega.\asin(thetaIP/thetaMax);
+% f_tIP2 = cat(3,zeros(size(zzIP)),diff(zIP,1,3)./diff(tIP,1,3),zeros(size(zzIP))); % NB! numerical time differentiation. Find a way to validate!
 thetaIP2 = cat(3,thetaIP(1),.5*(thetaIP(2:end)+thetaIP(1:end-1)),thetaIP(end));
-f_zIP2 = cat(3,f_zIP(:,:,1),.5*(f_zIP(:,:,2:end)+f_zIP(:,:,1:end-1)),f_zIP(:,:,end));
+f_zzIP2 = cat(3,f_zzIP(:,:,1),.5*(f_zzIP(:,:,2:end)+f_zzIP(:,:,1:end-1)),f_zzIP(:,:,end));
 
 [xxGrid2,yyGrid2,thGrid2] = ndgrid(xxIP,yyIP,thetaIP2);
-ft__fzIP = f_tIP2./f_zIP2;
-ft__fzIP(f_tIP2==0) = 0;
-ft__fz0 = griddedInterpolant(xxGrid2,yyGrid2,thGrid2,permute(f_tIP2./f_zIP2,[2,1,3]),'linear','none');
+F_theta__f_zz = F_thetaIP2./f_zzIP2;
+% F_theta__f_zz(f_zzIP2==0)=0;
+F_theta__fzz0 = griddedInterpolant(xxGrid2,yyGrid2,thGrid2,permute(F_theta__f_zz,[2,1,3]),'linear','none');
 
 
 % t_ = 0:.01:2*T;
@@ -142,11 +155,35 @@ ft__fz0 = griddedInterpolant(xxGrid2,yyGrid2,thGrid2,permute(f_tIP2./f_zIP2,[2,1
 % figure, plot(t_, pi*(mod(t_+T/4,T/2+1e-12)-T/4).*sign(cos(omega*t_)),  T/4*[1,1].*(1:4)',[-1,1]*pi/4,'k')
 % figure, plot(t_, thetaMax*sin(pi*(mod(t_+T/4,T/2+1e-12)-T/4).*sign(cos(omega*t_))),  T/4*[1,1].*(1:4)',[-1,1]*pi/4,'k')
 
-complex2grid = @(zz,t,ff) ff(real(zz)+0*t,imag(zz)+0*t, thetaMax*sin(omega*t)+0*zz);
+
+% create a ramp for the wavemaker motion
+Tramp = N_wavelenghtsInL*T;
+switch waveRampType
+    case 'tanh'
+        tanhCutOff = 0.01;
+        shapeFactor = -2*atanh(2*tanhCutOff-1); 
+        ramp_t0 = .5*shapeFactor*sech(.5*shapeFactor)^2/Tramp;
+        t_add = tanhCutOff/ramp_t0;
+        ramp = @(t) (t>t_add).*.5.*(1+tanh( shapeFactor*((t-t_add)/Tramp-.5))) + ramp_t0.*t.*(t<=t_add);
+        ramp_t = @(t) (t>t_add).*.5.*shapeFactor.*sech(shapeFactor*((t-t_add)/Tramp-.5)).^2/Tramp + ramp_t0.*(t<=t_add);
+    case 'linear'
+        ramp = @(t) min( t/Tramp, 1);
+        ramp_t = @(t) (t<Tramp)/Tramp;
+    otherwise
+        error('waveRampType ''%s'' not recognized.',waveRampType);
+end
+
+
+complex2grid = @(zz,t,ff) ff(real(zz)+0*t,imag(zz)+0*t, thetaMax*ramp(t).*sin(omega*t)+0*zz);
 fzIP = @(zz,t) complex2grid(zz,t,fzIP0);
 map.fy = @(zz,t) complex2grid(zz,t,fy0);
 map.fJInv = @(zz,t) complex2grid(zz,t,fJInv0);
-map.ft__fz = @(zz,t) complex2grid(zz,t,ft__fz0);
+
+%f(zz,t) = F[zz,theta(t)]
+% ft__fzz = f_t(zz,t)/f_zz(zz,t) = (dF[zz,theta(t)]/dt)/f_zz = F_theta*theta_t/f_zz 
+%         = (F_theta/f_zz)*theta_t/f_zz = F_theta__fzz*theta_t
+map.ft__fzz = @(zz,t) F_theta__fzz0(real(zz)+0*t,imag(zz)+0*t, thetaMax*ramp(t).*sin(omega*t)+0*zz)...
+    .*thetaMax*(ramp_t(t).*sin(omega*t) + omega*ramp(t).*cos(omega*t));
 
 
 % figure,plot(t_,map.fy(1+.2i,t_))
@@ -170,16 +207,16 @@ if ~isempty(flapPlotTimes)
     end
 end
 
-%% tests:
-assert(abs(map.fy(1+.2i,.1*T)-map.fy(1+.2i,1.1*T))<1e-12 && abs(map.fy(1+.2i,.1*T)-map.fy(1+.2i,-.9*T))<1e-12)
-assert(abs(map.fy(1+.2i,0)-map.fy(1+.2i,T))<1e-12 && abs(map.fy(1+.2i,0)-map.fy(1+.2i,-T))<1e-12)
-assert(abs(map.ft__fz(1+.2i,.1*T)-map.ft__fz(1+.2i,1.1*T))<1e-12 && abs(map.ft__fz(1+.2i,.1*T)-map.ft__fz(1+.2i,-.9*T))<1e-12)
-assert(abs(map.ft__fz(1+.2i,0)-map.ft__fz(1+.2i,T))<1e-12 && abs(map.ft__fz(1+.2i,0)-map.ft__fz(1+.2i,-T))<1e-12)
+% %% tests (remove wavemaker ramp before testing!):
+% assert(abs(map.fy(1+.2i,.1*T)-map.fy(1+.2i,1.1*T))<1e-12 && abs(map.fy(1+.2i,.1*T)-map.fy(1+.2i,-.9*T))<1e-12)
+% assert(abs(map.fy(1+.2i,0)-map.fy(1+.2i,T))<1e-12 && abs(map.fy(1+.2i,0)-map.fy(1+.2i,-T))<1e-12)
+% assert(abs(map.ft__fz(1+.2i,.1*T)-map.ft__fz(1+.2i,1.1*T))<1e-12 && abs(map.ft__fz(1+.2i,.1*T)-map.ft__fz(1+.2i,-.9*T))<1e-12)
+% assert(abs(map.ft__fz(1+.2i,0)-map.ft__fz(1+.2i,T))<1e-12 && abs(map.ft__fz(1+.2i,0)-map.ft__fz(1+.2i,-T))<1e-12)
 
 
 % NB! may need altering
 map.xi = x;
-map.H = h;
+map.zzDepth = h;
 
 
 % finvIp = scatteredInterpolant(  real(zIP(:)), imag(zIP(:)) , zzIP(:),'linear','none');
@@ -196,23 +233,26 @@ map.H = h;
 
 % return
 
-dim.L  = (map.xi(2)-map.xi(1))*nx/(2*pi);
-dim.t = sqrt(dim.L/g);
-dim.phi = sqrt(dim.L^3*g);
-dim.U = dim.L/dim.t;
-param.dim = dim;
+% dim.L  = (map.xi(2)-map.xi(1))*nx/(2*pi);
+% dim.t = sqrt(dim.L/g);
+% dim.phi = sqrt(dim.L^3*g);
+% dim.U = dim.L/dim.t;
+% param.dim = dim;
+% param.map = map;
+
 param.map = map;
+param.g = g;
+param.rDampingDim = rDamping*2*pi*sqrt(g/L); % check!
 
 %% Run simulation
 tic
 if RK4dt~=0
-    [t,y] = RK4(@(t,Y) HOS_Taylor(t,Y,param) ,[t0,RK4dt,param.t_end]/dim.t,[varphiS0/dim.phi;eta0_xiReg/dim.L]);
+    [t,y] = RK4(@(t,Y) HOS_Taylor_closed(t,Y,param) ,[t0,RK4dt,param.t_end],[varphiS0;eta0_xiReg]);
 else
-    [t,y] = ode45(@(t,Y) HOS_Taylor(t,Y,param) ,[t0,param.t_end]/dim.t,[varphiS0/dim.phi;eta0_xiReg/dim.L],ODEoptions);
+    [t,y] = ode45(@(t,Y) HOS_Taylor_closed(t,Y,param) ,[t0,param.t_end],[varphiS0;eta0_xiReg],ODEoptions);
 end
 fprintf('CPU time: %gs\n',toc);
-t = t*dim.t;
-varphiS = y(:,1:nx)*dim.phi; eta = y(:,nx+1:2*nx)*dim.L;
+varphiS = y(:,1:nx); eta = y(:,nx+1:2*nx);
 
 iNaN = find(isnan(varphiS(:,1)),1,'first');
 if ~isempty(iNaN), t(iNaN:end)=[]; varphiS(iNaN:end,:)=[]; eta(iNaN:end,:)=[]; end
@@ -242,16 +282,16 @@ for i=1:nPannel
     grid(ha(i),'on');
 end
 % axis(ha,'equal','tight')
-set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
+% set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
 % set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
 
-% estimate of reflected wave
-iRefPan = 9;
-ii = real(zS_ip(:,iRefPan))>-.25*L & real(zS_ip(:,iRefPan))<0;
-aRef = .5*( max(imag(zS_ip(ii,iRefPan)))-min(imag(zS_ip(ii,iRefPan))));
+% estimate of reflected wave and add it to export file name
+% iRefPan = 9;
+% ii = real(zS_ip(:,iRefPan))>-.25*L & real(zS_ip(:,iRefPan))<0;
+% aRef = .5*( max(imag(zS_ip(ii,iRefPan)))-min(imag(zS_ip(ii,iRefPan))));
+% fileName = sprintf('%s_a1%.4f_aRef%.5f',fileName,ka/k1,aRef); fileName(fileName=='.')='p';
 
-fileName = sprintf('%s_a1%.4f_aRef%.5f',fileName,ka/k1,aRef); fileName(fileName=='.')='p';
 if DO_EXPORT
 %     copyfile('./proto_beachRamp.m',[exportPath,'/m/',fileName,'.m']) 
     savefig(hf,[exportPath,'/fig/',fileName]);

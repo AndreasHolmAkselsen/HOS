@@ -50,7 +50,7 @@ eta_t  =  JInv.*(w.*(1+eta_xi.^2) - vphiS_xi.*eta_xi)  + eta_xi.*real(ft__fzz)-i
 vphiS_t = vphiS_xi.*real(ft__fzz) - .5*JInv.*(vphiS_xi.^2-(1+eta_xi.^2).*w.^2 ) - h;
 
 % Unpad, lowpass filter and dampen:
-M = ceil(N/2)-1;
+M = N;%ceil(N/2)-1;
 Md = param.kd__kmax*M;
 mu = param.rDampingDim*M*(((0:N-1)'-Md)/(M-Md)).^2.*((0:N-1)'>Md);    
 % kMax = (N-1)*dk;

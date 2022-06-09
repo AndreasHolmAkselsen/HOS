@@ -16,9 +16,9 @@ g = 9.81;
 
 % Flat bottom:
 %%%%%
-map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
-map.H = [2]; % plateau levels
-map.theta = []; % slope angles (positive values)
+% map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
+% map.H = [2]; % plateau levels
+% map.theta = []; % slope angles (positive values)
 %%%%%
 
 
@@ -40,10 +40,10 @@ map.nArrYDown = 100;    % # vertical points
 
 % Plot & export options
 DO_EXPORT = 1;
-EXPORT_MAT = 1;
+EXPORT_MAT = 2;
 PLOT_MAP = 0;
 PLOT_INTERPOLATION_MAP = 0;
-exportPrefix =  'benchmarkNoMp_';
+exportPrefix =  '';
 exportPath = './figures/';
 exportFormatsMap = {'-pdf','-png'};
 exportFormats = {'-png','-pdf','-m2'};
@@ -69,28 +69,71 @@ Lx = (2*pi/IC.k)*NWaves;
 xLR = [-Lx/2,Lx/2];
 
 % Wavemaker
-% waveMaker =  []; % no wavemaker
-waveMaker.type = 'singleHingedFlap';
-waveMaker.hingeDepth = 1;
-waveMaker.signal{1}.type = 'harmonicRamped';
-waveMaker.signal{1}.T = 2.5;
-waveMaker.signal{1}.dt = 0.025;
-waveMaker.signal{1}.tEnd = 60;
+
+% % waveMaker =  []; % no wavemaker
+
+% % benchmark, regular
+% waveMaker.type = 'singleHingedFlap';
+% waveMaker.hingeDepth = 1;
+% waveMaker.signal{1}.type = 'harmonicRamped';
+% waveMaker.signal{1}.T = 1.0;
+% waveMaker.signal{1}.dt = 0.025;
+% waveMaker.signal{1}.tEnd = 60;
+% waveMaker.signal{1}.tRamp = 20;
+% % waveMaker.signal{1}.tFinalStill = 20;
+% waveMaker.Nz = 256; % originally under nwt.hos.()
+% waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
+% ka_lin = .1;
+% waveMaker.signal{1}.thetaAmpDeg = flapAngleLin(waveMaker.signal{1}.T,ka_lin,map.H(1),waveMaker.hingeDepth);
+% a_lin = ka_lin/findWaveNumbers(2*pi/waveMaker.signal{1}.T,map.H(1),0,0);
+% exportPrefix =  'benchRegWave';
+% map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
+% map.H = [2]; % plateau levels
+% map.theta = []; % slope angles (positive values)
+
+
+% 
+% benchmark, irregular
+addpath c:/gits/timsas2/matlabLibs/
+waveMaker.signal{1}.type = 'specFile';
+waveMaker.signal{1}.specFile = './wespec/81000.spec2';
 waveMaker.signal{1}.tRamp = 20;
-waveMaker.signal{1}.tFinalStill = 20;
-% waveMaker.signal{1}.kaLin = .2;
-waveMaker.signal{1}.thetaAmpDeg = 5;
-waveMaker.Nz = 256; % originally under nwt.hos.()
+% waveMaker.signal{1}.tFinalStill = 20;
 waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
+waveMaker.hingeDepth = 1;
+waveMaker.Nz = 256; % originally under nwt.hos.()
+[~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
+map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
+map.H = [2]; % plateau levels
+map.theta = []; % slope angles (positive values)
+
+% % irregular, flat bottom (more shallow than hinge depth)
+% addpath c:/gits/timsas2/matlabLibs/
+% waveMaker.signal{1}.type = 'specFile';
+% waveMaker.signal{1}.specFile = './wespec/81100.spec2';
+% waveMaker.signal{1}.tRamp = 20;
+% % waveMaker.signal{1}.tFinalStill = 20;
+% waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
+% waveMaker.hingeDepth = 2.5;
+% waveMaker.Nz = 256; % originally under nwt.hos.()
+% [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
+% map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
+% map.H = [1]; % plateau levels
+% map.theta = []; % slope angles (positive values)
 
 % beach
 beach.length = Lx/5;
 beach.absorption = 0.4;
 
+% % Simulation/plotting time
+% NT_dt = 1;
+% dt = NT_dt*IC.T;
+% param.t_end = 9*dt;
+
 % Simulation/plotting time
+param.t_end = 'fromBM'; tFinalStill = 20;
 NT_dt = 1;
-dt = NT_dt*IC.T;
-param.t_end = 9*dt;
+
     
 % numerical
 nx__wave = 2^8;
@@ -192,10 +235,14 @@ end
 
 
 %% Linear wavemaker init, copied from SFo git hosm-nwt2d
-if isfield(waveMaker,'signal') && ~isempty(waveMaker.signal)
+if ~isempty(waveMaker)
     assert(strcmp(boundaryType,'closed'),'boundaryType must be ''closed'' when specifying a wavemaker load.')
     [phiAdd_of_x,param.waveMaker.time] = BM.callSFoWavemakerFunctions(waveMaker,nx,Lx,map.H(1),param.DO_PADDING);
     param.waveMaker.phiAdd = interp1(x,phiAdd_of_x,x_xiReg);
+    
+    if strcmp(param.t_end,'fromBM')
+        param.t_end = param.waveMaker.time(end)+tFinalStill;
+    end
 end
 % figure, plot(x,squeeze(param.waveMaker.phiAdd(:,1,:)),'k','linewidth',1);hold on;grid on
 
@@ -267,7 +314,7 @@ for i=1:nPannel
     plot(ha(i),[1;1].*real(zSingular(:)).',[minh;maxh],'--k'); 
 end
 % axis(ha,'equal','tight')
-set(ha,'XLim',[minh,maxh],'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
+set(ha,'XLim',[minh,maxh]);%,'YLim',[min(imag(zS_ip(:))),max(imag(zS_ip(:)))])
 % set(ha,'DataAspectRatio',[1,1,1])
 xlabel(ha(nPannel),'x [m]','fontsize',11)
 
@@ -281,11 +328,16 @@ if DO_EXPORT
     savefig(hf,[exportPath,'/fig/',fileName]);
     export_fig(hf,[exportPath,'/',fileName],exportFormats{:});
 end
-if EXPORT_MAT == 1
-    wh = whos;
-    vars = setdiff({wh.name},{'t','y','varphiS','eta'});
-    save([exportPath,'/mat/',fileName],vars{:}); 
-elseif EXPORT_MAT == 2
-    save([exportPath,'/mat/',fileName]); 
+
+wh = whos;
+switch EXPORT_MAT 
+    case  1
+        vars = setdiff({wh.name},{'t','y','varphiS','eta','phiAdd_of_x','param'});
+        save([exportPath,'/mat/',fileName],vars{:});
+    case 2
+        vars = setdiff({wh.name},{'t','y','varphiS','phiAdd_of_x','param'}); % store eta
+        save([exportPath,'/mat/',fileName],vars{:});
+    case 3
+        save([exportPath,'/mat/',fileName]); 
 end
 

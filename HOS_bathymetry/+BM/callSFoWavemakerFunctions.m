@@ -1,23 +1,62 @@
 function [PhiAdd,flapTime] = callSFoWavemakerFunctions(waveMaker,Nx,Lx,h,DO_PADDING)
 % Linear wavemaker init, copied from SFo git hosm-nwt2d
 
+
+
+
+
 x=Lx/Nx*(0:Nx);
 Nz0=waveMaker.Nz;
 extZDomainRatio=waveMaker.extZDomainRatio; %Size of the additional vertical domain (divided by h)
 Nz=(1+extZDomainRatio)*Nz0;
 %     Th=tanh(kz*Lx);
 hF=waveMaker.hingeDepth;                     %Depth of flap's rotation point [m]
-thetaAmp=waveMaker.signal{1}.thetaAmpDeg;    %Amplitude of the single flap motion [deg]
-T=waveMaker.signal{1}.T;                     %Period of the single flap motion [s]
-dt=waveMaker.signal{1}.dt;                   %Time step to define flap motion
-tMax=waveMaker.signal{1}.tEnd;               %Duration of flap motion signal
-tRamp=waveMaker.signal{1}.tRamp;             %Duration of ramp (beginning and end) [s]
-tFinalStill=waveMaker.signal{1}.tFinalStill; %Duration of the still period at the end
+
 %Initialize wave maker signal
-[flapTheta,flapTime]=BM.initializeFlapAngle_HarmonicRamp(thetaAmp,dt,tMax,T,tRamp,tFinalStill);
-[flapX,flapZ]=BM.initializeFlapMotion_SingleFlap(flapTheta,h,hF,Nz0);
+switch waveMaker.signal{1}.type
+    case 'harmonicRamped'    % regular
+        dt=waveMaker.signal{1}.dt;                   %Time step to define flap motion
+        [flapThetaDeg,flapTime]=BM.initializeFlapAngle_HarmonicRamp(waveMaker);
+    case 'specFile'
+
+        waveDef = timsas_r1.data.WaveDefinition;
+        waveDef.readFromSpecFile(waveMaker.signal{1}.specFile);
+        assert(h==waveDef.waterDepth,'Inconsistant water depths. Map: h=%g, spec file: h=%g.',h,waveDef.waterDepth);
+        dt = waveDef.dt;                   %Time step to define flap motion
+        ts = waveDef.getTimeRealization([0;0]); % returns a time series object
+%         ts.simplifyToConstantTimeStep();%time step is constant
+%         ts.trim([0,tEndFull]);
+
+
+%         % regular wave test
+%         Ttest = 1; aTest = .0248; ts.value = aTest*sin((2*pi/Ttest).*ts.getTime);
+
+        ts.taper(waveMaker.signal{1}.tRamp*[1,1]);
+        [f,hat_x] = FFTfreq(waveDef.dt,ts.value,'positive');
+        k = level1.wave.computeWaveNumber(2*pi*f,h,0,0);
+        kh = k*h; th = tanh(kh); ch = cosh(kh);
+        wbl = waveMaker.hingeDepth;
+        cosCosTerm = exp(-k*wbl).*(1+exp(-2*k*(h-wbl)))./(1+exp(-2*k*h));
+        TF = 2*th./(th+kh./ch.^2).*(th + (cosCosTerm-1)./(k*wbl));
+        FFTthetaDeg = hat_x./TF / wbl *180/pi; % to linear order!
+        FFTthetaDeg(1) = 0;
+        zero1 = zeros(mod(waveDef.nt-1,2));
+        flapThetaDeg = ifft([FFTthetaDeg(1:end);zero1;conj(FFTthetaDeg(end:-1:2))]);
+        assert(isreal(flapThetaDeg))
+%         flapThetaDeg = [flapThetaDeg;zeros(ceil(waveMaker.signal{1}.tFinalStill/dt),1)];
+%         flapTime = (0:length(flapTheta)-1)*dt;
+        flapTime = ts.getTime;
+%         figure();plot(flapTime,flapThetaDeg,'-');grid on; ylabel('\theta');xlabel('Time [s]')
+        
+end
+
+[flapX,flapZ]=BM.initializeFlapMotion_SingleFlap(flapThetaDeg,h,hF,Nz0);
 [X,z]=BM.extendToAdditionalDomain(flapX,flapZ,extZDomainRatio);
-flapMotion=BM.computeFlapMotionDerivatives(X,dt,z(2)-z(1));
+
+% flapMotion=BM.computeFlapMotionDerivatives(X,dt,z(2)-z(1));
+flapMotion=zeros(size(X,1),size(X,2),3); % only d_t and d_tt needed at first order.
+[~,flapMotion(:,:,2)]=gradient(X,dt);
+[~,flapMotion(:,:,3)]=gradient(flapMotion(:,:,2),dt);
 
 
 

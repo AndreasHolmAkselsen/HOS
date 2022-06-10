@@ -1,11 +1,11 @@
-function [PhiAdd,flapTime] = callSFoWavemakerFunctions(waveMaker,Nx,Lx,h,DO_PADDING)
+function [PhiAdd,flapTime] = callSFoWavemakerFunctions(waveMaker,N,Lx,DO_PADDING)
 % Linear wavemaker init, copied from SFo git hosm-nwt2d
 
 
 
 
 
-x=Lx/Nx*(0:Nx);
+x=Lx/N*(0:N);
 Nz0=waveMaker.Nz;
 extZDomainRatio=waveMaker.extZDomainRatio; %Size of the additional vertical domain (divided by h)
 Nz=(1+extZDomainRatio)*Nz0;
@@ -16,12 +16,14 @@ hF=waveMaker.hingeDepth;                     %Depth of flap's rotation point [m]
 switch waveMaker.signal{1}.type
     case 'harmonicRamped'    % regular
         dt=waveMaker.signal{1}.dt;                   %Time step to define flap motion
+        h = waveMaker.h;
         [flapThetaDeg,flapTime]=BM.initializeFlapAngle_HarmonicRamp(waveMaker);
     case 'specFile'
 
         waveDef = timsas_r1.data.WaveDefinition;
         waveDef.readFromSpecFile(waveMaker.signal{1}.specFile);
-        assert(h==waveDef.waterDepth,'Inconsistant water depths. Map: h=%g, spec file: h=%g.',h,waveDef.waterDepth);
+        h = waveDef.waterDepth;
+%         assert(h==waveDef.waterDepth,'Inconsistant water depths. Map: h=%g, spec file: h=%g.',h,waveDef.waterDepth);
         dt = waveDef.dt;                   %Time step to define flap motion
         ts = waveDef.getTimeRealization([0;0]); % returns a time series object
 %         ts.simplifyToConstantTimeStep();%time step is constant
@@ -36,8 +38,10 @@ switch waveMaker.signal{1}.type
         k = level1.wave.computeWaveNumber(2*pi*f,h,0,0);
         kh = k*h; th = tanh(kh); ch = cosh(kh);
         wbl = waveMaker.hingeDepth;
-        cosCosTerm = exp(-k*wbl).*(1+exp(-2*k*(h-wbl)))./(1+exp(-2*k*h));
-        TF = 2*th./(th+kh./ch.^2).*(th + (cosCosTerm-1)./(k*wbl));
+        d = max(0,h-wbl);
+        cosCosTerm = exp(k*(d-h)).* (1+exp(-2*k*d))./(1+exp(-2*k*h)); % =cosh(k*d)./cosh(k*h) 
+%         cosCosTerm = exp(-k*wbl).*(1+exp(-2*k*(h-wbl)))./(1+exp(-2*k*h));
+        TF = 2*th./(th+kh./ch.^2).*(th - (1-cosCosTerm)./(k*wbl));
         FFTthetaDeg = hat_x./TF / wbl *180/pi; % to linear order!
         FFTthetaDeg(1) = 0;
         zero1 = zeros(mod(waveDef.nt-1,2));
@@ -61,9 +65,11 @@ flapMotion=zeros(size(X,1),size(X,2),3); % only d_t and d_tt needed at first ord
 
 
 %Precompute the chi-matrix used to obtain the additional WM-potential on z=0
+
 %Fine x-grid for anti-aliaisng
+% AHA comment: we have to interpolate anyway, so doing the padding here isn't really necessary, but we'll keep it.
 p= 1+3*DO_PADDING; % p=4;
-Nd=Nx*(p+1)/2;
+Nd=N*(p+1)/2;
 x_AA=(0:Nd)/Nd*Lx;
 
 
@@ -112,12 +118,19 @@ for iT=1:size(Adphi1Add_dx,1)
     dphi1Add_dt_Z0(iT,:)=BM.getAddFunctionAtZ0_cos(Adphi1Add_dt(iT,:),kz,h,chiLargeX,chiLargeK,indKeep);
 end
 %         toc
-PhiAdd=zeros(size(dphi1Add_dx_Z0,1),size(dphi1Add_dx_Z0,2),3);
-PhiAdd(:,:,1)=dphi1Add_dx_Z0;
-PhiAdd(:,:,2)=dphi1Add_dz_Z0;
-PhiAdd(:,:,3)=dphi1Add_dt_Z0;
 
-
-% AHA: flip!
-PhiAdd = permute(PhiAdd,[2,1,3]); 
+PhiAdd=zeros(size(dphi1Add_dx_Z0,2),size(dphi1Add_dx_Z0,1),3);
+PhiAdd(:,:,1)=dphi1Add_dx_Z0.';
+PhiAdd(:,:,2)=dphi1Add_dz_Z0.';
+PhiAdd(:,:,3)=dphi1Add_dt_Z0.';
 flapTime = flapTime.';
+
+% PhiAdd=zeros(size(dphi1Add_dx_Z0,1),size(dphi1Add_dx_Z0,2),3);
+% PhiAdd(:,:,1)=dphi1Add_dx_Z0;
+% PhiAdd(:,:,2)=dphi1Add_dz_Z0;
+% PhiAdd(:,:,3)=dphi1Add_dt_Z0;
+% 
+% 
+% % AHA: flip!
+% PhiAdd = permute(PhiAdd,[2,1,3]); 
+% flapTime = flapTime.';

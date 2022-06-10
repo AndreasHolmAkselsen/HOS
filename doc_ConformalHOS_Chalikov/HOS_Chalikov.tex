@@ -304,7 +304,8 @@ Following \citet{chalikov2005modeling}, we extend the time derivative computatio
 where 
 \begin{equation}
 \mu_j = \begin{cases}
-r\times 2\pi M \sqrt{g/L}\rbr{\frac{|j|-M\_d}{M-M\_d}}^2,& j>M\_d\\
+%r\times 2\pi M \sqrt{g/L}\rbr{\frac{|j|-M\_d}{M-M\_d}}^2,& j>M\_d\\
+r\times  \sqrt{ 2\pi g/L}\,M\rbr{\frac{|j|-M\_d}{M-M\_d}}^2,& j>M\_d\\
 0 & \text{otherwise.}
 \end{cases}
         %mu = mu = k_cut*sqrt(2*pi*g*kx(2))*N/2 * (2*k/kmax-1).^2.*(k>kmax/2);
@@ -385,9 +386,9 @@ see \autoref{fig:vortex} and related memo.
 
 \begin{figure}[h!ptb]%
 \centering
-\subfloat[Vortex current]{\includegraphics[width=.5\columnwidth]{../conformalHOS_current/figures/curr_vortex.pdf}}%
+\subfloat[Vortex current]{\includegraphics[width=.5\columnwidth]{../HOS_ChalikovTaylor_current/figures/curr_vortex.pdf}}%
 \\
-\subfloat[Benchmark; \eqref{eq:BCb} vs.\ \eqref{eq:BCb_normalHos}.]{\includegraphics[width=\columnwidth]{../conformalHOS_current/figures/vortex.pdf}}%
+\subfloat[Benchmark; \eqref{eq:BCb} vs.\ \eqref{eq:BCb_normalHos}.]{\includegraphics[width=\columnwidth]{../HOS_ChalikovTaylor_current/figures/vortex.pdf}}%
 \caption{Simulation of wave train over a stationary vortex with normal HOS and Chalikov variant. $ka=0.2$. SSGW initial conditions.}%
 \label{fig:vortex}%
 \end{figure}
@@ -414,13 +415,13 @@ A demonstration so the full conformal map solution in a stage of plunging is giv
 \\
 \begin{figure}[h!ptb]%
 \centering
-\includegraphics[width=.6\columnwidth]{../conformalHOS_current/figures/rounded2_Chalikov_ka0p5_M3072_hInf_Nw1_dt0p177T_nx6145_pad1_.pdf}%
+\includegraphics[width=.6\columnwidth]{../HOS_ChalikovTaylor_current/figures/rounded2_Chalikov_ka0p5_M3072_hInf_Nw1_dt0p177T_nx6145_pad1_.pdf}%
 \caption{Wave initiated as a steep monochromatic wave $k\bar a=0.5$, cf. \refCS{}'s run 1. Infinite depth, $M=3072$.}%
 \label{fig:breaker:eta}%
 \end{figure}
 \begin{figure}[h!ptb]%
 \centering
-\includegraphics[width=.75\columnwidth]{../conformalHOS_current/figures/rounded2_contour.pdf}%
+\includegraphics[width=.75\columnwidth]{../HOS_ChalikovTaylor_current/figures/rounded2_contour.pdf}%
 \caption{Contour solution of fourth frame ($t=3.38$\,s) of \autoref{fig:breaker:eta}.}%
 \label{fig:breaker:contour}%
 \end{figure}
@@ -430,7 +431,7 @@ The high resolution here used is not necessary for attaining the plunger crest s
 This simulation is also stable and quite similar up to the point of breaking. We notice however that phase velocity of the two simulations differ during the `breaking event'.
 \begin{figure}[h!ptb]%
 \centering
-\includegraphics[width=.6\columnwidth]{../conformalHOS_current/figures/Chalikov_ka0p5_M512_hInf_Nw1_dt0p177T_nx1025_pad1.pdf}%
+\includegraphics[width=.6\columnwidth]{../HOS_ChalikovTaylor_current/figures/Chalikov_ka0p5_M512_hInf_Nw1_dt0p177T_nx1025_pad1.pdf}%
 \caption{\autoref{fig:breaker:eta}, but with $M=512$.}%
 \label{fig:breaker:etaCoarse}%
 \end{figure}

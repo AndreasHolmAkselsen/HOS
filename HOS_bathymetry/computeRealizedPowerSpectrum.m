@@ -5,7 +5,6 @@ x_wp = 0;
 
 t_uniform = param.waveMaker.time';
 eta_wp = interp1(t,eta(:,i_wp),t_uniform); 
-figure, plot(t_uniform,eta_wp)
 
 
 dt = t_uniform(2)-t_uniform(1);
@@ -21,7 +20,9 @@ ts.setFromVector(eta_wp,'m',0,dt,'s');
 ts.plot
 ts.trim([50,inf]);
 
-smoothingBandwidth = .01/enviDef.component{1}.spectralDensity.Tp;
+smoothingBandwidth = .01/waveDef.component{1}.spectralDensity.Tp;
 spec = ts.getSpectrum([1,99.9],1,smoothingBandwidth);
 
 figure, plot(spec.f,spec.S,waveDef.getUsedFrequencyVector,waveDef.getSpectralDensity);grid on;
+ylabel(['S [',spec.spectrumUnit.getUnitName,']'])
+xlabel('frequency [Hz]')

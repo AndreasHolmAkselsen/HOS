@@ -6,8 +6,8 @@ function a=isinfft(A)
 % with dx=L/(n-1), x=(0:n-1).'*dx, k=(0:n-1)*pi/L.
 
 n    = size(A,1);
-aPer = ifft([A;-flipud(A(2:n-1,:))],[],1);
-a    = imag(aPer(1:n,:));
+aPer = -1i*ifft([A;-flipud(A(2:n-1,:))],[],1);
+a    = aPer(1:n,:);
 
 % % test: 
 % assert(iscolumn(A));

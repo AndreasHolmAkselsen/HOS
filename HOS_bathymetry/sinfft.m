@@ -6,8 +6,9 @@ function A=sinfft(a)
 
 assert(all([a(1,:);a(end,:)]==0,'all'),'a(1,:) = a(end,:) = 0 assumed since sine is an odd function.')
 n = size(a,1);
-A = fft([a;-flipud(a(2:n-1,:))],[],1);
-A = -imag(A(1:n,:));
+A = 1i*fft([a;-flipud(a(2:n-1,:))],[],1);
+A = A(1:n,:);
+
 
 % % test: 
 % assert(iscolumn(a));

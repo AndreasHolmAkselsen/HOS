@@ -10,10 +10,10 @@ end
 
 wNl = param.nonLinRamp(t);
 
-N = size(eta,1);
+N = size(eta,1)-1; % number of spacings nx-1
 dxi = param.map.xi(2)-param.map.xi(1);
-dk = pi/(dxi*(N-1));
-kx = (0:N-1)'*dk;
+dk = pi/(dxi*N);
+kx = (0:N)'*dk;
 k = kx;
 
 % w is the vertical velocity in the zeta-plane; \varphi_\sigma
@@ -30,25 +30,25 @@ catch ME
     Y_t = nan(size(Y));
     return
 end
-JInv = abs(f_zz).^(-2);
 
 if param.DO_PADDING
-    error('padding not yet supported in closed domain simulation. Check whether it is straight forward.')
     Nd = N*(4+1)/2;
-    w_lin = ifft(fftPad(fft(w_lin),Nd));
-    w_nl = ifft(fftPad(fft(w_nl),Nd));
-    h = ifft(fftPad(fft(h),Nd));
-    JInv = ifft(fftPad(fft(JInv),Nd));
+    w_lin = icosfft(cosfftPad(cosfft(w_lin),Nd));
+    w_nl  = icosfft(cosfftPad(cosfft(w_nl ),Nd));
+    h     = icosfft(cosfftPad(cosfft(h    ),Nd));
+    f_zz  = icosfft(cosfftPad(cosfft(f_zz ),Nd));
 else
     Nd = N;
-end
-    
-eta_xi  =  isinfft(fftPad(-kx.*FFTeta,Nd));
-vphiS_xi =  isinfft(fftPad(-kx.*FFTvphiS,Nd));
+end  
+JInv = abs(f_zz).^(-2);
+
+eta_xi   =  isinfft(cosfftPad(-kx.*FFTeta,Nd));
+vphiS_xi =  isinfft(cosfftPad(-kx.*FFTvphiS,Nd));
 w = w_lin+w_nl;
 
-eta_t  =  JInv.*( w_lin + wNl.*(  w_nl  + eta_xi.^2.*w - vphiS_xi.*eta_xi ) );
+eta_t   =  JInv.*( w_lin + wNl.*(  w_nl  + eta_xi.^2.*w - vphiS_xi.*eta_xi ) );
 vphiS_t = - h*param.g + JInv.* wNl.*( -.5*vphiS_xi.^2  + .5*(1+eta_xi.^2).*w.^2 );
+
 
 if isfield(param,'beach')
 %     phi_xi = vphiS_xi-w.*eta_xi;
@@ -62,7 +62,7 @@ end
 if isfield(param,'waveMaker') && ~(t<param.waveMaker.time(1)||t>=param.waveMaker.time(end-1))
     %Interpolate partial derivatives of additional potential
     % param.waveMaker.phiAdd(i,n,j) are: j-{x,y,t} derivatives; i: xi_i positions; n: times n.
-    dtFlap=param.waveMaker.time(2)-param.waveMaker.time(1);
+    dtFlap = param.waveMaker.time(2)-param.waveMaker.time(1);
     indTime=1+fix((t-param.waveMaker.time(1))/dtFlap);
     w1=(param.waveMaker.time(indTime+1)-t)/dtFlap;
     w2=(t-param.waveMaker.time(indTime))/dtFlap;
@@ -77,15 +77,19 @@ if isfield(param,'waveMaker') && ~(t<param.waveMaker.time(1)||t>=param.waveMaker
 end
 
 % Unpad, lowpass filter and dampen:
-M = ceil(N/2)-1;
+% M = ceil(N/2)-1;
 M = N;
 Md = param.kd__kmax*M;
-mu = param.rDampingDim*M*(((0:N-1)'-Md)/(M-Md)).^2.*((0:N-1)'>Md);    
+mu = param.rDampingDim*M*(((0:N)'-Md)/(M-Md)).^2.*((0:N)'>Md);    
 % kMax = (N-1)*dk;
 % kd = param.kd__kmax*kMax*dk;
 % mu = param.rDamping*kMax*((k-kd)/(kMax-kd)).^2.*(k>kd);     
 kFilter = k<=param.iModeCut*dk;  
-Y_t = real([ icosfft(kFilter.*fftPad(cosfft(vphiS_t),N)-mu.*FFTvphiS)
-             icosfft(kFilter.*fftPad(cosfft(eta_t  ),N)-mu.*FFTeta  ) ]);        
+Y_t = real([ icosfft(kFilter.*cosfftPad(cosfft(vphiS_t),N)-mu.*FFTvphiS)
+             icosfft(kFilter.*cosfftPad(cosfft(eta_t  ),N)-mu.*FFTeta  ) ]); 
+if any(isnan(Y_t(:)))        
+    disp halt
+end
+         
 end
 

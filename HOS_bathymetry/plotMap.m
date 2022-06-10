@@ -36,7 +36,7 @@ plot(zzS0,'k','linewidth',1.5);
 
 % repeat for a 1-to-1 plot
 %     xxLR = [-5,10];
-xxLRnear = xxIP_near([1,end]);
+xxLRnear = [max(xxIP_near(1),xxLR(1)),min(xxIP_near(end),xxLR(2))];
 hf_mapZoom = figure('color','w','position',[436 63 637 600]);
 % plot the z-plane
 haz = subplot(211); hold on;

@@ -242,7 +242,8 @@ map.zzDepth = h;
 
 param.map = map;
 param.g = g;
-param.rDampingDim = rDamping*2*pi*sqrt(g/L); % check!
+% param.rDampingDim = rDamping*2*pi*sqrt(g/L); % check!
+param.rDampingDim = rDamping*sqrt(2*pi*g/L); 
 
 %% Run simulation
 tic

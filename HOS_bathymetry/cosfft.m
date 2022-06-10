@@ -6,7 +6,7 @@ function A = cosfft(a)
 
 n = size(a,1);
 A = fft([a;flipud(a(2:n-1,:))],[],1);
-A = real(A(1:n,:));
+A = A(1:n,:);
 
 % % test: 
 % assert(iscolumn(a));

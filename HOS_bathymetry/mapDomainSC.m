@@ -1,11 +1,11 @@
-function [map,fIP,varphiS0,eta0_xiReg] = mapDomainSC(map,x,h0,phiS0,PLOT)
+function [map,fIP,varphiS0,eta0_xiReg,hf_map] = mapDomainSC(map,x,h0,phiS0,PLOT_MAP,PLOT_INTERPOLATION_MAP)
 
 % Create inverse function through scattered interpolation:
 for iNan = find(isnan(map.xx_b))
     map.xx_b(iNan) = map.xx_b(iNan-1) - pi./map.theta(iNan).*log(map.H(iNan+1)./map.H(iNan));
 end
 crudeScale = 1.5*pi/min(map.H);
-yyUpper = max([2*max(h0)*crudeScale,.1*map.H]);
+yyUpper = max([2*max(h0),.1*map.H])*crudeScale;
 % xxIP = linspace(xLR(1),xLR(2),nArrX)*crudeScale;
 
 xLR = [x(1),-x(1)];
@@ -35,10 +35,11 @@ H = shiftdim(map.H,-1); theta = shiftdim(map.theta,-1); xx_b = shiftdim(map.xx_b
 assert(real(zIP(map.nArrYDown,1))<x(1)&&real(zIP(map.nArrYDown,end))>x(end),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(map.nArrYDown,1)),real(zIP(map.nArrYDown,end)))
 
 % plot interpolation basis to inspect resolution:
-if PLOT
+if PLOT_INTERPOLATION_MAP
     figure('color','w');hold on
     plot(zIP(:,1:round(end/30):end),'r','linewidth',1);  plot(zIP(1:round(end/10):end,:).' ,'b')
     minIz = min(imag(zIP(1,:))); patch(real(zIP(1,[1,1:end,end])),[1.1*minIz,imag(zIP(1,:)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');
+    drawnow
 end
 
 if ~all(abs(imag(zIP(map.nArrYDown,:)))<1e-3*max(map.H))
@@ -76,14 +77,20 @@ xS_xiReg = real(fIP(map.xi+1i*eta0_xiReg));
 if x(end) < xLR(2)-1e-12  %strcmp(boundaryType,'open')
     varphiS0 = interp1( [x-Lx;x;x+Lx],[phiS0;phiS0;phiS0],xS_xiReg );
 else
-    assert(x(1)<=xS_xiReg(1)&&x(end)>=xS_xiReg(end))
-    varphiS0 = interp1( x,phiS0,xS_xiReg);
+    dxNum = .01*(x(2)-x(1)); % small extension to avoid crash due to numerical presicion error.
+    assert(x(1)-dxNum<=xS_xiReg(1)&&dxNum+x(end)>=xS_xiReg(end),'Interpolation domain not covered. x=[%.2g,%.2g], xi=[%.2g,%.2g].',x(1),x(end),xS_xiReg(1),xS_xiReg(end))
+    varphiS0 = interp1( [x(1)-dxNum;x;x(end)+dxNum],[phiS0(1);phiS0;phiS0(end)],xS_xiReg);
 end
 %     figure, contourf(real(zIP),imag(zIP),map.fJInv(zIP));colorbar
 %     figure, subplot(121); plot(xS_xiReg,map.fy(map.xi+1i*eta0_xiReg),x,h0,'--');
 %     subplot(122);plot(xS_xiReg,varphiS0,x,phiS0,'--');
 
 
-
+if PLOT_MAP
+    [hf_map(1),hf_map(2)] = plotMap(fIP,xxIP,xxIP_near,map.xxLR,yyUpper,x,h0,zzS0,map.zzRoots);
+else
+    hf_map = [];
+end
+end
 
 

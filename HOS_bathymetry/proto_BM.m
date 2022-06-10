@@ -111,7 +111,7 @@ xLR = [-Lx/2,Lx/2];
 % param.iModeCut = nx__wave/4;
 % param.kd__kmax = 0;
 % rDamping = 0;
-
+% 
 % % irregular, flat bottom (more shallow than hinge depth)
 % addpath c:/gits/timsas2/matlabLibs/
 % waveMaker.signal{1}.type = 'specFile';
@@ -131,11 +131,10 @@ xLR = [-Lx/2,Lx/2];
 % rDamping = 0;
 
 
-
 % irregular, step bathymetry
 addpath c:/gits/timsas2/matlabLibs/
 waveMaker.signal{1}.type = 'specFile';
-waveMaker.signal{1}.specFile = './wespec/81300.spec2';
+waveMaker.signal{1}.specFile = './wespec/81200.spec2';
 waveMaker.signal{1}.tRamp = 20;
 % waveMaker.signal{1}.tFinalStill = 20;
 waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
@@ -149,6 +148,7 @@ param.nonLinRamp = @(t) 1;
 param.iModeCut = nx__wave/4;
 param.kd__kmax = .0;
 rDamping = .0;
+
 
 % beach
 % beach.length = Lx/5;
@@ -202,7 +202,6 @@ x = (0:N-strcmp(boundaryType,'open') )'*dx-Lx/2;
 fprintf('Fraction of filtered wavespace: %.3g.\n',  max(1-param.iModeCut/(N/(1+strcmp(boundaryType,'open'))),0) )
 packet = exp(-((x/Lx-packageCentre__L)/packageWidth__L).^2);
 
-t0 = 0;
 
 
 Hstr = sprintf('%.2f_',map.H); thetaStr = sprintf('%.0f_',map.theta*180/pi);
@@ -290,11 +289,16 @@ end
 %% Linear wavemaker init, copied from SFo git hosm-nwt2d
 if ~isempty(waveMaker)
     assert(strcmp(boundaryType,'closed'),'boundaryType must be ''closed'' when specifying a wavemaker load.')
-    [phiAdd_of_x,param.waveMaker.time] = BM.callSFoWavemakerFunctions(waveMaker,N,Lx,param.DO_PADDING);
+    [phiAdd_of_x,waveMakerTime] = BM.callSFoWavemakerFunctions(waveMaker,N,Lx,param.DO_PADDING);
+    param.waveMaker.time = waveMakerTime;
     param.waveMaker.phiAdd = interp1(x_AA,phiAdd_of_x,x_xiReg_AA);
     
     if strcmp(param.t_end,'fromBM')
+        dt_ODE = param.waveMaker.time(2);
         param.t_end = param.waveMaker.time(end)+tFinalStill;
+        t_ODE = 0:dt_ODE:param.t_end;
+    else
+        t_ODE = [0,param.t_end];
     end
 end
 % figure, plot(x,squeeze(param.waveMaker.phiAdd(:,1,:)),'k','linewidth',1);hold on;grid on
@@ -315,10 +319,10 @@ switch boundaryType
 end
 tic
 if RK4dt~=0
-    [t,y] = RK4(@(t,Y) HOS_function(t,Y,param) ,[t0,RK4dt,param.t_end],[varphiS0;eta0_xiReg]);
+    [t,y] = RK4(@(t,Y) HOS_function(t,Y,param) ,[0,RK4dt,t_ODE(end)],[varphiS0;eta0_xiReg]);
 else
     ODEoptions = odeset('RelTol',relTolODE,'InitialStep',initialStepODE);
-    [t,y] = ode45(@(t,Y) HOS_function(t,Y,param) ,[t0,param.t_end],[varphiS0;eta0_xiReg],ODEoptions);
+    [t,y] = ode45(@(t,Y) HOS_function(t,Y,param),t_ODE,[varphiS0;eta0_xiReg],ODEoptions);
 end
 fprintf('CPU time: %gs\n',toc);
 varphiS = y(:,1:end/2); eta = y(:,end/2+1:end);
@@ -374,9 +378,52 @@ switch EXPORT_MAT
         vars = setdiff({wh.name},{'t','y','varphiS','eta','phiAdd_of_x','param'});
         save([exportPath,'/mat/',fileName],vars{:});
     case 2
-        vars = setdiff({wh.name},{'t','y','varphiS','phiAdd_of_x','param'}); % store eta
+        vars = setdiff({wh.name},{'y','varphiS','phiAdd_of_x','param'}); % keep eta
         save([exportPath,'/mat/',fileName],vars{:});
     case 3
         save([exportPath,'/mat/',fileName]); 
 end
+
+
+%% plot power spectrum
+
+
+% load('./figures/mat/81200_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.mat')
+% load('./figures/mat/81200_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0')
+
+x_wp = 0; % sampling location
+% t_wp = t; % time is here uniform
+t_wp = waveMakerTime'; % sampling times
+
+% interpolate time signal h(x_wp,t) 
+xx_wp_temp = fzero(@(xx) real(fIP(xx))-x_wp,x_wp );
+[~,i_wp] = min(abs(map.xi-xx_wp_temp)); 
+xx_wp = map.xi(i_wp);
+eta_wp = interp1(t,eta(:,i_wp),t_wp); %
+h_wp = imag( fIP(xx_wp+1i*eta_wp) ); % near enough in uniform regions.
+
+
+dt = t_wp(2)-t_wp(1);
+% smoothingBandwidth = 0;
+% [f,S] = level1.spec.computePowerSpectralDensity(eta_wp,dt,smoothingBandwidth);
+waveDef = timsas_r1.data.WaveDefinition;
+waveDef.readFromSpecFile(waveMaker.signal{1}.specFile);
+ts = timsas_r1.data.TimeSeries;
+ts.setFromVector(h_wp,'m',0,dt,'s');
+ts.plot
+ts.trim([50,inf]); % check!
+
+smoothingBandwidth = .01/waveDef.component{1}.spectralDensity.Tp;
+spec = ts.getSpectrum([1,99.9],1,smoothingBandwidth);
+
+hfS = figure('color','w');
+plot(spec.f,spec.S,waveDef.getUsedFrequencyVector,waveDef.getSpectralDensity);grid on;
+ylabel(['S [',spec.spectrumUnit.getUnitName,']'])
+xlabel('frequency [Hz]')
+
+if DO_EXPORT
+    savefig(hfS,[exportPath,'/fig/S_',fileName]);
+    export_fig(hfS,[exportPath,'/S_',fileName],exportFormats{:});
+end
+
 

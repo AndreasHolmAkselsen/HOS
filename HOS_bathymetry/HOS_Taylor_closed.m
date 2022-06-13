@@ -87,9 +87,6 @@ mu = param.rDampingDim*M*(((0:N)'-Md)/(M-Md)).^2.*((0:N)'>Md);
 kFilter = k<=param.iModeCut*dk;  
 Y_t = real([ icosfft(kFilter.*cosfftPad(cosfft(vphiS_t),N)-mu.*FFTvphiS)
              icosfft(kFilter.*cosfftPad(cosfft(eta_t  ),N)-mu.*FFTeta  ) ]); 
-if any(isnan(Y_t(:)))        
-    disp halt
-end
          
 end
 

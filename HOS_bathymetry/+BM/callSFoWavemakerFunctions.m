@@ -1,4 +1,4 @@
-function [PhiAdd,flapTime] = callSFoWavemakerFunctions(waveMaker,N,Lx,DO_PADDING)
+function [PhiAdd,flapTime,X,z] = callSFoWavemakerFunctions(waveMaker,N,Lx,DO_PADDING)
 % Linear wavemaker init, copied from SFo git hosm-nwt2d
 
 

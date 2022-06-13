@@ -1,0 +1,131 @@
+%\documentclass[a4paper,12pt]{article}
+\documentclass[internal]{sintefmemo}
+%\documentclass{amsart}
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+
+%\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+\usepackage{xcolor}
+\usepackage{graphicx}
+\usepackage{graphbox} % allows includegraphics[align=c]
+\usepackage[round]{natbib}
+\usepackage{mathtools}
+\usepackage[font=normalsize,margin=2mm]{subfig}
+\usepackage{float}
+\usepackage{hyperref}
+\usepackage{xfrac}
+%\usepackage{cprotect}%for \verb in captions
+%\usepackage{enumerate}
+\usepackage{enumitem}
+\hypersetup{colorlinks=true,
+			linkcolor=blue,
+			filecolor=blue,
+			urlcolor=blue,
+			citecolor=blue}
+\newcommand{\mr}{\mathrm}
+\newcommand{\mc}{\mathcal}
+\let\SSS\S
+\renewcommand{\S}{^\mr{S}}
+\newcommand{\ii}{\mr{i}\,}
+\newcommand{\ee}{\mr{e}}
+\let\underscore\_
+\renewcommand{\_}[1]{_\mr{#1}}
+\newcommand{\oo}[1]{^{(#1)}}
+\let\Re\relax
+\let\Im\relax
+\DeclareMathOperator\Re{Re}
+\DeclareMathOperator\Im{Im}
+\newcommand{\w}{w}
+\newcommand{\bU}{\bm U}
+\newcommand{\h}{\hat}
+\newcommand{\br}[3]{\left#1#2\right#3}
+\newcommand{\rbr}[1]{\left(#1\right)}
+\newcommand{\sbr}[1]{\left[#1\right]}
+\newcommand{\cbr}[1]{\left\{#1\right\}}
+%\newcommand{\bU}{(\nabla\Phi)_{z=\eta}}
+
+
+\newcommand{\z}{z}
+\newcommand{\x}{x}
+\newcommand{\y}{y}
+\newcommand{\zz}{\zeta}
+\newcommand{\xx}{\xi}
+\newcommand{\yy}{\sigma}
+\newcommand{\kk}{\kappa}
+
+\newcommand{\zmap}{f}
+%\newcommand{\zzmap}{\zmap^{-1}}
+\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
+
+%\newcommand{\ww}{w}
+%\renewcommand{\w}{\ww^\mr{P}}
+\newcommand{\ww}{\omega}
+\renewcommand{\w}{w}
+
+\newcommand{\surf}{\eta}
+%\newcommand{\w}{\varpi}
+\newcommand{\dd}{\mr d}
+\newcommand{\ddfrac}[2]{\frac{\dd #1}{\dd #2}}
+
+\title{A benefit assessment of extending OSC beaches}
+\author{Andreas H. Akselsen}
+\project{302006355-3 (OSC pre-project)}
+\date{\today}
+\recipient[information]{SINTEF employees}
+%\recipient[information,agreed]{Statsbygg}
+
+\begin{document}
+
+
+%\maketitle
+\frontmatter
+
+%\tableofcontents
+
+\section{Introduction}
+
+
+\section{Results}
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_81300_linear_ka0_H3p00_0p50_theta90_Nw1.pdf}%
+\caption{Bathymetry: Map of step form depth 3 meters to 0.5 meters. Wavemaker at $x=-25$\,m, beach covers $x=8.3$ to 25.0\,m.}%
+\label{fig:map:step}%
+\end{figure}
+
+
+\begin{figure}[h!ptb]%
+\centering
+\includegraphics[width=.9\columnwidth]{../HOS_bathymetry/figures/81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}%
+\caption{Time record of surface elevation for flat bed simulation (0.5 meter depth).}%
+\label{fig:ts:flat}%
+\end{figure}
+
+%\begin{figure}[h!ptb]%
+%\centering
+%\subfloat[Flat bed]{
+%\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/S_81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+%\subfloat[Bathymetry step, wavemaker signal attuned to depth 0.5\,m]{
+%\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/S_81300_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+%\subfloat[Bathymetry step, wavemaker signal attuned to depth 3.0\,m]{
+%\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/S_81500_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+%\label{fig:S}%
+%\end{figure}
+
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[Flat bed]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+\subfloat[Bathymetry step]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81500_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+\caption{Power spectra measured at in the domain centre, at $x=0$\,m.}
+\label{fig:S}%
+\end{figure}
+
+\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
+\bibliography{sintef_bib}
+
+
+\end{document}

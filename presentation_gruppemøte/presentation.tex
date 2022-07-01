@@ -23,6 +23,10 @@
 \DeclareMathOperator\Re{Re}
 \DeclareMathOperator\Im{Im}
 \newcommand{\w}{w}
+\newcommand{\ww}{\omega}
+\newcommand{\zmap}{f}
+\newcommand{\iJac}{|\zmap_\zz|^{-2}}
+
 
 \newcommand{\bU}{\bm U}
 \newcommand{\z}{z}
@@ -125,9 +129,9 @@ with an ODE solver and match the modes $\hat\phi_j(t) $ to the surface potential
 
 \section{Representing currents (potential flow) in HOS}
 
-\begin{frame}{Currents in HOS}
+\begin{frame}{Currents in HOS}{Example: Waves propagating over a horizontal line vortex}
 \centering
-\vspace{-1.cm}
+\vspace{-.25cm}
 \begin{minipage}{.5\framewidth}
 %\resizebox{3cm}{!}{
 \scriptsize
@@ -147,16 +151,16 @@ with an ODE solver and match the modes $\hat\phi_j(t) $ to the surface potential
 
 
 
-\begin{frame}{Currents in HOS}
+\begin{frame}{Currents in HOS}{Examining the effect of recirculation from the OB current system}
 \centering
-\vspace{-1.cm}
+\vspace{-.25cm}
 \begin{minipage}{.5\framewidth}
 \includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec/novortex_flipLinear_Lh50x15_nx256nk512_patchPos8xm1p8x0x0_Uj0_posZ0.pdf}\\
 \includegraphics[width=\columnwidth]{C:/gits/SFo_gitHOS/hosm-nwt2d/basinSpec//flipLinear_Lh50x15_nx256nk512_dimVort15x3p5_Uj0p55_posZ0.pdf}%
 \end{minipage}%
 %\hfill
 \includegraphics[width=.5\framewidth,align=c]{C:/gits/SFo_gitHOS/hosm-nwt2d/results/merged/snapCompare_T1p5CM2.pdf}\\
-$T=1.5$\,s, double current strength.
+%$T=1.5$\,s, double current strength.
 \end{frame}
 
 
@@ -182,25 +186,38 @@ $T=1.5$\,s, double current strength.
 
 \begin{frame}{Conformally mapped bathymetry}{Step depth transitions}
 \vspace{-.5cm}
-\centering
+%\centering
 %\begin{figure}%
 %\subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_step.pdf}}%
 %\subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_step_inv.pdf}}%
 %%\caption{}
 %\end{figure}
 %\begin{tabular}{ccc}
-\includegraphics[width=.45\framewidth,align=c]{../conformalMapping/conformalBathymetry/CCMei_step_inv.pdf}
-$\rightarrow$
-\includegraphics[width=.45\framewidth,align=c]{../conformalMapping/conformalBathymetry/CCMei_step.pdf}
+\parbox[c]{.45\framewidth}{\centering
+\includegraphics[width=.45\framewidth]{../conformalMapping/conformalBathymetry/CCMei_step_inv.pdf}
+$\zz$-plane
+}
+\hfill$\rightarrow$ \hfill
+\parbox[c]{.45\framewidth}{\centering
+\includegraphics[width=.45\framewidth]{../conformalMapping/conformalBathymetry/CCMei_step.pdf}
+$\z$-plane
+}
 %\end{tabular}
-\vspace{.5cm}
-\small
+%\vspace{.5cm}
+
+\footnotesize
+Analytical map for step transition:
 \begin{align*}
 \lambda &= \exp(\zz),&
 \tau &= \sqrt{\frac{\lambda+c^2}{\lambda+1} },&
-z &\mapsfrom f(\zz) = -\ii H\_s +\frac{H\_d}{\pi}\left[\frac1c \ln^+\frac{\tau-c}{\tau+c} - \ln\frac{\tau-1}{\tau+1}\right],
+z &\mapsfrom f(\zz) = -\ii H\_s +\frac{H\_d}{\pi}\left[\frac1c \ln^+\frac{\tau-c}{\tau+c} - \ln\frac{\tau-1}{\tau+1}\right].
 \end{align*}%
-\normalsize
+Surface equations in the $\zz$-plane:
+\begin{align*}
+\eta_t &= \iJac\sbr{\varphi_\yy\rbr{1+\eta_\xx^2}-\varphi\S_\xx} + \eta_\xx \Re\rbr{\frac{\zmap_t}{\zmap_\zz}}-\Im\rbr{\frac{\zmap_t}{\zmap_\zz}},\\
+\varphi\S_t &= - \frac12\iJac\sbr{\rbr{\varphi\S_\xx}^2-\rbr{1+\eta_\xx^2}\varphi_\yy^2} - gh + \varphi\S_\xx \Re\rbr{ \frac{\zmap_t}{\zmap_\zz}}.
+\end{align*}
+
 \end{frame}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -229,11 +246,11 @@ $\rightarrow$
 %%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{frame}{Comparing ramp slopes}
-\centering
 \begin{figure}%
 \subfloat[$\theta=45$\textdegree]{\includegraphics[width=.33\framewidth]{../HOS_bathymetry/figures/map/mapZoom_SSGW_ka0p05_H1p00_0p50_nH2_ang1_0p5_Nw60.pdf}}%
 \subfloat[$\theta=9$\textdegree]{\includegraphics[width=.33\framewidth]{../HOS_bathymetry/figures/map/mapZoom_SSGW_ka0p05_H1p00_0p50_nH2_ang1_0p1_Nw60.pdf}}%
 \subfloat[$\theta=4.5$\textdegree]{\includegraphics[width=.33\framewidth]{../HOS_bathymetry/figures/map/mapZoom_SSGW_ka0p05_H1p00_0p50_nH2_ang1_0p05_Nw60.pdf}}%
+\caption{Depth transition maps}
 \end{figure}
 \end{frame}
 
@@ -269,8 +286,10 @@ $\rightarrow$
 \begin{frame}{Testing effect of beach extensions}
 	\begin{figure}[H]
 		\vspace{-1cm}
-		\centering
-		\subfloat[No beach extension]{\includegraphics[width=.4\textwidth,align=c]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th90_z.pdf}}
+		\begin{minipage}[c]{.45\textwidth}\centering
+		\includegraphics[width=\textwidth,align=c]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th90_z.pdf}\\
+		No beach extension
+		\end{minipage}%
 		\hfill
 		\begin{minipage}[c]{.5\textwidth}\centering
 			\includegraphics[width=1\textwidth]{../conformalMapping/conformalBathymetry/beachRamp_h10D4th45_z.pdf}\\
@@ -303,21 +322,67 @@ $\rightarrow$
 	\includegraphics[width=.7\framewidth]{../HOS_bathymetry/figures/beach_SSGW_T2p50_ka0p05_M5_H10p00_9p10_4p60_2p00_theta90_180_30_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p0777_aRef0p00149.pdf}\\
 \end{frame}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\section{Conformally mapping the wavemaker}
 
-\begin{frame}{Representing a wavemaker with conformal mapping}
-	\centering
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\begin{frame}{Power spectra in front and after depth transition}
 \vspace{-1cm}
-	\begin{equation*}
-f_\zz(\zz,t) = \prod_{j=-\infty}^\infty \rbr{1+\frac{d^2}{\rbr{\zz+2\ii j h}^2}}^{\theta(t)/\pi}
-= \sbr{1+\frac{\sin^2\!\frac{\pi d}{2h}}{\sinh^2\!\frac{\pi \zz}{2h}}}^{\theta(t)/\pi}
-\end{equation*}
-
-\includegraphics[width=.5\framewidth]{../conformalMapping/conformalWavemaker/mapFlap3_positive.pdf}%
-\includegraphics[width=.5\framewidth]{../conformalMapping/conformalWavemaker/mapFlap3_negative.pdf}%
+\scriptsize
+	\begin{figure}[h!ptb]%
+	\centering
+	\subfloat[Bathymetries]{
+		\includegraphics[width=.75\columnwidth]{./zmapsCrop.png}
+	%\includegraphics[width=.2\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_82100_linear_ka0_H3p00_0p50_theta90_Nw1.pdf}
+	%\includegraphics[width=.2\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_82000_linear_ka0_H3p00_0p50_theta45_Nw1.pdf}
+	%\includegraphics[width=.2\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_82100_linear_ka0_H3p00_0p50_theta15_Nw1.pdf}
+	}\\[-4mm]%
+	\subfloat[$x=5.0$\,m.]{
+	\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp5.pdf}}%
+	\subfloat[$x=10.0$\,m.]{
+	\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp10.pdf}}\\[-4mm]
+	\subfloat[$x=15.0$\,m.]{
+	\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp15.pdf}}%
+	\subfloat[$x=20.0$\,m.]{
+	\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp20.pdf}}%
+	\subfloat[$x=25.0$\,m.]{
+	\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp25.pdf}}%
+	\caption{Power spectra measured at various locations, comparing transitional ramps.
+	%Depth transition from 3.0 to 0.5 meters.
+	%$T\_p=2.5$\,s, $H\_s=0.125$\,m.
+	}
+	%\label{fig:S}%
+	\end{figure}
 \end{frame}
+
+\begin{frame}{Flat bottom reference}
+%\vspace{-1cm}
+\scriptsize
+\begin{figure}[h!ptb]%
+\centering
+\subfloat[$x=5.0$\,m.]{
+\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100_flatOnly/x_wp5.pdf}}%
+\subfloat[$x=10.0$\,m.]{
+\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100_flatOnly/x_wp10.pdf}}\\[-4mm]
+\subfloat[$x=15.0$\,m.]{
+\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100_flatOnly/x_wp15.pdf}}%
+\subfloat[$x=20.0$\,m.]{
+\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100_flatOnly/x_wp20.pdf}}%
+\subfloat[$x=25.0$\,m.]{
+\includegraphics[width=.28\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100_flatOnly/x_wp25.pdf}}%
+\caption{Power spectra measured at various locations, flat bed at 0.5 meters depth.}
+\label{fig:S}%
+\end{figure}
+\end{frame}
+
+
+
+
+
 
 
 
@@ -344,6 +409,27 @@ f_\zz(\zz,t) = \prod_{j=-\infty}^\infty \rbr{1+\frac{d^2}{\rbr{\zz+2\ii j h}^2}}
 %\vspace{-.5cm}
 \includegraphics[width=.6\framewidth]{../HOS_ChalikovTaylor_current/figures/rounded2_contour.pdf}%
 \end{frame}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\section{Conformally mapping the wavemaker}
+
+\begin{frame}{Representing a wavemaker with conformal mapping}
+	\centering
+\vspace{-1cm}
+	\begin{equation*}
+f_\zz(\zz,t) = \prod_{j=-\infty}^\infty \rbr{1+\frac{d^2}{\rbr{\zz+2\ii j h}^2}}^{\theta(t)/\pi}
+= \sbr{1+\frac{\sin^2\!\frac{\pi d}{2h}}{\sinh^2\!\frac{\pi \zz}{2h}}}^{\theta(t)/\pi}
+\end{equation*}
+
+\includegraphics[width=.5\framewidth]{../conformalMapping/conformalWavemaker/mapFlap3_positive.pdf}%
+\includegraphics[width=.5\framewidth]{../conformalMapping/conformalWavemaker/mapFlap3_negative.pdf}%
+\end{frame}
+
+
+
+
 
 \section{Other stuff (linear theory)}
 

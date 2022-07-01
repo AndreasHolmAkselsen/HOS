@@ -8,7 +8,7 @@ crudeScale = 1.5*pi/min(map.H);
 yyUpper = max([2*max(h0),.1*map.H])*crudeScale;
 % xxIP = linspace(xLR(1),xLR(2),nArrX)*crudeScale;
 
-xLR = [x(1),-x(1)];
+xLR = map.xLR;
 xxIP_far = linspace(xLR(1),xLR(2),map.nArrX_far)*crudeScale;
 map.zzRoots = [map.xx_b-1i*pi;map.xx_b+pi./map.theta.*log(map.H(2:end)./map.H(1:end-1))-1i*pi].';
 

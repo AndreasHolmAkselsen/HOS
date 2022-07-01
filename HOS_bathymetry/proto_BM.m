@@ -52,10 +52,17 @@ boundaryType = 'closed'; % 'open' or 'closed'
 % NWaves = 5;
 % Lx = (2*pi/IC.k)*NWaves;
 % nx__wave = 2^8;
+% Lx = 75;
+% NWaves = 1;
+% nx__wave = 1024*1.5;
+% xLR = [0,Lx];%[-Lx/2,Lx/2];
+
+% reduced domain
 Lx = 50;
 NWaves = 1;
-nx__wave = 1024;
-xLR = [-Lx/2,Lx/2];
+nx__wave = 2*1024;
+xLR = [0,Lx];
+
 
 % Wavemaker
 
@@ -107,49 +114,61 @@ xLR = [-Lx/2,Lx/2];
 % param.kd__kmax = 0;
 % rDamping = 0;
 
-% % irregular, flat bottom (more shallow than hinge depth)
+% irregular, flat bottom (more shallow than hinge depth)
+addpath c:/gits/timsas2/matlabLibs/
+waveMaker.signal{1}.type = 'specFile';
+waveMaker.signal{1}.tRamp = 20;
+% waveMaker.signal{1}.tFinalStill = 20;
+waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
+waveMaker.hingeDepth = 2.5;
+waveMaker.Nz = 256; % originally under nwt.hos.()
+map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
+map.theta = []; % slope angles (positive values)
+map.H = [0.5]; % plateau levels
+waveMaker.signal{1}.specFile = './wespec/82110.spec2';
+[~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'redo_'];
+% map.H = [3]; % plateau levels
+% waveMaker.signal{1}.specFile = './wespec/82100.spec2';
+% [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
+param.nonLinRamp = @(t) 1;
+param.iModeCut = nx__wave/4;
+param.kd__kmax = 0;
+rDamping = .0;
+
+
+
+% % irregular, slope bathymetry
 % addpath c:/gits/timsas2/matlabLibs/
 % waveMaker.signal{1}.type = 'specFile';
-% waveMaker.signal{1}.specFile = './wespec/81300.spec2';
+% waveMaker.signal{1}.specFile = './wespec/83000.spec2';
 % waveMaker.signal{1}.tRamp = 20;
 % % waveMaker.signal{1}.tFinalStill = 20;
 % waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
 % waveMaker.hingeDepth = 2.5;
 % waveMaker.Nz = 256; % originally under nwt.hos.()
 % [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
-% map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
-% map.H = [0.5]; % plateau levels
-% map.theta = []; % slope angles (positive values)
+% % map.H = [3,0.5]; % plateau levels
+% % map.xx_b = 15;  % xi-coordinate of "begining of" edge
+% % map.theta = [90]*pi/180; % slope angles (positive values)
+% % map.H = [3,0.5]; % plateau levels
+% % map.xx_b = 18;  % xi-coordinate of "begining of" edge
+% % map.theta = [45]*pi/180; % slope angles (positive values)
+% map.H = [3,0.5]; % plateau levels
+% map.xx_b = 28;  % xi-coordinate of "begining of" edge
+% map.theta = [15]*pi/180; % slope angles (positive values)
 % param.nonLinRamp = @(t) 1;
-% param.iModeCut = nx__wave/4;
-% param.kd__kmax = 0;
-% rDamping = 0;
+% param.iModeCut = nx__wave/2;
+% param.kd__kmax = .0;
+% rDamping = .0;
 
-% 
-% irregular, step bathymetry
-addpath c:/gits/timsas2/matlabLibs/
-waveMaker.signal{1}.type = 'specFile';
-waveMaker.signal{1}.specFile = './wespec/81300.spec2';
-waveMaker.signal{1}.tRamp = 20;
-% waveMaker.signal{1}.tFinalStill = 20;
-waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
-waveMaker.hingeDepth = 2.5;
-waveMaker.Nz = 256; % originally under nwt.hos.()
-[~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
-map.xx_b = [-70];  %2.7726  % xi-coordinate of "begining of" edge
-map.H = [3,0.5]; % plateau levels
-map.theta = [90]*pi/180; % slope angles (positive values)
-param.nonLinRamp = @(t) 1;
-param.iModeCut = nx__wave/4;
-param.kd__kmax = .0;
-rDamping = .0;
 
 
 % beach
-% beach.length = Lx/5;
-% beach.absorption = 0.4;
-beach.length = Lx/3;
+% beach.length = Lx/3;
+% beach.absorption = 1.0;
+beach.length = 1*Lx/3;
 beach.absorption = 1.0;
+beach.uniformFraction = 2/3; 
 
 % Initial conditions
 IC.T = 2.5; 
@@ -188,19 +207,23 @@ RK4dt = 0;%2.5e-3; % set to zero to use ODE45
 
 
 
-
 %% Simulation
 % N is the number spacings or the number of poits excluding x=+L/2, i.e., x(end)+dx=L/2
 N = nx__wave*NWaves;
 dx = Lx/N;
-x = (0:N-strcmp(boundaryType,'open') )'*dx-Lx/2;
+x = (0:N-strcmp(boundaryType,'open') )'*dx+xLR(1);
 fprintf('Fraction of filtered wavespace: %.3g.\n',  max(1-param.iModeCut/(N/(1+strcmp(boundaryType,'open'))),0) )
 packet = exp(-((x/Lx-packageCentre__L)/packageWidth__L).^2);
 
 
 
 Hstr = sprintf('%.2f_',map.H); thetaStr = sprintf('%.0f_',map.theta*180/pi);
-fileName = sprintf('%s%s_%s_T%.2f_ka%.2g_M%d_H%stheta%sNw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,boundaryType,INIT_WAVE_TYPE,IC.T,IC.ka,param.M,Hstr,thetaStr,NWaves,NT_dt,N,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); fileName(fileName=='.')='p';
+% fileName = sprintf('%s%s_%s_T%.2f_ka%.2g_M%d_H%stheta%sNw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,boundaryType,INIT_WAVE_TYPE,IC.T,IC.ka,param.M,Hstr,thetaStr,NWaves,NT_dt,N,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); fileName(fileName=='.')='p';
+fileName = sprintf('%s%s_M%d_H%stheta%sNw%d_nx%d_L%.3g_Lb%.3g_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,boundaryType,param.M,Hstr,thetaStr,NT_dt,N,Lx,beach.length,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); fileName(fileName=='.')='p';
+if IC.ka>0 
+    fileName = sprintf('%s_%s_T%.2f_ka%.2g_dt%.3gT',fileName,INIT_WAVE_TYPE,IC.T,IC.ka,NWaves);
+end
+
 if DO_EXPORT
     copyfile('./proto_BM.m',[exportPath,'/m/',fileName,'.m']) 
 end
@@ -235,6 +258,7 @@ phiS0 = phiS0.*packet;
 
 
 %%  map preparation
+map.xLR = xLR;
 if ~isempty(map.xx_b)
     [map,fIP,varphiS0,eta0_xiReg,hf_map] = mapDomainSC(map,x,h0,phiS0,PLOT_MAP,PLOT_INTERPOLATION_MAP);
     
@@ -263,7 +287,7 @@ x_xiReg = real(fIP(map.xi.')).';
 
 % interpolate as needed for anti-aliasing (padding)
 p = 1+3*param.DO_PADDING; Nd=N*(p+1)/2;
-x_AA = (0:Nd)'*N/Nd*dx + x(1); % =linspace(-Lx/2,Lx/2,Nd+1)';
+x_AA = (0:Nd)'*N/Nd*dx + x(1); % =linspace(xLR(1),xLR(2),Nd+1)';
 x_xiReg_AA = interp1((0:N)'/N,x_xiReg,(0:Nd)'/Nd);
 assert(abs(x_xiReg_AA(1)-x(1))<1e-9 && abs(x_xiReg_AA(end)-x(end))<1e-9)
 x_xiReg_AA([1,end]) = x([1,end]);
@@ -274,9 +298,13 @@ x_xiReg_AA([1,end]) = x([1,end]);
 %% Beach init.
 if exist('beach','var') && beach.length>0
     xB = xLR(2)-beach.length;    
-    u = (x_xiReg_AA-xB)/(xLR(2)-xB).*(x_xiReg_AA>xB);
+    xU = xB + beach.length*(1-beach.uniformFraction);
+%     u = (x_xiReg_AA-xB)/(xLR(2)-xB).*(x_xiReg_AA>xB);
+    u = (x_xiReg_AA-xB)/(xU-xB).*(x_xiReg_AA>xB);
 %     param.beach.nu = beach.absorption*u.^2; % Bonnefoy (2005)/SFo
     param.beach.nu = beach.absorption*u.^2.*(3-2*u); %Bonnefoy (2006)   
+    param.beach.nu(x_xiReg_AA>=xU) =  beach.absorption;
+%     figure, plot(x_xiReg_AA,param.beach.nu,'.-')
 end
 
 
@@ -386,13 +414,16 @@ end
 % load('./figures/mat/81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.mat')
 % load('./figures/mat/81300_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.mat')
 % load('./figures/mat/81400_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.mat')
+% load('./figures/mat/82100_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.mat')
 
-x_wp = 0; % sampling location
+
+for x_wp = [5,10,15,20,25,30] % sampling location
 % t_wp = t; % time is here uniform
 t_wp = waveMakerTime'; % sampling times
 
 % interpolate time signal h(x_wp,t) 
-xx_wp_temp = fzero(@(xx) real(fIP(xx))-x_wp,x_wp );
+xx_wp_temp = fzero(@(xx) real(fIP(xx*(xx>map.xxLR(1)&&xx<map.xxLR(2))))-x_wp,x_wp );
+if isnan(xx_wp_temp), continue; end
 [~,i_wp] = min(abs(map.xi-xx_wp_temp)); 
 xx_wp = map.xi(i_wp);
 eta_wp = interp1(t,eta(:,i_wp),t_wp); %
@@ -406,7 +437,7 @@ waveDef = timsas_r1.data.WaveDefinition;
 waveDef.readFromSpecFile(waveMaker.signal{1}.specFile);
 ts = timsas_r1.data.TimeSeries;
 ts.setFromVector(h_wp,'m',0,dt,'s');
-ts.plot
+% ts.plot
 ts.trim([50,inf]); % check!
 
 smoothingBandwidth = .01/waveDef.component{1}.spectralDensity.Tp;
@@ -416,11 +447,11 @@ hfS = figure('color','w');
 plot(spec.f,spec.S,waveDef.getUsedFrequencyVector,waveDef.getSpectralDensity);grid on;
 ylabel(['S [',spec.spectrumUnit.getUnitName,']'])
 xlabel('frequency [Hz]')
-title(rn)
-
+title([rn,', x = ',num2str(x_wp)]);
+ylim([0,8e-3]);xlim([0,1.8])
 if DO_EXPORT
     savefig(hfS,[exportPath,'/fig/S_',fileName]);
-    export_fig(hfS,[exportPath,'/S_',fileName],exportFormats{:});
+    export_fig(hfS,[exportPath,'/S_',num2str(x_wp,'%.3g'),'_',fileName],exportFormats{:});
 end
-
+end
 

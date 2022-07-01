@@ -68,7 +68,7 @@
 \newcommand{\dd}{\mr d}
 \newcommand{\ddfrac}[2]{\frac{\dd #1}{\dd #2}}
 
-\title{A benefit assessment of extending OSC beaches}
+\title{Assessment of the impact of depth transitions on wave quality}
 \author{Andreas H. Akselsen}
 \project{302006355-3 (OSC pre-project)}
 \date{\today}
@@ -86,24 +86,145 @@
 \section{Introduction}
 
 
-\section{Results}
 
-\begin{figure}[h!ptb]%
+
+\section{Method}
+\label{sec:method}
+\subsection{Boundary equations for the mapped plane}
+%Option \ref{it:chosen} seems the most promising of these options.
+The boundary value problem 
+\begin{align*}
+h_t + \phi_x h_x-\phi_y&=0,\\
+\phi_t + \frac12\rbr{\phi_x^2+\phi_y^2}+gh&=0
+\end{align*}
+can be re-stated in terms of the surface coordinate
+\[
+\x+\ii h(\x,t) \mapsfrom f[\xx+\ii \eta(\xx,t)].
+\]
+Introducing
+\[\varphi(\xx,\yy,t)=\Re\ww(\zz,t) \]
+and the boundary conditions expressed in terms of the surface potential 
+\[
+\varphi\S(\xx,t)=\varphi[\xx+\ii\eta(\xx,t),t]
+\]
+we get 
+\begin{subequations}
+\begin{align}
+\eta_t &= |\zmap'|^{-2} \sbr{-   \varphi\S_\xx\eta_\xx + \rbr{1+\eta_\xx^2} \varphi_\yy},\\
+\varphi\S_t  &= |\zmap'|^{-2}\sbr{ - \frac12  \rbr{\varphi\S_\xx}^2 + \frac12 \rbr{1+\eta_\xx^2} \varphi_\yy^2 }  - g h,
+\end{align}%
+\end{subequations}%
+after some derivation.
+Here $|\zmap'|^{2}$ is equivalent to the transformation Jacobian and $\varphi_\yy$ is evaluated at $\zz=\xx+\ii\eta$.
+$h=\Im \zmap(\xx+\ii\eta)$ is readily available. 
+
+\subsection{Mapping}
+%The Schwartz--Christoffel transform is a powerful approach for imposing straight angles in a mapping.
+A map of a depth transition from $H\_s$ to $H\_d$ with sloping angle $\theta$ is obtained by integrating
+\begin{equation}
+%\zmap'(\zz) = \frac{H\_s}{\pi \tau_\theta}, \qquad \tau_\theta = \rbr{\frac{\ee^\zz+ (H\_d/H\_s)^{\pi/\theta}}{\ee^\zz+1}}^{\theta/\pi}. 
+\zmap'(\zz) = \frac{H\_s}{\pi} \rbr{\frac{\ee^\zz+1}{\ee^\zz+ (H\_d/H\_s)^{\pi/\theta}}}^{\theta/\pi}. 
+\label{eq:SCnumStep}
+\end{equation}
+Any integration path can be used since the map is conformal; we integrate from the top of the domain down to avoid spreading numerical imprecision form the singularities located at $\zeta=-\ii\pi$ and $\zeta=2\ln c-\ii\pi$ into the domain.
+An example is shown on \autoref{fig:SCnumStep45deg} for a 45\textdegree down-step.
+
+\begin{figure}[H]%
 \centering
-\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_81300_linear_ka0_H3p00_0p50_theta90_Nw1.pdf}%
-\caption{Bathymetry: Map of step form depth 3 meters to 0.5 meters. Wavemaker at $x=-25$\,m, beach covers $x=8.3$ to 25.0\,m.}%
-\label{fig:map:step}%
+\subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStep45deg_zz.pdf}}%
+\hfill
+\subfloat[$\z$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStep45deg_z.pdf}}%
+\caption{Numerical integration of \eqref{eq:SCnumStep} with $\theta=\pi/4$, $H\_s = 0.5$ and $H\_d = 1.0$.}%
+\label{fig:SCnumStep45deg}%
 \end{figure}
 
 
-\begin{figure}[h!ptb]%
+We can extend this technique to combine several alterations in bathymetry level by adopting
+\begin{equation}
+\zmap'(\zz) = K \prod_{j=1}^{N_\angle} \rbr{\frac{\exp(\zz-\xi^\angle_j)+1}{\exp(\zz-\xx^\angle_j) + (H_{j+1}/H_j)^{\pi/\theta_j}}}^{\theta_j/\pi}
+\label{eq:SCnumMultiStep}
+\end{equation}
+and fixing the constant $K$ after integration (re-scaling). $N_\angle$ is here the number of depth transitions, $\{H_j\}$ the set of depths, $\{\theta_j\}$ ($>0$) the slopes of the individual transitions and $\{\xi^\angle_j\}$ the horizontal position around which it occurs in the $\zz$-plane. 
+%The singularities of \eqref{eq:SCnumMultiStep} are found at $\zz=\xx^\angle_j-\ii \pi$ and $\zz=\xx^\angle_j+\pi/\theta_j\ln(H_{j+1}/H_j)-\ii \pi$.
+%\autoref{fig:SCnumStep2x45deg} shows an example similar to the plateau seen earlier. 
+%A rougher bathymetry is displayed in \autoref{fig:SCnumMultiStep}. 
+%The deformation of some of the sharp corners in this image is due to inaccuracy in the numeral integration near the singularity and is of no consequence for simulation usage.
+%Corners can of course be smoothened by defining a higher bathymetry level $\yy=\tilde H < \pi$ in the $\zz$-plane, as shown in \autoref{fig:SCnumMultiStepSmooth}.
+%
+%\begin{figure}[H]%
+%\centering
+%\subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStep2x45deg_zz.pdf}}%
+%\hfill
+%\subfloat[$\z$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStep2x45deg_z.pdf}}%
+%\caption{Numerical integration of \eqref{eq:SCnumMultiStep} with 
+%%$\theta_1=\theta_2=\pi/4$; $H_1 = 1.0$, $H_2 = 0.5$, $H_3 = 1.0$ and $\xi^\angle_1=0$, $\xi^\angle_1=5$.
+%$\theta_j\in\{\pi/4,\pi/4\}$, $H_j \in\{1.0,0.5,1.0\}$ and $\xx^\angle_j\in\{0,5\}$.
+%}%
+%\label{fig:SCnumStep2x45deg}%
+%\end{figure}
+%
+%\begin{figure}[H]%
+%\centering
+%\subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStepMulti_zz.pdf}}%
+%\hfill
+%\subfloat[$\z$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStepMulti_z.pdf}}%
+%\caption{Numerical integration of \eqref{eq:SCnumMultiStep} with 
+%$\theta_j\in\{\pi/4,5\pi/2,5\pi/2\}$, $H_j \in\{0.5,1.5,0.75,1.5\}$ and $\xx^\angle_j\in\{0,8,14\}$.
+%}%
+%\label{fig:SCnumMultiStep}%
+%\end{figure}
+%
+%\begin{figure}[H]%
+%\centering
+%\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStepMultiSmooth_z.pdf}%
+%\caption{As \autoref{fig:SCnumMultiStep}, instead choosing bethymetry at $\yy = 0.1-\pi$.
+%}%
+%\label{fig:SCnumMultiStepSmooth}%
+%\end{figure}
+
+
+
+
+\section{Preliminary results}
+\label{sec:results}
+
+\subsection{Wave packets propagating over a step transition in depth}
+\label{sec:results:step}
+\input{results.tex} 
+
+\subsection{Wave packets propagating over a slope transition in depth}
+\label{sec:results:slope}
+\input{resultsSlope.tex}
+
+
+\subsection{Effect of depth transition on a wave spectrum}
+\label{sec:results:spectrum}
+We now move on to irregular waves.
+The new HOS code has been extended with options for a closed domain, a wavemaker boundary and a numerical beach. 
+This allows for simulations of a continuously incoming wave filed that is absorbed on the far end of the domain. 
+The wavemaker boundary is linear and can so be imprecise when compared to nonlinear wavemaker kinematics. 
+Wavemaker inaccuracies are however of little relevance since we are interested in the spatial evolution of whatever energy spectrum will be generated. 
+An example of the spatial surface elevation during several stages of simulation is shown in \autoref{fig:ts:flat}.
+See \citet{SFo2018_HOS,bonnefoy2010,bonnefoy2006A_BM,ducrozet2006_BM} for details on numerical wavemaker and beach.
+\\
+
+%\begin{figure}[H]%
+%\centering
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_81300_linear_ka0_H3p00_0p50_theta90_Nw1.pdf}%
+%\caption{Bathymetry: Map of step form depth 3 meters to 0.5 meters. Wavemaker at $x=-25$\,m, beach covers $x=8.3$ to 25.0\,m.}%
+%\label{fig:map:step}%
+%\end{figure}
+
+
+
+\begin{figure}[H]%
 \centering
 \includegraphics[width=.9\columnwidth]{../HOS_bathymetry/figures/81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}%
 \caption{Time record of surface elevation for flat bed simulation (0.5 meter depth).}%
 \label{fig:ts:flat}%
 \end{figure}
 
-%\begin{figure}[h!ptb]%
+%\begin{figure}[H]%
 %\centering
 %\subfloat[Flat bed]{
 %\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/S_81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
@@ -114,18 +235,212 @@
 %\label{fig:S}%
 %\end{figure}
 
-\begin{figure}[h!ptb]%
+%\begin{figure}[H]%
+%\centering
+%\subfloat[Flat bed]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+%\subfloat[Bathymetry step]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81500_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
+%\caption{Power spectra measured at in the domain centre, at $x=0$\,m.
+%$T\_p=2.0$\,s, $H\_s=0.075$\,m.}
+%\label{fig:S}%
+%\end{figure}
+
+
+
+%\begin{figure}[H]%
+%\centering
+%\subfloat[Flat bed]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81200_closed_M5_H0p50_theta_Nw1_nx1536_L75_Lb50_pad0_ikCut384_Md0_r0.pdf}}%
+%\subfloat[Bathymetry step]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81600_closed_M5_H3p00_0p50_theta90_Nw1_nx1536_L75_Lb50_pad0_ikCut384_Md0_r0.pdf}}%
+%\caption{Power spectra measured at in the domain centre, at $x=0$\,m.
+%$T\_p=2.0$\,s, $H\_s=0.125$\,m.}
+%\label{fig:S}%
+%\end{figure}
+
+
+
+%% THESE MAY BE USED, BUT COMBINE WITH OTHER SLOPES FIRST!
+%\begin{figure}[H]%
+%\centering
+%\subfloat[$x=5.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_5_83010_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=10.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_10_83010_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}\\
+%\subfloat[$x=15.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_15_83010_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=20.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_20_83010_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\caption{Power spectra measured at various locations. Flat bottom.
+%$T\_p=2.0$\,s, $H\_s=0.100$\,m. (Wave breaking/simulation crash with $H\_s=0.125$\,m.)}
+%\label{fig:S}%
+%\end{figure}
+
+%\begin{figure}[H]%
+%\centering
+%\subfloat[$x=5.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_5_82000_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=10.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_10_82000_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}\\
+%\subfloat[$x=15.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_15_82000_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=20.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_20_82000_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\caption{Power spectra measured at various locations. Step discontinuity at $x=12.2$\,m.
+%$T\_p=2.0$\,s, $H\_s=0.125$\,m.}
+%\label{fig:S}%
+%\end{figure}
+
+
+
+
+
+%\begin{figure}[H]%
+%\centering
+%\subfloat[$x=5.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_5_82110_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=10.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_10_82110_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}\\
+%\subfloat[$x=15.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_15_82110_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=20.0$\,m.]{ 
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_20_82110_closed_M5_H0p50_theta_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\caption{Power spectra measured at various locations. Flat bottom.
+%$T\_p=2.5$\,s, $H\_s=0.125$\,m.}
+%\label{fig:S}%
+%\end{figure}
+
+%\begin{figure}[H]%
+%\centering
+%\subfloat[$x=5.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_5_82100_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=10.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_10_82100_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}\\
+%\subfloat[$x=15.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_15_82100_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\subfloat[$x=20.0$\,m.]{
+%\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_20_82100_closed_M5_H3p00_0p50_theta90_Nw1_nx2048_L50_Lb16p7_pad0_ikCut512_Md0_r0.pdf}}%
+%\caption{Power spectra measured at various locations. Step discontinuity at $x=12.2$\,m.
+%$T\_p=2.5$\,s, $H\_s=0.125$\,m.}
+%\label{fig:S}%
+%\end{figure}
+
+
+We now consider a depth transition example where the water depth decreases from 3.0 meters to 0.5 meters some distance form the wavemaker. 
+Three transition slopes, $\theta = 90$\textdegree, $45$\textdegree and $15$\textdegree, are compared.
+Power spectra measured as various domain locations are shown in \autoref{fig:Tp2p5:slopes}.
+A JONSWAP spectrum with $T\_p=2.5$\,s, $H\_s=0.125$\,m is here the wavemaker target.
+
+Energy around the peak period is observed to deviate more from target with abrupt depth transition than with a gradual transition. 
+It is possible that this finding is related to the first-order reflection of wave packets observed in \autoref{sec:results:step}  and  \ref{sec:results:slope}, with reflected waves bouncing back within the deep water section of the domain and interacting with the wavemaker. 
+All transition slops generate a secondary energy peak around the double frequency $2/T\_p$, analogous to the second-order wave packets seen earlier. 
+Reduced slope angles do not appear no mitigate this development.
+The second order energy peaks diminish further away from the depth transition, likely due to further nonlinear development. 
+It is possible that numerical damping effects, for example for the spectral cut-off in the HOS scheme, also influence this development. 
+ 
+For comparison, a similar spectrum from simulation domains with no depth transition is shown in \autoref{fig:Tp2p5:flat}.
+These domain have depths of 3.0 and 0.5 meters all over and the wavemaker signal is adjusted accordingly. 
+A second order energy peak is seen close to the wavemaker in the shallow case. It diminished with increasing distance. 
+It is possibly generated by the wavemaker, both is a physical sense and in the sense of errors from the wavemaker approximation.
+Notable low-frequency energy is also observed in the shallow water case, which possesses stronger nonlinearities. 
+Again, beach damping of low-frequency waves is inefficient, so these surges may travel beck and forth across the numerical wave tank. 
+\\
+
+Similar observations are made in  \autoref{fig:Tp2p0:slopes}\ref{fig:Tp2p0:flat} with the target spectrum $T\_p=2.0$\,s, $H\_s=0.100$\,m.
+The bathymetry effect is smaller at this period, yet still notable in the energy deficit in the region $T\sim 6$\,s.
+
+\begin{figure}[H]%
 \centering
-\subfloat[Flat bed]{
-\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81300_closed_linear_T2p50_ka0_M5_H0p50_theta_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
-\subfloat[Bathymetry step]{
-\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/S_81500_closed_linear_T2p50_ka0_M5_H3p00_0p50_theta90_Nw1_dt1T_nx1024_pad0_ikCut256_Md0_r0.pdf}}%
-\caption{Power spectra measured at in the domain centre, at $x=0$\,m.}
-\label{fig:S}%
+\subfloat[Bathymetries]{
+\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_82100_linear_ka0_H3p00_0p50_theta90_Nw1.pdf}
+\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_82000_linear_ka0_H3p00_0p50_theta45_Nw1.pdf}
+\includegraphics[width=.33\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_82100_linear_ka0_H3p00_0p50_theta15_Nw1.pdf}
+}\\%
+\subfloat[$x=0.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp0.pdf}}%
+\subfloat[$x=5.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp5.pdf}}\\
+\subfloat[$x=10.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp10.pdf}}%
+\subfloat[$x=15.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp15.pdf}}\\
+\subfloat[$x=20.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp20.pdf}}%
+\subfloat[$x=25.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/82100/x_wp25.pdf}}%
+\caption{Power spectra measured at various locations, comparing transitional ramps.
+Depth transition from 3.0 to 0.5 meters.
+$T\_p=2.5$\,s, $H\_s=0.125$\,m.}
+\label{fig:Tp2p5:slopes}%
 \end{figure}
 
-\bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
-\bibliography{sintef_bib}
+\begin{figure}[H]%
+\centering
+\subfloat[$x=0.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/821x0_2xflatOnly/x_wp0.pdf}}%
+\subfloat[$x=5.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/821x0_2xflatOnly/x_wp5.pdf}}\\%
+\subfloat[$x=10.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/821x0_2xflatOnly/x_wp10.pdf}}%
+\subfloat[$x=15.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/821x0_2xflatOnly/x_wp15.pdf}}\\%
+\subfloat[$x=20.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/821x0_2xflatOnly/x_wp20.pdf}}%
+\subfloat[$x=25.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/821x0_2xflatOnly/x_wp25.pdf}}%
+\caption{Power spectra measured at various locations, flat bed at 0.5 meters depth.
+$T\_p=2.5$\,s, $H\_s=0.125$\,m.}
+\label{fig:Tp2p5:flat}%
+\end{figure}
+
+
+
+
+%%%%%%%%%%%%%
+
+\begin{figure}[H]%
+\centering
+\subfloat[$x=0.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/83000/x_wp0.pdf}}%
+\subfloat[$x=5.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/83000/x_wp5.pdf}}\\
+\subfloat[$x=10.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/83000/x_wp10.pdf}}%
+\subfloat[$x=15.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/83000/x_wp15.pdf}}\\
+\subfloat[$x=20.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/83000/x_wp20.pdf}}%
+\subfloat[$x=25.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/83000/x_wp25.pdf}}%
+\caption{Power spectra measured at various locations, comparing transitional ramps.
+Depth transition from 3.0 to 0.5 meters.
+$T\_p=2.0$\,s, $H\_s=0.100$\,m.}
+\label{fig:Tp2p0:slopes}%
+\end{figure}
+
+\begin{figure}[H]%
+\centering
+\subfloat[$x=0.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/830x0_2xflatOnly/x_wp0.pdf}}%
+\subfloat[$x=5.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/830x0_2xflatOnly/x_wp5.pdf}}\\%
+\subfloat[$x=10.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/830x0_2xflatOnly/x_wp10.pdf}}%
+\subfloat[$x=15.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/830x0_2xflatOnly/x_wp15.pdf}}\\%
+\subfloat[$x=20.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/830x0_2xflatOnly/x_wp20.pdf}}%
+\subfloat[$x=25.0$\,m.]{
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/powerSpec/830x0_2xflatOnly/x_wp25.pdf}}%
+\caption{Power spectra measured at various locations, flat bed at 0.5 meters depth.
+$T\_p=2.0$\,s, $H\_s=0.100$\,m.}
+\label{fig:Tp2p0:flat}%
+\end{figure}
+ 
+ 
+\bibliographystyle{abbrvnat} % abbrvnat,plainnat,unsrtnat
+\bibliography{../sintef_bib}
 
 
 \end{document}

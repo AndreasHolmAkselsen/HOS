@@ -212,7 +212,7 @@ Examples of thus computed potential fields are presented in \autoref{fig:res:dou
 The stability properties of a direct mapping approach has not been tested in a simulation setting.
 
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 {\includegraphics[width=.33\columnwidth]{../conformalMapping/conformalBathymetry/figures/double_nWaves2_h1_0p25_h2_1_nx101_aEta0p05_kCutF1.pdf}}%
 {\includegraphics[width=.33\columnwidth]{../conformalMapping/conformalBathymetry/figures/double_nWaves2_h1_0p25_h2_1_nx201_aEta0p075_kCutF1_L10.pdf}}
@@ -335,7 +335,7 @@ An example of such a map is presented in \autoref{fig:SC_step}
 Map \eqref{eq:mapSC} cannot be analytically inverted.
 \\
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/SC_step.pdf}}%
 \subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/SC_step_inv.pdf}}%
@@ -384,7 +384,7 @@ For numerical precision can become an issue for large real positive or real nega
 \end{alignat*}
 $\xi\_s$ and $\xi\_d$ being locations suitably far away form the step on each side.
 \\
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_step.pdf}}%
 \subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_step_inv.pdf}}%
@@ -392,7 +392,7 @@ $\xi\_s$ and $\xi\_d$ being locations suitably far away form the step on each si
 \label{fig:Mei_step}%
 \end{figure}
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\lambda(\zz)$-plane]{\includegraphics[width=.37\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_step_lambda.pdf}}%
 \qquad
@@ -418,7 +418,7 @@ where $L_\xx$ and $L_\x=-f(-L_\xx)$ is the step half-width in the $\zz$ and $\z$
 This map will not be strictly conformal along the seam $\xx=0$, but approximately so provided there is some distance between the steps.
 An demonstration is shown in \autoref{fig:Mei_double}.
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\z$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_doubleStep.pdf}}%
 \subfloat[$\zz$-plane]{\includegraphics[width=.5\columnwidth]{../conformalMapping/conformalBathymetry/CCMei_doubleStep_inv.pdf}}%
@@ -455,7 +455,7 @@ For example, a map similar to \eqref{eq:map_logstrip}, \autoref{fig:Mei_step}, b
 The path of such an integration is irrelevant since the map is conformal; we integrate from the top of the domain down to avoid spreading numerical imprecision form the singularities located at $\zeta=-\ii\pi$ and $\zeta=2\ln c-\ii\pi$ into the domain.
 An example is shown on \autoref{fig:SCnumStep45deg} for a 45\textdegree down-step.
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStep45deg_zz.pdf}}%
 \hfill
@@ -477,7 +477,7 @@ A rougher bathymetry is displayed in \autoref{fig:SCnumMultiStep}.
 The deformation of some of the sharp corners in this image is due to inaccuracy in the numeral integration near the singularity and is of no consequence for simulation usage.
 Corners can of course be smoothened by defining a higher bathymetry level $\yy=\tilde H < \pi$ in the $\zz$-plane, as shown in \autoref{fig:SCnumMultiStepSmooth}.
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStep2x45deg_zz.pdf}}%
 \hfill
@@ -489,7 +489,7 @@ $\theta_j\in\{\pi/4,\pi/4\}$, $H_j \in\{1.0,0.5,1.0\}$ and $\xx^\angle_j\in\{0,5
 \label{fig:SCnumStep2x45deg}%
 \end{figure}
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \subfloat[$\zz$-plane]{\includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStepMulti_zz.pdf}}%
 \hfill
@@ -500,7 +500,7 @@ $\theta_j\in\{\pi/4,5\pi/2,5\pi/2\}$, $H_j \in\{0.5,1.5,0.75,1.5\}$ and $\xx^\an
 \label{fig:SCnumMultiStep}%
 \end{figure}
 
-\begin{figure}[h!ptb]%
+\begin{figure}[H]%
 \centering
 \includegraphics[width=.47\columnwidth]{../conformalMapping/conformalBathymetry/SCnumStepMultiSmooth_z.pdf}%
 \caption{As \autoref{fig:SCnumMultiStep}, instead choosing bethymetry at $\yy = 0.1-\pi$.
@@ -514,7 +514,7 @@ $\theta_j\in\{\pi/4,5\pi/2,5\pi/2\}$, $H_j \in\{0.5,1.5,0.75,1.5\}$ and $\xx^\an
 
 
 \bibliographystyle{plainnat} % abbrvnat,plainnat,unsrtnat
-\bibliography{bib,sintef_bib} %You need a file 'literature.bib' for this.
+\bibliography{../sintef_bib} %You need a file 'literature.bib' for this.
 
 
 \end{document}

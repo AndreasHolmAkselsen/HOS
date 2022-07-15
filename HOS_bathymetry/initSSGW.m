@@ -1,12 +1,12 @@
-function [h,phiS] = initSSGW(k0,H,ka,N_SSGW,NWaves,x,g)
+function [h,phiS] = initSSGW(k0,H,ka,N_SSGW,x,g)
 
-[zIC,dwdz,PP] = SSGW(k0.*H,ka,N_SSGW);
+[zIC0,dwdz,PP] = SSGW(k0.*H,ka,N_SSGW);
 
 if isinf(PP(1)), L_scale = 1/k0; else, L_scale = H; end
 out.c_e = PP(4)*sqrt(g*L_scale); % phase velocity observed from where the meam velocity at the bed is zero
 out.c_s = PP(5)*sqrt(g*L_scale); % mean flow velocity (phase velocity in frame without mean flow)
 out.k = PP(2)/L_scale;
-zIC = zIC*L_scale;
+zIC0 = zIC0*L_scale;
 
 %         % to move wave to centre (optional)
 %         z = [ z(N_SSGW+1:end)-lambda/2 ; z(1:N_SSGW)+lambda/2 ];
@@ -14,7 +14,8 @@ zIC = zIC*L_scale;
 
 % duplicate across domain.
 lambda = 2*pi/k0;
-zIC = reshape(repmat(zIC,1,NWaves)+lambda*(0:NWaves-1),[],1) + x(1);
+NWaves = ceil( (x(end)-x(1))/lambda );
+zIC = reshape(repmat(zIC0,1,NWaves)+lambda*(0:NWaves-1),[],1) + x(1);
 dwdz = repmat(dwdz,NWaves,1);
 dwdz = dwdz*sqrt(g*L_scale);
 
@@ -25,9 +26,11 @@ wIC = [0;cumsum( dwdz0_m.*diff(zIC))];
 wIC = wIC-mean(wIC);
 
 % if z(1)<2*eps&&z(1)>-2*eps, z(1)=1i*imag(z(1));end
-Lx = -2*x(1);
-zIC = [zIC(end)-Lx;zIC;zIC(1)+Lx]; % extend with ghost nodes
-wIC = [wIC(end);wIC;wIC(end)];
+zIC = [zIC0(end)-lambda;zIC;zIC0(1)+NWaves*lambda];% extend with ghost nodes
+wIC = [wIC(end);wIC;wIC(1)];
+% Lx = -2*x(1);
+% zIC = [zIC(end)-Lx;zIC;zIC(1)+Lx]; 
+% wIC = [wIC(end);wIC;wIC(1)];
 h = interp1(real(zIC),imag(zIC),x,'linear',nan);
 phiS = interp1(real(zIC),real(wIC),x,'linear',nan);
 fft_h = fftshift(fft(h));

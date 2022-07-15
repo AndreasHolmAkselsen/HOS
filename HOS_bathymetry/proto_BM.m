@@ -36,10 +36,10 @@ map.nArrYDown = 100;    % # vertical points
 
 
 % Plot & export options
-DO_EXPORT = 1;
+DO_EXPORT = 0;
 EXPORT_MAT = 2;
 PLOT_MAP = 1;
-PLOT_INTERPOLATION_MAP = 0;
+PLOT_INTERPOLATION_MAP = 1;
 exportPrefix =  '';
 exportPath = './figures/';
 exportFormatsMap = {'-pdf','-png'};
@@ -114,59 +114,57 @@ xLR = [0,Lx];
 % param.kd__kmax = 0;
 % rDamping = 0;
 
-% irregular, flat bottom (more shallow than hinge depth)
-addpath c:/gits/timsas2/matlabLibs/
-waveMaker.signal{1}.type = 'specFile';
-waveMaker.signal{1}.tRamp = 20;
-% waveMaker.signal{1}.tFinalStill = 20;
-waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
-waveMaker.hingeDepth = 2.5;
-waveMaker.Nz = 256; % originally under nwt.hos.()
-map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
-map.theta = []; % slope angles (positive values)
-map.H = [0.5]; % plateau levels
-waveMaker.signal{1}.specFile = './wespec/82110.spec2';
-[~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'redo_'];
-% map.H = [3]; % plateau levels
-% waveMaker.signal{1}.specFile = './wespec/82100.spec2';
-% [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
-param.nonLinRamp = @(t) 1;
-param.iModeCut = nx__wave/4;
-param.kd__kmax = 0;
-rDamping = .0;
-
-
-
-% % irregular, slope bathymetry
+% % irregular, flat bottom (more shallow than hinge depth)
 % addpath c:/gits/timsas2/matlabLibs/
 % waveMaker.signal{1}.type = 'specFile';
-% waveMaker.signal{1}.specFile = './wespec/83000.spec2';
 % waveMaker.signal{1}.tRamp = 20;
 % % waveMaker.signal{1}.tFinalStill = 20;
 % waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
 % waveMaker.hingeDepth = 2.5;
 % waveMaker.Nz = 256; % originally under nwt.hos.()
-% [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
-% % map.H = [3,0.5]; % plateau levels
-% % map.xx_b = 15;  % xi-coordinate of "begining of" edge
-% % map.theta = [90]*pi/180; % slope angles (positive values)
-% % map.H = [3,0.5]; % plateau levels
-% % map.xx_b = 18;  % xi-coordinate of "begining of" edge
-% % map.theta = [45]*pi/180; % slope angles (positive values)
-% map.H = [3,0.5]; % plateau levels
-% map.xx_b = 28;  % xi-coordinate of "begining of" edge
-% map.theta = [15]*pi/180; % slope angles (positive values)
+% map.xx_b = [];  %2.7726  % xi-coordinate of "begining of" edge
+% map.theta = []; % slope angles (positive values)
+% map.H = [0.5]; % plateau levels
+% waveMaker.signal{1}.specFile = './wespec/82110.spec2';
+% [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'redo_'];
+% % map.H = [3]; % plateau levels
+% % waveMaker.signal{1}.specFile = './wespec/82100.spec2';
+% % [~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
 % param.nonLinRamp = @(t) 1;
-% param.iModeCut = nx__wave/2;
-% param.kd__kmax = .0;
+% param.iModeCut = nx__wave/4;
+% param.kd__kmax = 0;
 % rDamping = .0;
 
 
 
+% irregular, slope bathymetry
+addpath c:/gits/timsas2/matlabLibs/
+waveMaker.signal{1}.type = 'specFile';
+waveMaker.signal{1}.specFile = './wespec/83000.spec2';
+waveMaker.signal{1}.tRamp = 20;
+waveMaker.signal{1}.tFinalStill = 20;
+waveMaker.extZDomainRatio = 3;% originally under nwt.hos.()
+waveMaker.hingeDepth = 2.5;
+waveMaker.Nz = 256; % originally under nwt.hos.()
+[~,rn] = fileparts(waveMaker.signal{1}.specFile); exportPrefix =  [rn,'_'];
+map.H = [3,0.5]; % plateau levels
+map.xx_b = 15;  % xi-coordinate of "begining of" edge
+map.theta = [90]*pi/180; % slope angles (positive values)
+% map.H = [3,0.5]; % plateau levels
+% map.xx_b = 18;  % xi-coordinate of "begining of" edge
+% map.theta = [45]*pi/180; % slope angles (positive values)
+% map.H = [3,0.5]; % plateau levels
+% map.xx_b = 28;  % xi-coordinate of "begining of" edge
+% map.theta = [15]*pi/180; % slope angles (positive values)
+param.nonLinRamp = @(t) 1;
+param.iModeCut = nx__wave/2;
+param.kd__kmax = .0;
+rDamping = .0;
+
+
+
 % beach
-% beach.length = Lx/3;
-% beach.absorption = 1.0;
-beach.length = 1*Lx/3;
+beach.length = 0*Lx/3;
 beach.absorption = 1.0;
 beach.uniformFraction = 2/3; 
 
@@ -237,7 +235,7 @@ switch INIT_WAVE_TYPE
         h0 = IC.ka/IC.k*(cos(phaseAngs));
         phiS0 = IC.ka/IC.k.*g/omega*sin(phaseAngs);
     case 'SSGW'
-        [h0,phiS0] = initSSGW(IC.k,IC.depth,IC.ka,IC.N_SSGW,NWaves,x,g);
+        [h0,phiS0] = initSSGW(IC.k,IC.depth,IC.ka,IC.N_SSGW,x,g);
     otherwise % input data file assumed
         filePath = ['./IC/',INIT_WAVE_TYPE,'.mat'];
         assert(isfile(filePath));

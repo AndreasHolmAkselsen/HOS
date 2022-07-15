@@ -8,6 +8,7 @@ function [zz,df,z] = fmap_SCnum(xx,yy,H,theta,xx_b)
     % compute df for each corner
     lambda = exp(zz-xx_b);
     df_i = ((lambda+1)./(lambda+(H(2:end)./H(1:end-1)).^(pi/theta))).^(theta/pi); % df ~ 1/tau
+%     df_i = ((lambda+(H(2:end)./H(1:end-1)).^(pi/theta))./(lambda+1)).^(-theta/pi); % df ~ 1/tau
     
     xi_cut = 50; % xi_value at which to follow asymptote in step.
     iPlus = real(zz-xx_b) > xi_cut;

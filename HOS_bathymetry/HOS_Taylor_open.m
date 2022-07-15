@@ -1,6 +1,4 @@
 function Y_t = HOS_Taylor_open(t,Y,param)
-% Normalization: t -> t*(L/g)^1/2, (eta,x,y,H) -> (eta,x,y,H)*L, phi -> phi*(L^3*g)^1/2, (p/rho) -> (p/rho)*L*g, k -> k/L
-% g = 9.81; L is chosen as domain length/(2*pi) (such that k_j = j)
 global timeReached
 [vphiS,eta] = deal(Y(1:end/2,:),Y(end/2+1:end,:));
 
@@ -24,9 +22,15 @@ k = abs(kx);
 FFTeta = fft(eta);
 FFTvphiS = fft(vphiS);
 
-zzS = param.map.xi+1i*eta;
-h = param.map.fy(zzS);
-JInv= param.map.fJInv(zzS);
+try
+    zzS  = param.map.xi+1i*eta;
+    h    = param.map.fy(zzS);
+    JInv = abs(param.map.f_zz(zzS)).^(-2);
+catch ME
+    warning(ME.identifier,'%s',ME.message);
+    Y_t = nan(size(Y));
+    return
+end
 
 
 if param.DO_PADDING

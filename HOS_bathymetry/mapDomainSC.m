@@ -5,7 +5,7 @@ for iNan = find(isnan(map.xx_b))
     map.xx_b(iNan) = map.xx_b(iNan-1) - pi./map.theta(iNan).*log(map.H(iNan+1)./map.H(iNan));
 end
 crudeScale = 1.5*pi/min(map.H);
-yyUpper = max([2*max(h0),.1*map.H])*crudeScale;
+yyUpper = min(max([2*max(h0),.1*map.H])*crudeScale,.99*pi);
 % xxIP = linspace(xLR(1),xLR(2),nArrX)*crudeScale;
 
 xLR = map.xLR;
@@ -32,7 +32,6 @@ assert(yyIP(map.nArrYDown)==0)
 
 H = shiftdim(map.H,-1); theta = shiftdim(map.theta,-1); xx_b = shiftdim(map.xx_b,-1);
 [zzIP,dfIP,zIP] = fmap_SCnum(xxIP,yyIP,H,theta,xx_b);
-assert(real(zIP(map.nArrYDown,1))<x(1)&&real(zIP(map.nArrYDown,end))>x(end),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(map.nArrYDown,1)),real(zIP(map.nArrYDown,end)))
 
 % plot interpolation basis to inspect resolution:
 if PLOT_INTERPOLATION_MAP
@@ -41,6 +40,7 @@ if PLOT_INTERPOLATION_MAP
     minIz = min(imag(zIP(1,:))); patch(real(zIP(1,[1,1:end,end])),[1.1*minIz,imag(zIP(1,:)),1.1*minIz],.5*[1,1,1],'FaceAlpha',.5,'lineStyle','none');
     drawnow
 end
+assert(real(zIP(map.nArrYDown,1))<=x(1)&&real(zIP(map.nArrYDown,end))>=x(end),'Physical domain [%.3g,%.3g] out of range of interpolation range [%.3g,%.3g]. Extend interpolation range.',x(1),x(end),real(zIP(map.nArrYDown,1)),real(zIP(map.nArrYDown,end)))
 
 if ~all(abs(imag(zIP(map.nArrYDown,:)))<1e-3*max(map.H))
     warning('Map appears not to have a flat surface at yy=0. max|y(yy=0)| = %g',max(abs(imag(zIP(map.nArrYDown,:)))))
@@ -48,10 +48,11 @@ end
 % assert(all(abs(imag(zIP(map.nArrYDown,:)))<1e-3*max(map.H)),'Map appears not to have a flat surface at yy=0')
 xxLR = interp1(real(zIP(map.nArrYDown,:)),xxIP,xLR);
 
-% iTrim = xxIP>=xxLR(1)&xxIP<=xxLR(2);
-iTrim = (find(xxIP<xxLR(1),1,'last')-1):(find(xxIP>xxLR(2),1,'first')+1);
+
+iTrim = xxIP>=xxLR(1)-2*(xxIP(2)-xxIP(1)) & xxIP<=xxLR(2)+2*(xxIP(end)-xxIP(end-1));
+% iTrim = (find(xxIP<xxLR(1),1,'last')-1):(find(xxIP>xxLR(2),1,'first')+1);
 zzIP = zzIP(:,iTrim); zIP = zIP(:,iTrim); dfIP = dfIP(:,iTrim); %xxIP = xxIP(:,iTrim);
-assert(all(real(zzIP(:,1))<xxLR(1)) && all(real(zzIP(:,end))>xxLR(2)))
+assert(all(real(zzIP(:,1))<=xxLR(1)) && all(real(zzIP(:,end))>=xxLR(2)))
 
 
 fzIP0 = griddedInterpolant(real(zzIP).',imag(zzIP)',zIP.','linear','none');
@@ -75,6 +76,7 @@ map.zzDepth = pi;
 eta0_xiReg = interp1(real(zzS0),imag(zzS0),map.xi);
 xS_xiReg = real(fIP(map.xi+1i*eta0_xiReg));
 if x(end) < xLR(2)-1e-12  %strcmp(boundaryType,'open')
+    Lx = (x(2)-x(1))*numel(x);
     varphiS0 = interp1( [x-Lx;x;x+Lx],[phiS0;phiS0;phiS0],xS_xiReg );
 else
     dxNum = .01*(x(2)-x(1)); % small extension to avoid crash due to numerical presicion error.

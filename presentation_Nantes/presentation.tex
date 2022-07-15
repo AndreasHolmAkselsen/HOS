@@ -102,7 +102,7 @@
 \begin{frame}{The Higher Order Spectral method}
 \vspace{-1cm}
 \begin{center}
-\includegraphics[width=.5\framewidth]{HOS1.png}
+\includegraphics[width=.5\framewidth]{HOS2.png}
 \end{center}
 
 Body of fluid represented analytically:
@@ -112,9 +112,9 @@ Body of fluid represented analytically:
 
 We solve only the equations for the free surface 
 \begin{align*}
-h_t &=   - \nabla\eta\cdot\nabla\phi\S     + \big(1+|\nabla\eta|^2\big)(\phi_y)_{y=h}, %(\Phi_y)_{y=\eta} 
+\eta_t &=   - \nabla\eta\cdot\nabla\phi\S     + \big(1+|\nabla\eta|^2\big)(\phi_y)_{y=\eta}, %(\Phi_y)_{y=\eta} 
 \\
-\phi\S_t &= - \frac12\big|\nabla\phi\S|^2 + \frac12\big(1+|\nabla\eta|^2\big)(\phi_y)_{y=h}^2 - gh.
+\phi\S_t &= - \frac12\big|\nabla\phi\S|^2 + \frac12\big(1+|\nabla\eta|^2\big)(\phi_y)_{y=\eta}^2 - g\eta.
 \end{align*}
 with an ODE solver and match the modes $\hat\phi_j(t) $ to the surface potential $\phi\S(\bm r,t)$.
 \end{frame}
@@ -130,11 +130,11 @@ with an ODE solver and match the modes $\hat\phi_j(t) $ to the surface potential
 	\end{align*}
 	results in the boundary conditions
 	\begin{align*}
-		h_t &=   - \nabla\eta\cdot\nabla(\phi\S +\Phi)  + \big(1+|\nabla\eta|^2\big)\phi_y + \Phi_y,
+		\eta_t &=   - \nabla\eta\cdot\nabla(\phi\S +\Phi)  + \big(1+|\nabla\eta|^2\big)\phi_y + \Phi_y,
 		\\
-		\phi\S_t &= -\Phi_t\big|_{y=\eta} - \frac12\big|\nabla(\phi\S +\Phi)|^2 + \frac12\big(1+|\nabla\eta|^2\big)\phi_y^2 - g h
+		\phi\S_t &= -\Phi_t\big|_{y=\eta} - \frac12\big|\nabla(\phi\S +\Phi)|^2 + \frac12\big(1+|\nabla\eta|^2\big)\phi_y^2 - g \eta
 	\end{align*}
-	at $y=h(x,t)$.
+	at $y=\eta(x,t)$.
 	$\Phi$ can correct for the presence of a wavemaker, bathymetry alterations, \textit{a flow field}, etc. \\
 	
 	Myriad background flow fields can be constructed using classical (undergrad) potential theory.	
@@ -143,7 +143,7 @@ with an ODE solver and match the modes $\hat\phi_j(t) $ to the surface potential
 
 \begin{frame}{Example: Steady fluid sources, sinks, vortices, doublets}
 	Condition: Flow parallel to reference plane ($\sim$surface) and bathymetry + horizontally periodic or parallel to walls.\\
-	$z=x+\ii y$, $w=\Phi + \ii\Psi$;
+	$z=x+\ii y$, $W=\Phi + \ii\Psi$;
 	\begin{equation*}
 		W(z) =  U_0 z + \sum_j \sum_{n,m=-\infty}^{\infty} W_j(z + L n + \ii H m)
 	\end{equation*}
@@ -306,17 +306,17 @@ $\rightarrow$
 \end{frame}
 
 
-
+\newcommand{\teta}{\tilde \eta}
 \begin{frame}{Boundary equations for $\zz$-variables}
 \vspace{-.5cm}
 \begin{align*}
 	\zz &= \xx+\ii\yy, &
-	\x+\ii h(\x,t) &\mapsfrom f[\xx+\ii \eta(\xx,t)], &
+	\x+\ii \eta(\x,t) &\mapsfrom f[\xx+\ii \teta(\xx,t)], &
 	 \varphi &= \Re w[f(\zz)];\; w(\z)=\phi+\ii\psi
 \end{align*}
 \begin{align*}
-\eta_t &= \iJac\sbr{\varphi_\yy\rbr{1+\eta_\xx^2}-\varphi\S_\xx} + \eta_\xx \Re\rbr{\frac{\zmap_t}{\zmap_\zz}}-\Im\rbr{\frac{\zmap_t}{\zmap_\zz}},\\
-\varphi\S_t &= - \frac12\iJac\sbr{\rbr{\varphi\S_\xx}^2-\rbr{1+\eta_\xx^2}\varphi_\yy^2} - gh + \varphi\S_\xx \Re\rbr{ \frac{\zmap_t}{\zmap_\zz}}.
+\teta_t &= \iJac\sbr{\varphi_\yy\rbr{1+\teta_\xx^2}-\varphi\S_\xx} + \teta_\xx \Re\rbr{\frac{\zmap_t}{\zmap_\zz}}-\Im\rbr{\frac{\zmap_t}{\zmap_\zz}},\\
+\varphi\S_t &= - \frac12\iJac\sbr{\rbr{\varphi\S_\xx}^2-\rbr{1+\teta_\xx^2}\varphi_\yy^2} - g\eta + \varphi\S_\xx \Re\rbr{ \frac{\zmap_t}{\zmap_\zz}}.
 \end{align*}
 Usually, $f_t\equiv 0$.
 \end{frame}
@@ -331,25 +331,25 @@ Usually, $f_t\equiv 0$.
 		\vspace{-5mm}
 	\centering
 	\parbox[b]{.5\columnwidth}{\centering \includegraphics[width=.45\columnwidth]{../HOS_bathymetry/figures/map/map_logstrip_SSGW_ka0p05_H1p00_0p50_Nw60.pdf}\\Full domain.}%
-	\qquad
+%	\qquad
 	\parbox[b]{.5\columnwidth}{\centering \includegraphics[width=.45\columnwidth]{../HOS_bathymetry/figures/map/mapZoom_logstrip_SSGW_ka0p05_H1p00_0p50_Nw60.pdf}\\Corner, 1--to--1.}
 \end{frame}
 
-\begin{frame}{Bathymetry step; surface elevation}
+\begin{frame}{Small bathymetry step; surface elevation}
 		\vspace{-5mm}
 	\centering
 	\includegraphics[width=.65\columnwidth]{../HOS_bathymetry/figures/logstrip_SSGW_ka0p05_M5_H1p00_0p75_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}\\
 	 $H\_s/H\_d = 0.75$.
 \end{frame}
 
-\begin{frame}{Bathymetry step; surface elevation}
+\begin{frame}{Medium bathymetry step; surface elevation}
 		\vspace{-5mm}
 	\centering
 	\includegraphics[width=.65\columnwidth]{../HOS_bathymetry/figures/logstrip_SSGW_ka0p05_M5_H1p00_0p50_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}\\
 	$H\_s/H\_d = 0.50$.
 \end{frame}
 
-\begin{frame}{Bathymetry step; surface elevation}
+\begin{frame}{Large bathymetry step; surface elevation}
 		\vspace{-5mm}
 	\centering
 	\includegraphics[width=.65\columnwidth]{../HOS_bathymetry/figures/logstrip_SSGW_ka0p05_M5_H1p00_0p35_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}\\
@@ -440,11 +440,45 @@ Usually, $f_t\equiv 0$.
 \end{frame}
 
 
+
+
+\begin{frame}{Testing effect of beach extensions}
+	
+	\begin{table}[H]
+		\centering
+	\subfloat[Five meter water depth]{\parbox[c]{.4\textwidth}{\centering
+			\begin{tabular}{r|ccc}
+				$T\big\backslash\theta$& $90$\textdegree{}&$45$\textdegree{} & $30$\textdegree{}\\\hline
+				$2.50$\,s&4.6\%&2.6\%&1.5\%\\
+				$3.00$\,s&8.3\%&5.7\%&2.8\%\\
+				$3.50$\,s&11.2\%&8.7\%&5.5\%\\
+				$4.00$\,s&12.8\%&11.0\%&8.1\%
+			\end{tabular}\label{tab:results:abs}
+	}}%
+\qquad
+		\subfloat[Ten meter water depth]{\parbox[c]{.4\textwidth}{\centering
+		\begin{tabular}{r|ccc}
+			$T\big\backslash\theta$& $90$\textdegree{}&$45$\textdegree{} & $30$\textdegree{}\\\hline
+			$2.50$\,s & 4.0\% & 2.0\%  &1.9\%\\
+			$3.00$\,s &7.9\%&3.9\%&1.8\%\\
+			$3.50$\,s&12.1\%&7.3\%&1.9\%\\
+			$4.00$\,s&16.0\%&11.4\%&5.9\%
+		\end{tabular}\label{tab:results:abs}
+}}%	
+		\caption{Rough reflection estimates tabulated against carrier periods and beach extension slopes.}
+		\label{tab:results}
+	\end{table}
+\end{frame}
+
+
+
 \begin{frame}{	No beach extension, 2.50 second period.}
 	\centering
 	\vspace{-5mm}
 	\includegraphics[width=.7\framewidth]{../HOS_bathymetry/figures/beach_SSGW_T2p50_ka0p05_M5_H10p00_2p00_theta90_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25_a10p0777_aRef0p00314.pdf}\\
 \end{frame}
+
+
 
 \begin{frame}{	$\theta=45$\textdegree{} beach extension, 2.50 second period.}
 	\centering
@@ -538,16 +572,22 @@ Usually, $f_t\equiv 0$.
 \normalsize
 
 \includegraphics[width=.8\framewidth]{../HOS_old/conformalHOS/figures/imagedecayingConformalka0p2_M5_h1p00_Nw1_dt0p25T_nx512.pdf}%
+
+%\vspace{5mm}
+\begin{flushleft}
+	\texttt{ \scriptsize D. Chalikov and D. Sheinin. Modeling extreme waves based on equations of potential
+		flow with a free surface. J.\ Comp. Phys., 210(1):247–273, 2005.}
+\end{flushleft}
 \end{frame}
 
 \begin{frame}{Conformally mapped free surface}
 	\centering
-%\vspace{-.5cm}
+\vspace{-.5cm}
 \includegraphics[width=.6\framewidth]{../HOS_ChalikovTaylor_current/figures/rounded2_contour.pdf}%
 
 
 
-%\vspace{5mm}
+%%\vspace{5mm}
 \begin{flushleft}
 	\texttt{ \scriptsize D. Chalikov and D. Sheinin. Modeling extreme waves based on equations of potential
 		flow with a free surface. J.\ Comp. Phys., 210(1):247–273, 2005.}
@@ -579,21 +619,23 @@ f_\zz(\zz,t) = \prod_{j=-\infty}^\infty \rbr{1+\frac{d^2}{\rbr{\zz+2\ii j h}^2}}
 		\begin{itemize}
 			\item Further validation.
 			\item Wave breaking model.
-			\item Improved wavemaker? 
+			\item Conformal or higher order wavemaker? 
 			\item Combination of bathymetry and surface mapping?
 			\item 3D?
 		\end{itemize}
 	\item Utilization
 		\begin{itemize}
-			\item Parametric design studies OSC.
-			\item Digital twin in SINTEF projects.
+			\item Parametric design studies for new laboratories.
+			\item Digital twin in research projects.
 			\item Grants, research \& publication.
 		\end{itemize} 
 	\end{itemize}
 
 \end{frame}
 
-
+\begin{frame}{}
+	\includegraphics[width=\textwidth]{./Q.png}
+\end{frame}
 
 \backmatter
 

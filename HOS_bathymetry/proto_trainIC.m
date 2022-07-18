@@ -37,8 +37,12 @@ boundaryType = 'open'; % 'open' or 'closed'
 % xLR = [0,Lx];%[-Lx/2,Lx/2];
 
 % reduced domain
-Lx = 75;
-N = 1*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
+% Lx = 76;
+% N = 2*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
+% Lx = 2*76;
+% N = 4*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
+Lx = 100;
+N = 3*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
 xLR = [0,Lx];
 
 
@@ -47,30 +51,35 @@ waveMaker =  []; % no wavemaker
 
 % irregular, slope bathymetry
 addpath c:/gits/timsas2/matlabLibs/
-map.H = [1,0.5]; % plateau levels
-map.xx_b = Lx/2*pi ;  % xi-coordinate of "begining of" edge
+map.H =  [1,.2];%[.300001,.3]; % plateau levels
+map.xx_b = Lx/2*pi/map.H(1) ;  % xi-coordinate of "begining of" edge
 map.theta = [90]*pi/180; % slope angles (positive values)
+% map.H =  [.1,1,.1];%[.300001,.3]; % plateau levels
+% map.xx_b = [5,Lx/2*pi/map.H(2)] ;  % xi-coordinate of "begining of" edge
+% map.theta = [90,90]*pi/180; % slope angles (positive values)
 param.nonLinRamp = @(t) 1;
-param.iModeCut = N/3;
+param.iModeCut = floor(N/4);
 param.kd__kmax = .0;
 rDamping = .0;
 
 
 
 % beach
-beach.length = 0*Lx/3;
-beach.absorption = 1.0;
+beach.length = 0*Lx/20;
+beach.absorption = 0*1.0;
 beach.uniformFraction = 2/3; 
 
 % Initial conditions
 IC.depth = map.H(1);
-IC.ka = .2; % linear wave steepness
+IC.ka = .1; % linear wave steepness
 IC.k = pi;%findWaveNumbers(2*pi/IC.T,map.IC.depth,0,0);
 IC.T = 2*pi/sqrt(g*IC.k*tanh(IC.k*IC.depth));
 INIT_WAVE_TYPE = 'SSGW';  % 'SSGW', 'linear' or a file name
 IC.N_SSGW = 2^12; % number of modes in SSGW solution
 packetWidth__L = .5;  % set to inf if not simulating wave packets
 packetCentre__L = .25;
+% packetWidth__L = .35;  % set to inf if not simulating wave packets
+% packetCentre__L = .5-packetWidth__L/2;
 packetType = 'taperedTrain'; %'taperedTrain', 'gaussian'
 
 
@@ -82,11 +91,11 @@ packetType = 'taperedTrain'; %'taperedTrain', 'gaussian'
 
 % Simulation/plotting time
 % param.t_end = 'fromBM'; tFinalStill = 20;
-NT_dt = 2.5;
+NT_dt = 5;%3.0;
 param.t_end = 9*NT_dt*IC.T;
 
 % numerical
-param.M = 5; 
+param.M = 10; 
 % initialStepODE = 1e-3*IC.T;
 initialStepODE = 1e-3;
 relTolODE = 1e-4;% 1e-8;
@@ -106,10 +115,12 @@ x = (0:N_end)'*dx+xLR(1);
 fprintf('Fraction of filtered wavespace: %.3g.\n',  max(1-param.iModeCut/(N/(1+strcmp(boundaryType,'open'))),0) )
 
 switch packetType
+    case 'none'
+        packet = 1;
     case 'gaussian'
         packet = exp(-((x/Lx-packetCentre__L)/packetWidth__L).^2);
     case 'taperedTrain'
-        taperWidth = 2*2*pi/IC.k; % two wavelengths
+        taperWidth = 4*2*pi/IC.k; % four wavelengths
         packet=zeros(size(x));
         x1 = (packetCentre__L - .5*packetWidth__L)*Lx;
         x2 = (packetCentre__L + .5*packetWidth__L)*Lx;
@@ -125,9 +136,9 @@ end
 
 Hstr = sprintf('%.2f_',map.H); thetaStr = sprintf('%.0f_',map.theta*180/pi);
 % fileName = sprintf('%s%s_%s_T%.2f_ka%.2g_M%d_H%stheta%sNw%d_dt%.3gT_nx%d_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,boundaryType,INIT_WAVE_TYPE,IC.T,IC.ka,param.M,Hstr,thetaStr,NWaves,NT_dt,N,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); fileName(fileName=='.')='p';
-fileName = sprintf('%s%s_M%d_H%stheta%sNw%.3g_nx%d_L%.3g_Lb%.3g_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,boundaryType,param.M,Hstr,thetaStr,NT_dt,N,Lx,beach.length,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); 
+fileName = sprintf('%s%s_M%d_H%stheta%sNTdt%.3g_nx%d_L%.3g_Lb%.3g_pad%d_ikCut%.4g_Md%.2g_r%.2g',exportPrefix,boundaryType,param.M,Hstr,thetaStr,NT_dt,N,Lx,beach.length,param.DO_PADDING,param.iModeCut,param.kd__kmax,rDamping); 
 if IC.ka>0 
-    fileName = sprintf('%s_%s_T%.2f_ka%.2g',fileName,INIT_WAVE_TYPE,IC.T,IC.ka);
+    fileName = sprintf('%s_%s_T%.2f_ka%.3g',fileName,INIT_WAVE_TYPE,IC.T,IC.ka);
 end
 fileName(fileName=='.')='p';
 
@@ -171,7 +182,7 @@ if ~isempty(map.xx_b)
     
     if PLOT_MAP && DO_EXPORT
         Hstr = sprintf('%.2f_',map.H); thetaStr = sprintf('%.0f_',map.theta*180/pi);
-        fileNameMap = sprintf('%s%s_ka%.2g_H%stheta%sNw%d',exportPrefix,INIT_WAVE_TYPE,IC.ka,Hstr,thetaStr,NWaves); fileNameMap(fileNameMap=='.')='p';
+        fileNameMap = sprintf('%s%s_ka%.2g_H%stheta%sLx%.3g',exportPrefix,INIT_WAVE_TYPE,IC.ka,Hstr,thetaStr,Lx); fileNameMap(fileNameMap=='.')='p';
         export_fig(hf_map(1),['./figures/map/map_',fileNameMap],exportFormatsMap{:})
         savefig(hf_map(1),['./figures/fig/map_',fileNameMap])
         export_fig(hf_map(2),['./figures/map/mapZoom_',fileNameMap],exportFormatsMap{:})
@@ -208,9 +219,15 @@ if exist('beach','var') && beach.length>0
     xU = xB + beach.length*(1-beach.uniformFraction);
 %     u = (x_xiReg_AA-xB)/(xLR(2)-xB).*(x_xiReg_AA>xB);
     u = (x_xiReg_AA-xB)/(xU-xB).*(x_xiReg_AA>xB);
+
 %     param.beach.nu = beach.absorption*u.^2; % Bonnefoy (2005)/SFo
     param.beach.nu = beach.absorption*u.^2.*(3-2*u); %Bonnefoy (2006)   
     param.beach.nu(x_xiReg_AA>=xU) =  beach.absorption;
+    
+    
+%     %%TEMP    
+%     xB = xLR(1)+beach.length; 
+%     param.beach.nu(x_xiReg_AA<xB) = beach.absorption*(1-x_xiReg_AA(x_xiReg_AA<xB)/xB);
 %     figure, plot(x_xiReg_AA,param.beach.nu,'.-')
 end
 

@@ -93,7 +93,7 @@ clear tStart nWaves nPeriods exPrefix refl matFiles
 % 0.1, 45 deg bathymetry
 % tStart(i)=35;nWaves(i)=5;nPeriods(i)=5;exPrefix{i}='downStrepRefl45degDeep_';refl(i)=1;matFiles{i}='./figures/mat/train_open_M5_H0p10_1p00_theta45_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
 % 0.1, 9 deg bathymetry
-tStart(i)=35;nWaves(i)=5;nPeriods(i)=5;exPrefix{i}='downStrepRefl9degDeep_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_1p00_theta9_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
+% tStart(i)=35;nWaves(i)=5;nPeriods(i)=5;exPrefix{i}='downStrepRefl9degDeep_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_1p00_theta9_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
 % 0.1, 4.5 deg bathymetry
 % tStart(i)=35;nWaves(i)=4;nPeriods(i)=4;exPrefix{i}='downStrepRefl4p5deg_';refl(i)=1;matFiles{i}='./figures/mat/train_open_M5_H0p10_0p30_1p00_theta90_5_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
 % 0.1, 2 deg bathymetry
@@ -102,6 +102,13 @@ tStart(i)=35;nWaves(i)=5;nPeriods(i)=5;exPrefix{i}='downStrepRefl9degDeep_';refl
 % 0.1, 1.0 deg bathymetry
 % % tStart(i)=35;nWaves(i)=5;nPeriods(i)=5;exPrefix{i}='downStrepRefl1deg_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_0p30_1p00_theta90_1_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
 % tStart(i)=42;nWaves(i)=3;nPeriods(i)=3;exPrefix{i}='downStrepRefl1deg_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_0p30_1p00_theta90_1_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
+
+% 0.1, 4.5 deg bathymetry deep
+% tStart(i)=35;nWaves(i)=4;nPeriods(i)=4;exPrefix{i}='downStrepRefl4p5degDeep_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_1p00_theta5_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
+% 0.1, 2 deg bathymetry deep
+% tStart(i)=42;nWaves(i)=3;nPeriods(i)=3;exPrefix{i}='downStrepRefl2degDeep_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_1p00_theta2_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
+% 0.1, 1.0 deg bathymetry deep
+tStart(i)=42;nWaves(i)=3;nPeriods(i)=3;exPrefix{i}='downStrepRefl1degDeep_';refl(i)=1;matFiles{i}='./figures/mat/train_closed_M5_H0p10_1p00_theta1_NTdt3p63_nx4608_L150_Lb0_pad0_ikCut1152_Md0_r0_SSGW_T2p05_ka0p05';i=i+1;
 
 
 %% code

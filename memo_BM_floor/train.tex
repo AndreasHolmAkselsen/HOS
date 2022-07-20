@@ -1,71 +1,7 @@
  %\documentclass[a4paper,12pt]{article}
 %%\documentclass{amsart}
 %\usepackage[a4paper, total={17cm, 25cm}]{geometry}
-%\usepackage[utf8]{inputenc}
-%\usepackage[english]{babel}
-%\usepackage{amsmath,bm,amsfonts,amssymb}
-%\usepackage{xcolor}
-%\usepackage{graphicx}
-%
-%\usepackage{graphbox}
-%
-%\usepackage[round]{natbib}
-%\usepackage{mathtools}
-%\usepackage[font=normalsize]{subfig}
-%\usepackage{float}
-%\usepackage{hyperref}
-%\usepackage{enumitem}
-%%\usepackage{cprotect} % \cprotect\caption{\verb|#1|}%
-%\hypersetup{colorlinks=true, 	
-			%linkcolor=blue,
-			%filecolor=blue,
-			%urlcolor=blue,
-			%citecolor=blue}
-%\newcommand{\mr}{\mathrm}
-%\newcommand{\mc}{\mathcal}
-%\let\SSS\S
-%\renewcommand{\S}{^\mr{S}}
-%\newcommand{\ii}{\mr{i}\,}
-%\newcommand{\ee}{\mr{e}}
-%%\newcommand{\phit}{\psi}
-%\newcommand{\phit}{\tilde\phi}
-%\newcommand{\br}[3]{\left#1#2\right#3}
-%\let\underscore\_
-%\renewcommand{\_}[1]{_\mr{#1}}
-%\newcommand{\oo}[1]{^{(#1)}}
-%\newcommand{\rr}{\bm r}%{x,y}
-%\newcommand{\cp}{c\_p}
-%\let\Re\relax
-%\let\Im\relax
-%\DeclareMathOperator\Re{Re}
-%\DeclareMathOperator\Im{Im}
-%\newcommand{\w}{w}
-%\newcommand{\bU}{\bm U}
-%\newcommand{\h}{\hat}
-%\newcommand{\rbr}[1]{\left(#1\right)}
-%\newcommand{\sbr}[1]{\left[#1\right]}
-%\newcommand{\cbr}[1]{\left\{#1\right\}}
-%\newcommand{\z}{z}
-%\newcommand{\x}{x}
-%\newcommand{\y}{y}
-%\newcommand{\zz}{\zeta}
-%\newcommand{\xx}{\xi}
-%\newcommand{\yy}{\sigma}
-%%\newcommand{\k}{k}
-%\newcommand{\kk}{\kappa}
-%
-%\usepackage{pifont}% http://ctan.org/pkg/pifont
-%\newcommand{\cmark}{\text{\ding{51}}}% or \checkmark
-%\newcommand{\xmark}{\text{\ding{55}}}%
-%
-%\newcommand{\zmap}{f}
-%%\newcommand{\zzmap}{\zmap^{-1}}
-%\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
-%
-%\newcommand{\ww}{\omega}
-%\renewcommand{\w}{w}
-%\newcommand{\surf}{\eta}
-%\newcommand{\dd}[2]{\frac{\mr d #1}{\mr d #2}}
+%\input{init.tex}
 %
 %\begin{document}
 
@@ -105,6 +41,7 @@ $(ka)\_d\Big\backslash h\_s/\lambda\_d$		&0.25	 &0.20      &0.15&0.10&0.05\\\hli
 
 %\autoref{fig:H0p3_0p3_ka0p2} to \ref{fig:H1p0_0p1_ka0p05} shows wave trains propagating over steps form deep to intermediate water depths.
 %Wave steepness is restricted by wave breaking which is not yet handled by the simulator. 
+We consider deep-to-shallow water depth transitions using maps such as presented in \autoref{fig:map:deepToShallow}.
 \autoref{fig:H1p0_0p5_ka0p25_nw3_np3} to \ref{fig:H1p0_0p1_ka0p05_nw10_np10} shows surface elevation in the region after the depth transition in a time window that contains spurious waves released as a result of the transition.
 Also shown are spectral amplitudes in space and time.
 Breaking occurs at the step discontinuity for shallowest water examples. 
@@ -112,6 +49,15 @@ Wave breaking occurs at the front of the wave train due to modulational instabil
 The strength of the spurious free harmonics are for the shallow water transition seen to be of magnitudes similar to the corresponding bound harmonics. 
 Spurious harmonics are understandably weaker with the less shallow transitions. Again, stronger spurious harmonics would likely be observed for these cases was it not for the modulational instability that places a limit on wave steepness.
 
+
+
+\begin{figure}[H]%
+\centering
+\subfloat[Step transition]{\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/map_train_SSGW_ka0p05_H1p00_0p10_theta90_Lx100.pdf}}%
+\subfloat[1.0\textdegree{} slope transition starting at depth $0.15\lambda$]{\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/map_train_SSGW_ka0p05_H1p00_0p30_0p10_theta90_1_Lx100.pdf}}%
+\caption{Conformal map for deep-to-shallow depth transition.}%
+\label{fig:map:deepToShallow}%
+\end{figure}
 
 
 \newcommand{\triIm}[2]{
@@ -192,24 +138,35 @@ This is essentially because the wavelength of the strongest reflected wave is th
 
 
 \subsection{Down-step}
-We consider next the inverse geometries with the wave train propagating from shallow to deep water. 
+
+
+We consider next the inverse geometries with the wave train propagating from shallow to deep water, such as shown in \autoref{fig:map:shallowToDeep}. 
 \autoref{fig:downStrepRefl_H0p3_1p0_ka0p2_nw4_np4} to \ref{fig:downStrepRefl_H0p1_1p0_ka0p05_nw5_np5}
 holds the results for reflected waves in a step transition from shallow depths $h\_s/\lambda\_d =0.15$ to $h\_s/\lambda\_d =0.05$, respectively.
 These are seen to differ from the down-step case (\autoref{fig:refl_H1p0_0p3_ka0p2_nw5_np5} to \ref{fig:refl_H1p0_0p1_ka0p05_nw5_np5}) in that higher order harmonics dominate more.
+
+\begin{figure}[H]%
+\centering
+\subfloat[Step transition]{\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/map_train_SSGW_ka0p1_H0p20_1p00_theta90_Lx150.pdf}}%
+\subfloat[1.0\textdegree{} slope transition]{\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/figures/map/map_train_SSGW_ka0p05_H0p10_1p00_theta1_Lx150.pdf}}%
+\caption{Conformal map for shallow-to-deep depth transition.}%
+\label{fig:map:shallowToDeep}%
+\end{figure}
+
 
 \triIm{downStrepRefl_H0p3_1p0_ka0p2_nw4_np4}{Reflected wave from down-step. $h\_s/\lambda\_d =0.15$, $(ka)\_d = 0.20$.}
 \triIm{downStrepRefl_H0p2_1p0_ka0p1_nw4_np4}{Reflected wave from down-step. $h\_s/\lambda\_d =0.10$, $(ka)\_d = 0.10$.}
 \triIm{downStrepRefl_H0p1_1p0_ka0p05_nw5_np5}{Reflected wave from down-step. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
 
 
-Similar to \autoref{fig:45degDeep_H1p0_0p1_ka0p05_nw10_np10} to \ref{fig:1deg_H1p0_0p3_ka0p05_nw10_np10}, we also consider in \autoref{fig:downStrepRefl45degDeep_H0p1_1p0_ka0p05_nw5_np5} to \ref{fig:downStrepRefl1deg_H0p1_0p3_1p0_ka0p05_nw3_np3} the effect of down-sloping depth transitions.
-
+Similar to \autoref{fig:45degDeep_H1p0_0p1_ka0p05_nw10_np10} to \ref{fig:downStrepRefl1degDeep_H0p1_0p3_1p0_ka0p05_nw3_np3}, we also consider in \autoref{fig:downStrepRefl45degDeep_H0p1_1p0_ka0p05_nw5_np5} to \ref{fig:downStrepRefl1deg_H0p1_0p3_1p0_ka0p05_nw3_np3} the effect of down-sloping depth transitions.
+We let these slopes extend all the way down to deep water depths. (Abrupt depth transitions after depth $0.15\lambda$ causes additional reflection, as observed earlier.)
 
 \triIm{downStrepRefl45degDeep_H0p1_1p0_ka0p05_nw5_np5}{Reflected wave from 45.0\textdegree{} down-sloap. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
 \triIm{downStrepRefl9degDeep_H0p1_1p0_ka0p05_nw5_np5}{Reflected wave from 9.0\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
-\triIm{downStrepRefl4p5deg_H0p1_0p3_1p0_ka0p05_nw4_np4}{Reflected wave from from 4.5\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
-\triIm{downStrepRefl2deg_H0p1_0p3_1p0_ka0p05_nw3_np3}{Reflected wave from from 2.0\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
-\triIm{downStrepRefl1deg_H0p1_0p3_1p0_ka0p05_nw3_np3}{Reflected wave from from 1.0\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl4p5degDeep_H0p1_1p0_ka0p05_nw4_np4}{Reflected wave from from 4.5\textdegree{} down-sloap. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl2degDeep_H0p1_1p0_ka0p05_nw3_np3}{Reflected wave from from 2.0\textdegree{} down-sloap. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl1degDeep_H0p1_1p0_ka0p05_nw3_np3}{Reflected wave from from 1.0\textdegree{} down-sloap. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
 
 
 

@@ -3,73 +3,7 @@
 %\documentclass{amsart}
 %\usepackage[a4paper, total={17cm, 25cm}]{geometry}
 
-%\usepackage[utf8]{inputenc}
-\usepackage[english]{babel}
-%\usepackage{amsmath,bm,amsfonts,amssymb}
-\usepackage{xcolor}
-\usepackage{graphicx}
-\usepackage{graphbox} % allows includegraphics[align=c]
-\usepackage[round]{natbib}
-\usepackage{mathtools}
-\usepackage[font=normalsize,margin=2mm]{subfig}
-\usepackage{float}
-\usepackage{hyperref}
-\usepackage{xfrac}
-%\usepackage{cprotect}%for \verb in captions
-%\usepackage{enumerate}
-\usepackage{enumitem}
-\hypersetup{colorlinks=true,
-			linkcolor=blue,
-			filecolor=blue,
-			urlcolor=blue,
-			citecolor=blue}
-\newcommand{\mr}{\mathrm}
-\newcommand{\mc}{\mathcal}
-\let\SSS\S
-\renewcommand{\S}{^\mr{S}}
-\newcommand{\ii}{\mr{i}\,}
-\newcommand{\ee}{\mr{e}}
-\let\underscore\_
-\renewcommand{\_}[1]{_\mr{#1}}
-\newcommand{\oo}[1]{^{(#1)}}
-\let\Re\relax
-\let\Im\relax
-\DeclareMathOperator\Re{Re}
-\DeclareMathOperator\Im{Im}
-\newcommand{\w}{w}
-\newcommand{\bU}{\bm U}
-\newcommand{\h}{\hat}
-\newcommand{\br}[3]{\left#1#2\right#3}
-\newcommand{\rbr}[1]{\left(#1\right)}
-\newcommand{\sbr}[1]{\left[#1\right]}
-\newcommand{\cbr}[1]{\left\{#1\right\}}
-%\newcommand{\bU}{(\nabla\Phi)_{z=\eta}}
-
-\usepackage{pifont}% http://ctan.org/pkg/pifont
-\newcommand{\cmark}{\text{\ding{51}}}% or \checkmark
-\newcommand{\xmark}{\text{\ding{55}}}%
-
-\newcommand{\z}{z}
-\newcommand{\x}{x}
-\newcommand{\y}{y}
-\newcommand{\zz}{\zeta}
-\newcommand{\xx}{\xi}
-\newcommand{\yy}{\sigma}
-\newcommand{\kk}{\kappa}
-
-\newcommand{\zmap}{f}
-%\newcommand{\zzmap}{\zmap^{-1}}
-\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
-
-%\newcommand{\ww}{w}
-%\renewcommand{\w}{\ww^\mr{P}}
-\newcommand{\ww}{\omega}
-\renewcommand{\w}{w}
-
-\newcommand{\surf}{\eta}
-%\newcommand{\w}{\varpi}
-\newcommand{\dd}{\mr d}
-\newcommand{\ddfrac}[2]{\frac{\dd #1}{\dd #2}}
+\input{init.tex}
 
 \title{Assessment of the impact of depth transitions on wave quality}
 \author{Andreas H. Akselsen}
@@ -88,19 +22,22 @@
 \section{Introduction}
 
 
-
-
 \section{Method}
 \label{sec:method}
 
-This study is based on the higher order spectral method adjusted using conformal mapping to acount for depth transitions. 
-Development of this original method started at SINTEF Ocean in late 2021 for presicely this purpose.
+
+This study is based on the higher order spectral method (HOS) adjusted using conformal mapping to account for depth transitions. 
+Development of this original method started at SINTEF Ocean in late 2021 for precisely this purpose.
 A quick description now follows. 
-More information is provided in the memo \citet{AHA_2021_conformalHOS} and hopfully in future publications.
+More information is provided in the memo \citet{AHA_2021_conformalHOS} and hopefully in future publications.
+HOS was chosen for the development due to its efficiency and because our group at SINTEF Ocean already has experience with it implementation and use. 
+For more information on HOS see \citet{SFo2018_HOS,bonnefoy2010,bonnefoy2006A_BM,ducrozet2006_BM}.
+
 
 \subsection{Boundary equations for the mapped plane}
+The HOS reduces a two-dimensional boundary value problem into a one-dimensional problem by analytically accounting for the sub-surface domain (subject to the Laplace equation), numerically solving only the surface boundary equations.
 %Option \ref{it:chosen} seems the most promising of these options.
-The boundary value problem 
+The surface boundary value problem 
 \begin{align*}
 h_t + \phi_x h_x-\phi_y&=0,\\
 \phi_t + \frac12\rbr{\phi_x^2+\phi_y^2}+gh&=0
@@ -124,7 +61,8 @@ we get
 \end{subequations}%
 after some derivation.
 Here $|\zmap'|^{2}$ is equivalent to the transformation Jacobian and $\varphi_\yy$ is evaluated at $\zz=\xx+\ii\eta$.
-$h=\Im \zmap(\xx+\ii\eta)$ is readily available. 
+This Jacobian holds information related to the bathymetry, together with 
+$h=\Im \zmap(\xx+\ii\eta)$ which is readily available. 
 
 \subsection{Mapping}
 %The Schwartz--Christoffel transform is a powerful approach for imposing straight angles in a mapping.
@@ -214,9 +152,12 @@ and fixing the constant $K$ after integration (re-scaling). $N_\angle$ is here t
  
 \section{Conclusions}
 \begin{itemize}
-	\item Very shallow transitions ($\sim 1\textdegree{}$) are needed to alleviate transmitted contamination from depth transition.
-	\item Less shallow transitions ($\sim 10\textdegree{}$) are needed to eliminated reflected waves from depth transition.This slope must however extend deeper than is necessary for the transmitted components. 
-	%\item In terms of an elevated floor, reflected waves from the up-step has little effect other than to modulate the 
+	\item Very shallow transitions ($\sim 1$\textdegree{}) are needed to alleviate transmitted contamination from deep-to-shallow depth transitions and reflected contamination from shallow-to-deep depth transitions.
+	This result is supported by the literature.
+	\item Less shallow transitions ($\sim 10$\textdegree{}) are needed to eliminated reflected waves from depth transition. This slope must however extend deeper than is necessary for the transmitted components. 
+	\item Spectral energy is seen to be transmitted to the double-frequency after depth transition. This also happens naturally through nonlinear interactions (modulation). Sensitivity to transition slope is similar to that which was observed for wave trains.
+	\item The reflection associated with a depth transition is seen to modulate the energy distribution around the spectral peak. This may be cause by reflected waves bouncing off and interacting with the wavemaker.
+	\item Implementation of a wave breaking model would permit study of more extreme wave states.
 \end{itemize}
 
 

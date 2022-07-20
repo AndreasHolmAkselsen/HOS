@@ -109,7 +109,7 @@ NT_dt = 1.45*2.5;%5;
 param.t_end = 9*NT_dt*IC.T;
 
 % numerical
-param.M = 5; 
+param.M = 10; 
 % initialStepODE = 1e-3*IC.T;
 initialStepODE = 1e-3;
 relTolODE = 1e-4;% 1e-8;

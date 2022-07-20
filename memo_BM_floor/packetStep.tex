@@ -1,0 +1,177 @@
+ %\documentclass[a4paper,12pt]{article}
+%%\documentclass{amsart}
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+%\usepackage[utf8]{inputenc}
+%\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+%\usepackage{xcolor}
+%\usepackage{graphicx}
+%
+%\usepackage{graphbox}
+%
+%\usepackage[round]{natbib}
+%\usepackage{mathtools}
+%\usepackage[font=normalsize]{subfig}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage{enumitem}
+%\hypersetup{colorlinks=true, 	
+			%linkcolor=blue,
+			%filecolor=blue,
+			%urlcolor=blue,
+			%citecolor=blue}
+%\newcommand{\mr}{\mathrm}
+%\newcommand{\mc}{\mathcal}
+%\let\SSS\S
+%\renewcommand{\S}{^\mr{S}}
+%\newcommand{\ii}{\mr{i}\,}
+%\newcommand{\ee}{\mr{e}}
+%%\newcommand{\phit}{\psi}
+%\newcommand{\phit}{\tilde\phi}
+%\newcommand{\br}[3]{\left#1#2\right#3}
+%\let\underscore\_
+%\renewcommand{\_}[1]{_\mr{#1}}
+%\newcommand{\oo}[1]{^{(#1)}}
+%\newcommand{\rr}{\bm r}%{x,y}
+%\newcommand{\cp}{c\_p}
+%\let\Re\relax
+%\let\Im\relax
+%\DeclareMathOperator\Re{Re}
+%\DeclareMathOperator\Im{Im}
+%\newcommand{\w}{w}
+%\newcommand{\bU}{\bm U}
+%\newcommand{\h}{\hat}
+%\newcommand{\rbr}[1]{\left(#1\right)}
+%\newcommand{\sbr}[1]{\left[#1\right]}
+%\newcommand{\cbr}[1]{\left\{#1\right\}}
+%\newcommand{\z}{z}
+%\newcommand{\x}{x}
+%\newcommand{\y}{y}
+%\newcommand{\zz}{\zeta}
+%\newcommand{\xx}{\xi}
+%\newcommand{\yy}{\sigma}
+%%\newcommand{\k}{k}
+%\newcommand{\kk}{\kappa}
+%
+%\newcommand{\zmap}{f}
+%%\newcommand{\zzmap}{\zmap^{-1}}
+%\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
+%
+%\newcommand{\ww}{\omega}
+%\renewcommand{\w}{w}
+%\newcommand{\surf}{\eta}
+%\newcommand{\dd}[2]{\frac{\mr d #1}{\mr d #2}}
+%
+%\begin{document}
+%
+
+%Results shown here pertain to HOS simulations using the algebraic conformal maps described in \autoref{sec:SC} and the approach of \autoref{sec:zz-planeApproach}.
+Simulation over the step shown in \autoref{fig:res:map_logstrip} is presented in \autoref{fig:res:logstrip1} to \ref{fig:res:logstrip3}.
+These simulations take about five minutes each to run on a piece-of-shit laptop.
+
+\begin{figure}[H]%
+\centering
+\subfloat[Full domain]{\includegraphics[width=.5\columnwidth,align=c]{../HOS_bathymetry/figures/map/map_logstrip_SSGW_ka0p05_H1p00_0p50_Nw60.pdf}}%
+\subfloat[Corner, 1--to--1.]{\includegraphics[width=.5\columnwidth,align=c]{../HOS_bathymetry/figures/map/mapZoom_logstrip_SSGW_ka0p05_H1p00_0p50_Nw60.pdf}}
+\caption{Conformal map, single step; $H\_d = 1.0$, $H\_s = 0.5$}%
+\label{fig:res:map_logstrip}%
+\end{figure}
+
+\begin{figure}[H]%
+\centering
+\includegraphics[width=1\columnwidth]{../HOS_bathymetry/figures/logstrip_SSGW_ka0p05_M5_H1p00_0p75_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}%
+\caption{Surface elevation, $(ka)\_L = 0.05$, $(kH)\_L = 1.00$ ($H\_d=1.0$\,m corresponds to $T\approx2.30$\,s); single step, $H\_s/H\_d = 0.75$. Dashed line indicates $\x$-location of step transition.}%
+\label{fig:res:logstrip1}%
+\end{figure}
+\begin{figure}[H]%
+\centering 
+\includegraphics[width=1\columnwidth]{../HOS_bathymetry/figures/logstrip_SSGW_ka0p05_M5_H1p00_0p50_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}%
+\caption{Similar to \autoref{fig:res:logstrip1}, but with $H\_s/H\_d = 0.50$.}%
+\label{fig:res:logstrip2}%
+\end{figure}
+\begin{figure}[H]%
+\centering 															  
+\includegraphics[width=1\columnwidth]{../HOS_bathymetry/figures/logstrip_SSGW_ka0p05_M5_H1p00_0p35_Nw60_dt5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}%
+\caption{Similar to \autoref{fig:res:logstrip1}, but with $H\_s/H\_d = 0.35$.}%
+\label{fig:res:logstrip3}%
+\end{figure}
+
+
+\begin{figure}[H]%
+\centering
+\includegraphics[width=\columnwidth]{../HOS_bathymetry/linearStepTheory/contourPlot.pdf}%
+\caption{Example of linear theory solution by discontinuity matching. ($H\_d = 1.0$, $H\_s = 0.50$, $kH\_d = 1.00$.) Solid black and dashed red lines are values at left and right side of discontinuity $x=0$, respectively.}%
+\label{fig:linearReflection:contour}%
+\end{figure}
+
+\begin{figure}[H]%
+\centering
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/linearStepTheory/R0.pdf}%
+\includegraphics[width=.5\columnwidth]{../HOS_bathymetry/linearStepTheory/R0_k.pdf}%
+\caption{Reflection coefficients form linear theory}%
+\label{fig:linearReflection:R0}%
+\end{figure}
+
+
+
+A comparison to linear theory and to the second-order nonlinear theory of \citet{li_2021_step1} is made in \autoref{tab:compareTheory} for the simulations shown in \autoref{fig:res:logstrip1} to \ref{fig:res:logstrip3}.
+(See also the memo \citet{AHA_2021_LiTheory} summarizing \citeauthor{li_2021_step1}'s second-order theory in relation to design decisions of SINTEF Ocean Space Center.)
+The relative depth is $(kH)\_L=1.00$,  corresponding to $T/\sqrt{H\_d/g}=7.20$.
+Both linear reflected and second-order free transmitted wave packet amplitudes correspond reasonably well to observations.
+Discrepancies should likely be attributed to wave packet dispersion, wave packet stability and numerical damping, all of which contributes to the observed amplitudes being smaller than the theoretical ones.
+Inaccuracies also arise from estimating the initial primary mode amplitude as half the wave height and form a small portion of the initial energy travelling in the negative direction.
+
+Third and possibly forth-order transmitted wave packets are discernible in the shallowest simulation shown in \autoref{fig:res:logstrip3}.
+We can also see in the final panel the emergence of what is likely the second-order sub-harmonic transmitted wave packet. 
+Note that wave packet stability and also the numerical resolution and damping may affect results somewhat. 
+\\
+
+
+\begin{table}[H]%
+\centering
+\begin{tabular}{c|ccc}
+$H\_s/H\_d$ & 0.75 & 0.50 & 0.35\\\hline
+$R_0$ & 0.054 & 0.135 & 0.208 \\
+$R\_{HOS}^{(1)}$ &  0.052 & 0.132 & 0.20\\\hline
+$T_{20}$ & 1.93 & 7.57& 18.58 \\
+$T^{(2)}\_{HOS}$ & 1.6 & 6.32 & 14.4
+\end{tabular}
+\caption{
+Comparison with theory of simulation results for $(kH)\_L=1.00$ shown in \autoref{fig:res:logstrip1} to \ref{fig:res:logstrip3}.
+Reflection coefficients $R_0$ from linear theory (\autoref{fig:linearReflection:contour}, \ref{fig:linearReflection:R0})
+and coefficient $T_{20}$ for second-order transmitted free wave packet from the theory by \citet{li_2021_step1}.
+Observed linear reflected and second-order free transmitted wave amplitudes are estimated by visual inspection of the fifth and eight plot panel from below, respectively.
+$T^{(2)}\_{HOS} = A_{20}/(2A_0^2 \omega/g)$ is adopted for estimating the second-order coefficients from plots, $A_0$ being the incident packet amplitude and $A_{20}$ the observed second-order free transmitted packet amplitude. 
+}
+\label{tab:compareTheory}
+\end{table}
+
+
+
+Wave propagation over the plateau configuration  is considered in \autoref{fig:res:double}.
+We here have linear reflections associated with both steps of the plateau, as well as the excretion of second-order reflected and transmitted packets.
+The main spurious wave packets observed across the plateau are the linear reflected packet from the rear step and the second-order free transmitted packet from the front step. 
+These will in turn partially reflect when reaching the opposite step, albeit less intensely. 
+Also distinct is the second-order sub-harmonic free wave travelling ahead of the main wave group after interacting with the bathymetry. 
+Amplitudes of  sub-harmonic packets can also be estimated with the theory of \citet{li_2021_step1}, although we do not do so here. 
+Passive absorption of sub-harmonic  (surge-type) waves is inefficient such that these may persist in a wave tank for a long time.
+
+Images also contain some pollution form a wave packet associated with imprecision in the initial conditions. This packet travels in the negative direction through the periodic boundary.
+The simulation has been terminated at the point in time when the linear wave reflected at the up-step reaches the down-step via the periodic boundary. 
+
+
+\begin{figure}[H]%
+\centering
+\subfloat[Map]{\includegraphics[width=1\columnwidth]{../HOS_bathymetry/figures/map/map2_double_SSGW_ka0p05_H1p00_0p50_Nw60.pdf}}\\
+\subfloat[Surface elevation]{\includegraphics[width=1\columnwidth]{../HOS_bathymetry/figures/double_SSGW_ka0p05_M5_H1p00_0p50_Nw60_dt7p5T_nx3840_pad0_ikCutInf_Md0p5_r0p25.pdf}}%
+\caption{Double step, $(ka)_0 = 0.05$, $(kH)_0 = 1.00$, $H\_s/H\_d = 0.50$. Plateau length is 35\% of domain length.}%
+\label{fig:res:double}%
+\end{figure}
+
+
+
+
+%\big|\zeta_{0T,f}^{(22,0)}\big| &= \frac{2\omega_0}{g}|T_{20}| A_0^2.
+
+
+%\end{document}

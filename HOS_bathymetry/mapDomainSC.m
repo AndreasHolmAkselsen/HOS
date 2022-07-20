@@ -5,7 +5,7 @@ for iNan = find(isnan(map.xx_b))
     map.xx_b(iNan) = map.xx_b(iNan-1) - pi./map.theta(iNan).*log(map.H(iNan+1)./map.H(iNan));
 end
 crudeScale = 1.5*pi/min(map.H);
-yyUpper = min(max([2*max(h0),.1*map.H])*crudeScale,.99*pi);
+yyUpper = min(max([2*max(h0),.1*map.H])*crudeScale,.5*pi);
 % xxIP = linspace(xLR(1),xLR(2),nArrX)*crudeScale;
 
 xLR = map.xLR;
@@ -51,7 +51,7 @@ xxLR = interp1(real(zIP(map.nArrYDown,:)),xxIP,xLR);
 
 iTrim = xxIP>=xxLR(1)-2*(xxIP(2)-xxIP(1)) & xxIP<=xxLR(2)+2*(xxIP(end)-xxIP(end-1));
 % iTrim = (find(xxIP<xxLR(1),1,'last')-1):(find(xxIP>xxLR(2),1,'first')+1);
-zzIP = zzIP(:,iTrim); zIP = zIP(:,iTrim); dfIP = dfIP(:,iTrim); %xxIP = xxIP(:,iTrim);
+zzIP = zzIP(:,iTrim); zIP = zIP(:,iTrim); dfIP = dfIP(:,iTrim); xxIP = xxIP(:,iTrim);
 assert(all(real(zzIP(:,1))<=xxLR(1)) && all(real(zzIP(:,end))>=xxLR(2)))
 
 

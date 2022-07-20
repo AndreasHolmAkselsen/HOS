@@ -10,14 +10,20 @@ function [zz,df,z] = fmap_SCnum(xx,yy,H,theta,xx_b)
     df_i = ((lambda+1)./(lambda+(H(2:end)./H(1:end-1)).^(pi/theta))).^(theta/pi); % df ~ 1/tau
 %     df_i = ((lambda+(H(2:end)./H(1:end-1)).^(pi/theta))./(lambda+1)).^(-theta/pi); % df ~ 1/tau
     
-    xi_cut = 50; % xi_value at which to follow asymptote in step.
-    iPlus = real(zz-xx_b) > xi_cut;
-    iMinus = real(zz-xx_b) < -xi_cut;
+    xi_cut = 500;%50; % xi_value at which to follow asymptote in step.
+    iPlus = real(zz-max(xx_b)) > xi_cut & true(size(xx_b));
+    iMinus = real(zz-min(xx_b)) < -xi_cut & true(size(xx_b));
     df_i(iPlus) = 1;
     temp = H(1:end-1)./H(2:end)+0*zz;
     df_i(iMinus) = temp(iMinus);
    
     df = prod(df_i,3);
+    
+%     figure('color','w'); 
+%     imagesc(xx,yy,real(df));axis xy
+%     figure('color','w'); 
+%     imagesc(xx,yy,imag(df));axis xy
+    
     [ny,nx] = size(zz);
     df_xh = .5*(df(1,1:nx-1)+df(1,2:nx));
     df_yh = .5*(df(1:ny-1,:)+df(2:ny,:));

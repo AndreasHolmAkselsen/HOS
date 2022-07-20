@@ -10,15 +10,15 @@ g = 9.81;
 
 % interpolation grid for conformal map
 map.nArrX_far = 1500;   % # horizontal points (far field)
-map.nArrX_near = 500;  % # horizontal points (near field)
+map.nArrX_near = 2500;%500;  % # horizontal points (near field)
 map.nArrYDown = 100;    % # vertical points
 
 
 % Plot & export options
 DO_EXPORT = 1;
 EXPORT_MAT = 2;
-PLOT_MAP = 0;
-PLOT_INTERPOLATION_MAP = 0;
+PLOT_MAP = 1;
+PLOT_INTERPOLATION_MAP = 1;
 exportPrefix =  'train_';
 exportPath = './figures/';
 exportFormatsMap = {'-pdf','-png'};
@@ -27,7 +27,7 @@ exportFormats = {'-png','-pdf','-m2'};
 
 
 % Domain parameters
-boundaryType = 'open'; % 'open' or 'closed'
+boundaryType = 'closed'; % 'open' or 'closed'
 % NWaves = 5;
 % Lx = (2*pi/IC.k)*NWaves;
 % nx__wave = 2^8;
@@ -41,8 +41,10 @@ boundaryType = 'open'; % 'open' or 'closed'
 % N = 2*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
 % Lx = 2*76;
 % N = 4*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
-Lx = 100;
-N = 3*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
+% Lx = 100;
+% N = 3*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
+Lx = 150;
+N = 1.5*3*1024; % N is the number spacings or the number of poits excluding x=+L, i.e., x(end)+dx=L
 xLR = [0,Lx];
 
 
@@ -51,12 +53,24 @@ waveMaker =  []; % no wavemaker
 
 % irregular, slope bathymetry
 addpath c:/gits/timsas2/matlabLibs/
-map.H =  [1,.2];%[.300001,.3]; % plateau levels
+% map.H =  [1,.1];%[.300001,.3]; % plateau levels
+% map.xx_b = Lx/2*pi/map.H(1) ;  % xi-coordinate of "begining of" edge
+% map.theta = [90]*pi/180; % slope angles (positive values)
+% map.H =  [1,.1];%% plateau levels
+% map.xx_b = .65*Lx*pi/map.H(1) ;  % xi-coordinate of "begining of" edge
+% map.theta = [9]*pi/180; % slope angles (positive values)
+% map.H =  [1,.1];% plateau levels
+% map.xx_b = .53*Lx*pi/map.H(1) ;  % xi-coordinate of "begining of" edge
+% map.theta = [45]*pi/180; % slope angles (positive values)
+% map.H =  [1,.3,.1]; % plateau levels
+% map.xx_b = [.52*Lx*pi/map.H(1),nan] ;  % xi-coordinate of "begining of" edge
+% map.theta = [90,2]*pi/180; % slope angles (positive values)
+map.H =  [.1,1]; %5 plateau levels
 map.xx_b = Lx/2*pi/map.H(1) ;  % xi-coordinate of "begining of" edge
-map.theta = [90]*pi/180; % slope angles (positive values)
-% map.H =  [.1,1,.1];%[.300001,.3]; % plateau levels
-% map.xx_b = [5,Lx/2*pi/map.H(2)] ;  % xi-coordinate of "begining of" edge
-% map.theta = [90,90]*pi/180; % slope angles (positive values)
+map.theta = [1]*pi/180; % slope angles (positive values)
+% map.H =  [.1,.3,1]; %5 plateau levels
+% map.xx_b = [Lx/2*pi/map.H(1),nan] ;  % xi-coordinate of "begining of" edge
+% map.theta = [90,1]*pi/180; % slope angles (positive values)
 param.nonLinRamp = @(t) 1;
 param.iModeCut = floor(N/4);
 param.kd__kmax = .0;
@@ -71,7 +85,7 @@ beach.uniformFraction = 2/3;
 
 % Initial conditions
 IC.depth = map.H(1);
-IC.ka = .1; % linear wave steepness
+IC.ka = .05; % linear wave steepness
 IC.k = pi;%findWaveNumbers(2*pi/IC.T,map.IC.depth,0,0);
 IC.T = 2*pi/sqrt(g*IC.k*tanh(IC.k*IC.depth));
 INIT_WAVE_TYPE = 'SSGW';  % 'SSGW', 'linear' or a file name
@@ -91,11 +105,11 @@ packetType = 'taperedTrain'; %'taperedTrain', 'gaussian'
 
 % Simulation/plotting time
 % param.t_end = 'fromBM'; tFinalStill = 20;
-NT_dt = 5;%3.0;
+NT_dt = 1.45*2.5;%5;
 param.t_end = 9*NT_dt*IC.T;
 
 % numerical
-param.M = 10; 
+param.M = 5; 
 % initialStepODE = 1e-3*IC.T;
 initialStepODE = 1e-3;
 relTolODE = 1e-4;% 1e-8;
@@ -283,7 +297,7 @@ clear y
 
 % t_ip = (0:dt:param.t_end)';
 t_ip = linspace(0,t(end),10).';
-% t_ip = linspace(0,.9*t(end),10).';
+% t_ip = linspace(0,.5*t(end),10).';
 
 nPannel = length(t_ip);
 varphiS_ip = interp1(t,varphiS,t_ip).';

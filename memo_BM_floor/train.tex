@@ -1,0 +1,216 @@
+ %\documentclass[a4paper,12pt]{article}
+%%\documentclass{amsart}
+%\usepackage[a4paper, total={17cm, 25cm}]{geometry}
+%\usepackage[utf8]{inputenc}
+%\usepackage[english]{babel}
+%\usepackage{amsmath,bm,amsfonts,amssymb}
+%\usepackage{xcolor}
+%\usepackage{graphicx}
+%
+%\usepackage{graphbox}
+%
+%\usepackage[round]{natbib}
+%\usepackage{mathtools}
+%\usepackage[font=normalsize]{subfig}
+%\usepackage{float}
+%\usepackage{hyperref}
+%\usepackage{enumitem}
+%%\usepackage{cprotect} % \cprotect\caption{\verb|#1|}%
+%\hypersetup{colorlinks=true, 	
+			%linkcolor=blue,
+			%filecolor=blue,
+			%urlcolor=blue,
+			%citecolor=blue}
+%\newcommand{\mr}{\mathrm}
+%\newcommand{\mc}{\mathcal}
+%\let\SSS\S
+%\renewcommand{\S}{^\mr{S}}
+%\newcommand{\ii}{\mr{i}\,}
+%\newcommand{\ee}{\mr{e}}
+%%\newcommand{\phit}{\psi}
+%\newcommand{\phit}{\tilde\phi}
+%\newcommand{\br}[3]{\left#1#2\right#3}
+%\let\underscore\_
+%\renewcommand{\_}[1]{_\mr{#1}}
+%\newcommand{\oo}[1]{^{(#1)}}
+%\newcommand{\rr}{\bm r}%{x,y}
+%\newcommand{\cp}{c\_p}
+%\let\Re\relax
+%\let\Im\relax
+%\DeclareMathOperator\Re{Re}
+%\DeclareMathOperator\Im{Im}
+%\newcommand{\w}{w}
+%\newcommand{\bU}{\bm U}
+%\newcommand{\h}{\hat}
+%\newcommand{\rbr}[1]{\left(#1\right)}
+%\newcommand{\sbr}[1]{\left[#1\right]}
+%\newcommand{\cbr}[1]{\left\{#1\right\}}
+%\newcommand{\z}{z}
+%\newcommand{\x}{x}
+%\newcommand{\y}{y}
+%\newcommand{\zz}{\zeta}
+%\newcommand{\xx}{\xi}
+%\newcommand{\yy}{\sigma}
+%%\newcommand{\k}{k}
+%\newcommand{\kk}{\kappa}
+%
+%\usepackage{pifont}% http://ctan.org/pkg/pifont
+%\newcommand{\cmark}{\text{\ding{51}}}% or \checkmark
+%\newcommand{\xmark}{\text{\ding{55}}}%
+%
+%\newcommand{\zmap}{f}
+%%\newcommand{\zzmap}{\zmap^{-1}}
+%\newcommand{\zzmap}{\zmap^{\raisebox{.2ex}{$\scriptscriptstyle-1$}}}
+%
+%\newcommand{\ww}{\omega}
+%\renewcommand{\w}{w}
+%\newcommand{\surf}{\eta}
+%\newcommand{\dd}[2]{\frac{\mr d #1}{\mr d #2}}
+%
+%\begin{document}
+
+We will in this section examine generation of spurious waves ensuing from a Strokes wave propagating across a water depth transition. Both abrupt and slanting transitions are examined, from deep to shallow and shallow to deep.
+Simulations are carried out by initiating a sufficiently long Stokes wave train in front of a transition.  
+SSGW is used for the initial conditions and the train is tapered in both ends.
+A window in time and space, typically 3--10 wavelengths $\times$ wave periods, is then interpolated form the simulation history. The window is placed such that it contains both the fundamental wave and the active spurious harmonics, avoiding tapering ramps.\\
+
+The parameter space if interest includes the wave periods, water depth on deep and shallow side, wave steepnerss and slope of water depth transition.
+We reduce the parameter space as follows: Deep side water depth is chosen as deep water,
+i.e., we fixed $h\_d/\lambda\_d=0.5$ ($k\_dh\_d=\pi$, $\tanh\pi\approx0.996$).
+Wave steepness is fixed as the largest steepness that we in practice can simulate without encountering wave breaking. 
+(Wave breaking will result in simulation breakdown unless a wave breaking model is implemented.)
+An overview of the stability map, estimated by trial, is presented in \autoref{tab:trainStab}
+\\
+
+\begin{table}[H]%
+\centering
+\begin{tabular}{c|ccccc}
+$(ka)\_d\Big\backslash h\_s/\lambda\_d$		&0.25	 &0.20      &0.15&0.10&0.05\\\hline
+0.300  	& $\cmark^*$ & $\xmark$ &  &&	\\
+0.275  &$\cmark^*$&$\cmark^*$&&&\\
+0.250  &$\cmark^*$&$\cmark^*$&&&\\
+0.225 &$\cmark$& $\cmark$& $\xmark$ &&\\
+0.200 &&&$\cmark$&$\xmark$&\\
+0.150 &&&&$\xmark$&\\
+0.100  &&&&$\cmark$& $\xmark$\\
+0.075 &&&&& $\xmark$\\
+0.050 &&&&&$\cmark$
+\end{tabular}
+\caption{Stability map for varying wave steepness of waves travelling across a step depth transition. $\cmark$: Non-breaking, $\cmark^*$: Survives transition but breaks early due to modulational instability, $\xmark$: Breaks at depth transition.}
+\label{tab:trainStab}
+\end{table}
+
+
+\subsection{Transmitted waves over step transition}
+
+%\autoref{fig:H0p3_0p3_ka0p2} to \ref{fig:H1p0_0p1_ka0p05} shows wave trains propagating over steps form deep to intermediate water depths.
+%Wave steepness is restricted by wave breaking which is not yet handled by the simulator. 
+\autoref{fig:H1p0_0p5_ka0p25_nw3_np3} to \ref{fig:H1p0_0p1_ka0p05_nw10_np10} shows surface elevation in the region after the depth transition in a time window that contains spurious waves released as a result of the transition.
+Also shown are spectral amplitudes in space and time.
+Breaking occurs at the step discontinuity for shallowest water examples. 
+Wave breaking occurs at the front of the wave train due to modulational instability with deeper waters, limiting the number of crests that we are able to include in the analysis space-time window. Larger wave steepnesses will be possible with a wave breaking model in place. 
+The strength of the spurious free harmonics are for the shallow water transition seen to be of magnitudes similar to the corresponding bound harmonics. 
+Spurious harmonics are understandably weaker with the less shallow transitions. Again, stronger spurious harmonics would likely be observed for these cases was it not for the modulational instability that places a limit on wave steepness.
+
+
+
+\newcommand{\triIm}[2]{
+\begin{figure}[H]%
+\centering
+\subfloat[Surface elevation]{
+\includegraphics[width=.33\textwidth]{../HOS_bathymetry/figures/trainAly/#1.pdf}%
+\includegraphics[width=.33\textwidth]{../HOS_bathymetry/figures/trainAly/#1_xt.pdf}%
+}%
+\\
+\subfloat[Fourier transform of surface elevation (wave amplitudes).]{
+\includegraphics[width=.33\textwidth]{../HOS_bathymetry/figures/trainAly/#1_xw.pdf}%
+\includegraphics[width=.33\textwidth]{../HOS_bathymetry/figures/trainAly/#1_kt.pdf}%
+\includegraphics[width=.33\textwidth]{../HOS_bathymetry/figures/trainAly/#1_kw.pdf}%
+}%
+\caption{#2}%
+\label{fig:#1}%
+\end{figure}
+}
+\triIm{H0p3_0p3_ka0p2}{Reference: transmitted wave, no step. $h/\lambda = 0.15$, $ka = 0.2$.}
+\triIm{H1p0_0p5_ka0p25_nw3_np3}{Transmitted wave, $h\_s/\lambda\_d =0.25$, $(ka)\_d = 0.25$.}%$H\_d/\lambda = 0.5$,
+\triIm{H1p0_0p4_ka0p25_nw3_np3}{Transmitted wave, $h\_s/\lambda\_d =0.20$, $(ka)\_d = 0.25$.}
+%\triIm{H1p0_0p4_ka0p225_nw5_np5}{$h\_s/\lambda\_d =0.20$, $(ka)\_d = 0.225$.}
+\triIm{H1p0_0p3_ka0p2_nw8_np8}{Transmitted wave, $h\_s/\lambda\_d =0.15$, $(ka)\_d = 0.20$.}
+\triIm{H1p0_0p2_ka0p1_nw10_np10}{Transmitted wave, $h\_s/\lambda\_d =0.10$, $(ka)\_d = 0.10$.}
+\triIm{H1p0_0p1_ka0p05_nw10_np10}{Transmitted wave, $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+
+
+
+
+\subsection{Reflected waves from step transition}
+
+\autoref{fig:refl_H1p0_0p3_ka0p2_nw5_np5} to \ref{fig:refl_H1p0_0p1_ka0p05_nw5_np5} displays the wavenumber--frequency distribution on the reflection side of the shallow water steps. The first and third quadrant of in $k$--$\omega$ space indicates reflected amplitudes. 
+
+\triIm{refl_H1p0_0p3_ka0p2_nw5_np5}{Reflected wave, $h\_s/\lambda\_d =0.15$, $(ka)\_d = 0.20$.}
+\triIm{refl_H1p0_0p2_ka0p1_nw8_np8}{Reflected wave, $h\_s/\lambda\_d =0.10$, $(ka)\_d = 0.10$.}
+\triIm{refl_H1p0_0p1_ka0p05_nw5_np5}{Reflected wave, $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+%\triIm{refl_H1p0_0p1_ka0p05_nw8_np8}{Reflected wave, $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+
+
+
+
+\subsection{Transmitted waves over sloping transition}
+Transmission across sloping depth transitions is examined in \autoref{fig:45degDeep_H1p0_0p1_ka0p05_nw10_np10} to \ref{fig:1deg_H1p0_0p3_ka0p05_nw10_np10}.
+Only the largest depth transition down to $h\_s/\lambda\_d =0.05$ is considered.
+Increasing slopes of the depth transition appears to only very gradually affect the overall energy of the spurious harmonics. 
+Instead, the spurious energy is seen to spread around the higher harmonics.
+A good transition with little contamination if first obtained at slope 1\textdegree{}(!), see \autoref{fig:1deg_H1p0_0p3_ka0p05_nw10_np10}.
+
+It is worthwhile to examine the surface elevation snapshots in the transition region, for example \autoref{fig:4p5deg_H1p0_0p3_ka0p05_nw10_np10}.
+Waves are seen to contract across the slope transition, but are not `ready' for the shallow water depth encountered thereafter, resulting in wave crest deformations.
+\\
+
+\triIm{45degDeep_H1p0_0p1_ka0p05_nw10_np10}{Transmitted wave, 45.0\textdegree{} slope. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$, cf.\ \autoref{fig:H1p0_0p1_ka0p05_nw10_np10}.}
+\triIm{9degDeep_H1p0_0p1_ka0p05_nw10_np10}{Transmitted wave, 9.0\textdegree{} slope. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{4p5deg_H1p0_0p3_ka0p05_nw10_np10}{Transmitted wave, 4.5\textdegree{} slope starting at depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{2deg_H1p0_0p3_ka0p05_nw10_np10}{Transmitted wave, 2.0\textdegree{} slope starting at depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{1deg_H1p0_0p3_ka0p05_nw10_np10}{Transmitted wave, 1.0\textdegree{} slope starting at depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+
+Transition wave breaking is also affected by having the steepness of the depth transition. 
+Waves are in \autoref{tab:trainStab} presented as breaking with a step transition for $(ka)\_d \geq 0.075$, identified by the breakdown of our simulation. 
+Wave breaking is however avoided with the $1.0\textdegree{}$ transition slope. Results for this wave steepness are displayed in \autoref{fig:1degka075_H1p0_0p3_0p1_ka0p075_nw10_np10}.
+Wave again break for wave steepness $(ka)\_d \geq 0.100$ or a $2.0\textdegree{}$ transition slope.
+
+\triIm{1degka075_H1p0_0p3_0p1_ka0p075_nw10_np10}{Like \autoref{fig:1deg_H1p0_0p3_ka0p05_nw10_np10} (1.0\textdegree{}) but with a steeper wave $(ka)\_d = 0.075$.}
+
+
+
+\subsection{Reflected waves from sloping transition}
+Reflection form the sloping depth transition is examined in \autoref{fig:refl45degDeep_H1_0p1_ka0p05_nw5_np5} to \ref{fig:refl9deg_H1_0p3_0p1_ka0p05_nw5_np5}. 
+Contrary to the transmitted disturbances, steeper sloping depth transitions do appear to be beneficial for reducing reflected waves. Very little reflection remains with the 9.0\textdegree{} slope as shown in \autoref{fig:refl9degDeep_H1_0p1_ka0p05_nw5_np5}. We see however that transition slopes need to extend deeper into the water to achieve full effect (\autoref{fig:refl9deg_H1_0p3_0p1_ka0p05_nw5_np5}).
+This is essentially because the wavelength of the strongest reflected wave is the same as the incident wave, while the strongest spurious transmitted wave is a shorter a second order harmonic.
+
+\triIm{refl45degDeep_H1_0p1_ka0p05_nw5_np5}{Reflected wave, 45.0\textdegree{} slope. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$, cf.\ \autoref{fig:refl_H1p0_0p1_ka0p05_nw5_np5}.}
+\triIm{refl9degDeep_H1_0p1_ka0p05_nw5_np5}{Reflected wave, 9.0\textdegree{} slope. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{refl9deg_H1_0p3_0p1_ka0p05_nw5_np5}{Reflected wave, 9.0\textdegree{} slope starting at depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+
+
+
+\subsection{Down-step}
+We consider next the inverse geometries with the wave train propagating from shallow to deep water. 
+\autoref{fig:downStrepRefl_H0p3_1p0_ka0p2_nw4_np4} to \ref{fig:downStrepRefl_H0p1_1p0_ka0p05_nw5_np5}
+holds the results for reflected waves in a step transition from shallow depths $h\_s/\lambda\_d =0.15$ to $h\_s/\lambda\_d =0.05$, respectively.
+These are seen to differ from the down-step case (\autoref{fig:refl_H1p0_0p3_ka0p2_nw5_np5} to \ref{fig:refl_H1p0_0p1_ka0p05_nw5_np5}) in that higher order harmonics dominate more.
+
+\triIm{downStrepRefl_H0p3_1p0_ka0p2_nw4_np4}{Reflected wave from down-step. $h\_s/\lambda\_d =0.15$, $(ka)\_d = 0.20$.}
+\triIm{downStrepRefl_H0p2_1p0_ka0p1_nw4_np4}{Reflected wave from down-step. $h\_s/\lambda\_d =0.10$, $(ka)\_d = 0.10$.}
+\triIm{downStrepRefl_H0p1_1p0_ka0p05_nw5_np5}{Reflected wave from down-step. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+
+
+Similar to \autoref{fig:45degDeep_H1p0_0p1_ka0p05_nw10_np10} to \ref{fig:1deg_H1p0_0p3_ka0p05_nw10_np10}, we also consider in \autoref{fig:downStrepRefl45degDeep_H0p1_1p0_ka0p05_nw5_np5} to \ref{fig:downStrepRefl1deg_H0p1_0p3_1p0_ka0p05_nw3_np3} the effect of down-sloping depth transitions.
+
+
+\triIm{downStrepRefl45degDeep_H0p1_1p0_ka0p05_nw5_np5}{Reflected wave from 45.0\textdegree{} down-sloap. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl9degDeep_H0p1_1p0_ka0p05_nw5_np5}{Reflected wave from 9.0\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl4p5deg_H0p1_0p3_1p0_ka0p05_nw4_np4}{Reflected wave from from 4.5\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl2deg_H0p1_0p3_1p0_ka0p05_nw3_np3}{Reflected wave from from 2.0\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+\triIm{downStrepRefl1deg_H0p1_0p3_1p0_ka0p05_nw3_np3}{Reflected wave from from 1.0\textdegree{} down-sloap, abruptly increasing after depth $0.15\lambda$. $h\_s/\lambda\_d =0.05$, $(ka)\_d = 0.05$.}
+
+
+
+%\end{document}
